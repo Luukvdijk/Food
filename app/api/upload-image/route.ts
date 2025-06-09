@@ -1,10 +1,41 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { getUser } from "@/lib/auth"
+import { createClient } from "@supabase/supabase-js"
+import { cookies } from "next/headers"
 
 export async function POST(request: NextRequest) {
   try {
-    // Check authentication
-    const user = await getUser()
+    const cookieStore = cookies()
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+    const supabaseServiceKey =
+      process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_SECRET_KEY
+
+    if (!supabaseUrl || !supabaseKey || !supabaseServiceKey) {
+      return NextResponse.json(
+        {
+          error: "Supabase configuratie ontbreekt",
+        },
+        { status: 500 },
+      )
+    }
+
+    const supabase = createClient(supabaseUrl, supabaseServiceKey, {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false,
+      },
+    })
+
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser()
+
+    if (userError) {
+      console.error("Error getting user:", userError)
+      return NextResponse.json({ error: "Niet geautoriseerd" }, { status: 401 })
+    }
+
     if (!user) {
       return NextResponse.json({ error: "Niet geautoriseerd" }, { status: 401 })
     }
@@ -28,25 +59,12 @@ export async function POST(request: NextRequest) {
     }
 
     // Check environment variables
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-    const supabaseServiceKey =
-      process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_SECRET_KEY
-
-    if (!supabaseUrl || !supabaseServiceKey) {
-      return NextResponse.json(
-        {
-          error: "Supabase configuratie ontbreekt",
-        },
-        { status: 500 },
-      )
-    }
 
     // Convert file to buffer
     const bytes = await file.arrayBuffer()
     const buffer = Buffer.from(bytes)
 
     // Create Supabase client
-    const { createClient } = await import("@supabase/supabase-js")
 
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
       auth: {
