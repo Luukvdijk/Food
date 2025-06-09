@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { CheckCircle, XCircle } from "lucide-react"
+import { CheckCircle, XCircle, AlertTriangle } from "lucide-react"
 import Link from "next/link"
 import { getUser } from "@/lib/auth"
 import { redirect } from "next/navigation"
@@ -24,27 +24,45 @@ interface AdminPageProps {
 
 async function handleSignOut() {
   "use server"
-
-  // Simple redirect to signout API
   redirect("/api/auth/signout-redirect")
 }
 
 export default async function AdminPage({ searchParams }: AdminPageProps) {
-  const user = await getUser()
-  if (!user) {
+  // Check authentication first
+  let user
+  try {
+    user = await getUser()
+    if (!user) {
+      redirect("/auth/signin")
+    }
+  } catch (error) {
+    console.error("Auth error:", error)
     redirect("/auth/signin")
   }
 
-  const recepten = await getAllReceptenAdmin()
+  // Try to load data with error handling
+  let recepten: any[] = []
+  let dataError: string | null = null
+  let editData = null
+
+  try {
+    recepten = await getAllReceptenAdmin()
+  } catch (error) {
+    console.error("Error loading recepten:", error)
+    dataError = "Kon recepten niet laden. Controleer de database verbinding."
+  }
 
   // Check if we're editing a recipe
   const editId = searchParams.edit ? Number.parseInt(searchParams.edit) : null
-  let editData = null
-
-  if (editId) {
-    editData = await getReceptForEdit(editId)
-    if (!editData) {
-      redirect("/admin?error=true")
+  if (editId && !dataError) {
+    try {
+      editData = await getReceptForEdit(editId)
+      if (!editData) {
+        redirect("/admin?error=recipe_not_found")
+      }
+    } catch (error) {
+      console.error("Error loading recipe for edit:", error)
+      redirect("/admin?error=edit_failed")
     }
   }
 
@@ -89,15 +107,40 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
         </Alert>
       )}
 
-      {searchParams.error && (
+      {(searchParams.error || dataError) && (
         <Alert variant="destructive" className="mb-6">
           <XCircle className="h-4 w-4" />
-          <AlertDescription>Er is een fout opgetreden. Probeer het opnieuw.</AlertDescription>
+          <AlertDescription>{dataError || "Er is een fout opgetreden. Probeer het opnieuw."}</AlertDescription>
         </Alert>
       )}
 
-      {/* Als we aan het bewerken zijn, toon het edit formulier */}
-      {editData ? (
+      {/* Database error fallback */}
+      {dataError ? (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5" />
+              Database Verbindingsprobleem
+            </CardTitle>
+            <CardDescription>
+              Er kan geen verbinding worden gemaakt met de database. Controleer de volgende punten:
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ul className="list-disc list-inside space-y-2 text-sm">
+              <li>Is de DATABASE_URL environment variable correct ingesteld?</li>
+              <li>Is de database server bereikbaar?</li>
+              <li>Zijn de database tabellen aangemaakt?</li>
+            </ul>
+            <div className="mt-4">
+              <Button asChild>
+                <Link href="/">Terug naar hoofdpagina</Link>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      ) : editData ? (
+        /* Edit form */
         <EditReceptForm
           recept={editData.recept}
           ingredienten={editData.ingredienten}

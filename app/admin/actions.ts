@@ -72,12 +72,17 @@ export async function addRecept(formData: FormData) {
     const bijgerechtenLines = bijgerechtenString.split("\n").filter((line) => line.trim())
 
     // Check if eigenaar column exists
-    const columnCheck = await sql`
-      SELECT column_name 
-      FROM information_schema.columns 
-      WHERE table_name = 'recepten' AND column_name = 'eigenaar'
-    `
-    const hasEigenaarColumn = columnCheck.length > 0
+    let hasEigenaarColumn = false
+    try {
+      const columnCheck = await sql`
+        SELECT column_name 
+        FROM information_schema.columns 
+        WHERE table_name = 'recepten' AND column_name = 'eigenaar'
+      `
+      hasEigenaarColumn = columnCheck.length > 0
+    } catch (error) {
+      console.error("Error checking eigenaar column:", error)
+    }
 
     // Voeg het recept toe
     let receptResult
@@ -126,7 +131,7 @@ export async function addRecept(formData: FormData) {
     redirect("/admin?success=true")
   } catch (error) {
     console.error("Error adding recept:", error)
-    redirect("/admin?error=true")
+    redirect("/admin?error=add_failed")
   }
 }
 
@@ -172,12 +177,17 @@ export async function updateRecept(formData: FormData) {
     const bijgerechtenLines = bijgerechtenString.split("\n").filter((line) => line.trim())
 
     // Check if eigenaar column exists
-    const columnCheck = await sql`
-      SELECT column_name 
-      FROM information_schema.columns 
-      WHERE table_name = 'recepten' AND column_name = 'eigenaar'
-    `
-    const hasEigenaarColumn = columnCheck.length > 0
+    let hasEigenaarColumn = false
+    try {
+      const columnCheck = await sql`
+        SELECT column_name 
+        FROM information_schema.columns 
+        WHERE table_name = 'recepten' AND column_name = 'eigenaar'
+      `
+      hasEigenaarColumn = columnCheck.length > 0
+    } catch (error) {
+      console.error("Error checking eigenaar column:", error)
+    }
 
     // Update het recept
     if (hasEigenaarColumn) {
@@ -233,7 +243,7 @@ export async function updateRecept(formData: FormData) {
     redirect("/admin?updated=true")
   } catch (error) {
     console.error("Error updating recept:", error)
-    redirect("/admin?error=true")
+    redirect("/admin?error=update_failed")
   }
 }
 
@@ -245,26 +255,31 @@ export async function deleteRecept(receptId: number) {
     redirect("/admin?deleted=true")
   } catch (error) {
     console.error("Error deleting recept:", error)
-    redirect("/admin?error=true")
+    redirect("/admin?error=delete_failed")
   }
 }
 
 export async function getAllReceptenAdmin() {
   try {
     // Check if eigenaar column exists
-    const columnCheck = await sql`
-      SELECT column_name 
-      FROM information_schema.columns 
-      WHERE table_name = 'recepten' AND column_name = 'eigenaar'
-    `
-    const hasEigenaarColumn = columnCheck.length > 0
+    let hasEigenaarColumn = false
+    try {
+      const columnCheck = await sql`
+        SELECT column_name 
+        FROM information_schema.columns 
+        WHERE table_name = 'recepten' AND column_name = 'eigenaar'
+      `
+      hasEigenaarColumn = columnCheck.length > 0
+    } catch (error) {
+      console.error("Error checking eigenaar column:", error)
+    }
 
     let result
     if (hasEigenaarColumn) {
       result = await sql`
         SELECT r.*, 
-               COUNT(i.id) as ingredient_count,
-               COUNT(b.id) as bijgerecht_count
+               COUNT(DISTINCT i.id) as ingredient_count,
+               COUNT(DISTINCT b.id) as bijgerecht_count
         FROM recepten r
         LEFT JOIN ingredienten i ON r.id = i.recept_id
         LEFT JOIN bijgerechten b ON r.id = b.recept_id
@@ -274,8 +289,8 @@ export async function getAllReceptenAdmin() {
     } else {
       result = await sql`
         SELECT r.*, 
-               COUNT(i.id) as ingredient_count,
-               COUNT(b.id) as bijgerecht_count
+               COUNT(DISTINCT i.id) as ingredient_count,
+               COUNT(DISTINCT b.id) as bijgerecht_count
         FROM recepten r
         LEFT JOIN ingredienten i ON r.id = i.recept_id
         LEFT JOIN bijgerechten b ON r.id = b.recept_id
@@ -289,23 +304,32 @@ export async function getAllReceptenAdmin() {
     return result
   } catch (error) {
     console.error("Error fetching recepten for admin:", error)
-    return []
+    throw new Error("Database connection failed")
   }
 }
 
 export async function getReceptForEdit(id: number) {
   try {
     const [recept] = await sql`SELECT * FROM recepten WHERE id = ${id}`
+    if (!recept) {
+      return null
+    }
+
     const ingredienten = await sql`SELECT * FROM ingredienten WHERE recept_id = ${id} ORDER BY id`
     const bijgerechten = await sql`SELECT * FROM bijgerechten WHERE recept_id = ${id} ORDER BY id`
 
     // Check if eigenaar column exists
-    const columnCheck = await sql`
-      SELECT column_name 
-      FROM information_schema.columns 
-      WHERE table_name = 'recepten' AND column_name = 'eigenaar'
-    `
-    const hasEigenaarColumn = columnCheck.length > 0
+    let hasEigenaarColumn = false
+    try {
+      const columnCheck = await sql`
+        SELECT column_name 
+        FROM information_schema.columns 
+        WHERE table_name = 'recepten' AND column_name = 'eigenaar'
+      `
+      hasEigenaarColumn = columnCheck.length > 0
+    } catch (error) {
+      console.error("Error checking eigenaar column:", error)
+    }
 
     // Add default eigenaar if column doesn't exist
     if (!hasEigenaarColumn && recept) {
@@ -319,6 +343,6 @@ export async function getReceptForEdit(id: number) {
     }
   } catch (error) {
     console.error("Error fetching recept for edit:", error)
-    return null
+    throw new Error("Failed to load recipe for editing")
   }
 }
