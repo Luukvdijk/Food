@@ -1,16 +1,13 @@
 import { NextResponse } from "next/server"
-import { cookies } from "next/headers"
+import { getUser } from "@/lib/auth"
 
 export async function GET() {
   try {
-    const cookieStore = cookies()
-    const authToken = cookieStore.get("auth-token")
-
-    const isAuthenticated = authToken?.value === "authenticated"
+    const user = await getUser()
 
     return NextResponse.json({
-      isAuthenticated,
-      user: isAuthenticated ? { name: "Admin", email: "admin@recepten.nl" } : null,
+      isAuthenticated: !!user,
+      user: user || null,
     })
   } catch (error) {
     console.error("Auth status error:", error)
