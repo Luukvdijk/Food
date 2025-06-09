@@ -104,16 +104,6 @@ export default function SignInPage() {
                 {isLoading ? "Inloggen..." : "Inloggen"}
               </Button>
             </form>
-
-            <div className="mt-6 text-center">
-              <p className="text-sm text-muted-foreground">
-                Demo inloggegevens:
-                <br />
-                E-mail: admin@recepten.nl
-                <br />
-                Wachtwoord: admin123
-              </p>
-            </div>
           </CardContent>
         </Card>
       </div>
