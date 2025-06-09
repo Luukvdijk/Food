@@ -4,9 +4,10 @@ import type React from "react"
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { Search } from "lucide-react"
+import { Search, Settings } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
+import Link from "next/link"
 
 export function Header() {
   const [zoekterm, setZoekterm] = useState("")
@@ -42,6 +43,13 @@ export function Header() {
               <span className="sr-only">Zoeken</span>
             </Button>
           </form>
+
+          <Button asChild variant="outline" size="sm">
+            <Link href="/admin">
+              <Settings className="h-4 w-4 mr-2" />
+              Admin
+            </Link>
+          </Button>
         </div>
       </div>
     </header>
