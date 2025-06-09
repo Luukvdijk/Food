@@ -8,7 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Pencil, Trash2, Save, X } from "lucide-react"
-import { Alert, AlertDescription } from "@/components/ui/alert"
+import { useToast } from "@/hooks/use-toast"
 import type { Ingredient, Recept } from "@/types"
 
 interface IngredientWithRecept extends Ingredient {
@@ -27,7 +27,7 @@ export function IngredientsManager() {
     notitie: "",
   })
   const [isLoading, setIsLoading] = useState(true)
-  const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null)
+  const { toast } = useToast()
 
   useEffect(() => {
     loadData()
@@ -48,7 +48,11 @@ export function IngredientsManager() {
         setRecepten(receptenData)
       }
     } catch (error) {
-      setMessage({ type: "error", text: "Fout bij laden van data" })
+      toast({
+        title: "Fout",
+        description: "Fout bij laden van data",
+        className: "bg-red-50 border-red-200 text-red-800",
+      })
     } finally {
       setIsLoading(false)
     }
@@ -83,14 +87,26 @@ export function IngredientsManager() {
       })
 
       if (response.ok) {
-        setMessage({ type: "success", text: "Ingredient succesvol bijgewerkt" })
+        toast({
+          title: "Succes!",
+          description: "Ingredient succesvol bijgewerkt",
+          className: "bg-green-50 border-green-200 text-green-800",
+        })
         loadData()
         cancelEdit()
       } else {
-        setMessage({ type: "error", text: "Fout bij bijwerken" })
+        toast({
+          title: "Fout",
+          description: "Fout bij bijwerken",
+          className: "bg-red-50 border-red-200 text-red-800",
+        })
       }
     } catch (error) {
-      setMessage({ type: "error", text: "Fout bij bijwerken" })
+      toast({
+        title: "Fout",
+        description: "Fout bij bijwerken",
+        className: "bg-red-50 border-red-200 text-red-800",
+      })
     }
   }
 
@@ -103,13 +119,25 @@ export function IngredientsManager() {
       })
 
       if (response.ok) {
-        setMessage({ type: "success", text: "Ingredient verwijderd" })
+        toast({
+          title: "Succes!",
+          description: "Ingredient verwijderd",
+          className: "bg-green-50 border-green-200 text-green-800",
+        })
         loadData()
       } else {
-        setMessage({ type: "error", text: "Fout bij verwijderen" })
+        toast({
+          title: "Fout",
+          description: "Fout bij verwijderen",
+          className: "bg-red-50 border-red-200 text-red-800",
+        })
       }
     } catch (error) {
-      setMessage({ type: "error", text: "Fout bij verwijderen" })
+      toast({
+        title: "Fout",
+        description: "Fout bij verwijderen",
+        className: "bg-red-50 border-red-200 text-red-800",
+      })
     }
   }
 
@@ -119,12 +147,6 @@ export function IngredientsManager() {
 
   return (
     <div className="space-y-6">
-      {message && (
-        <Alert variant={message.type === "error" ? "destructive" : "default"}>
-          <AlertDescription>{message.text}</AlertDescription>
-        </Alert>
-      )}
-
       {/* Filter */}
       <Card>
         <CardHeader>

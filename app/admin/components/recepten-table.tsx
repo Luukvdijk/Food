@@ -19,6 +19,7 @@ import {
 import { Trash2, Eye, Clock, Users, Pencil, Loader2 } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
+import { useToast } from "@/hooks/use-toast"
 
 interface ReceptenTableProps {
   recepten: any[]
@@ -27,6 +28,7 @@ interface ReceptenTableProps {
 export function ReceptenTable({ recepten }: ReceptenTableProps) {
   const [deletingId, setDeletingId] = useState<number | null>(null)
   const router = useRouter()
+  const { toast } = useToast()
 
   // Check if eigenaar column exists in the data
   const hasEigenaarColumn = recepten.length > 0 && "eigenaar" in recepten[0]
@@ -37,11 +39,22 @@ export function ReceptenTable({ recepten }: ReceptenTableProps) {
       await deleteRecept(id)
     } catch (error: any) {
       // Check if this is a redirect (which is expected and means success)
-      if (!(error?.digest?.includes("NEXT_REDIRECT") || error?.message === "NEXT_REDIRECT")) {
+      if (error?.digest?.includes("NEXT_REDIRECT") || error?.message === "NEXT_REDIRECT") {
+        // This is actually success - the redirect happened
+        toast({
+          title: "Succes!",
+          description: "Recept succesvol verwijderd",
+          className: "bg-green-50 border-green-200 text-green-800",
+        })
+      } else {
         // This is an actual error
         console.error("Delete error:", error)
+        toast({
+          title: "Fout",
+          description: "Er is een fout opgetreden bij het verwijderen van het recept",
+          className: "bg-red-50 border-red-200 text-red-800",
+        })
       }
-      // If it's a redirect, that's expected behavior for success
     } finally {
       setDeletingId(null)
     }
