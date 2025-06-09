@@ -1,5 +1,12 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { createServerClient } from "@/lib/supabase"
+
+// Demo gebruiker - in productie zou dit uit een database komen
+const DEMO_USER = {
+  email: "admin@recepten.nl",
+  password: "Bonappetit",
+  id: "1",
+  name: "Admin",
+}
 
 export async function POST(request: NextRequest) {
   try {
