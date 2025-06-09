@@ -42,6 +42,12 @@ export async function addRecept(formData: FormData) {
     const afbeelding_url = formData.get("afbeelding_url") as string
     const eigenaar = (formData.get("eigenaar") as Eigenaar) || "henk"
 
+    // Validatie
+    if (!naam || !beschrijving || !bereidingstijd || !type) {
+      console.error("Missing required fields")
+      redirect("/admin?error=missing_fields")
+    }
+
     // Parse seizoenen (comma separated)
     const seizoenString = formData.get("seizoen") as string
     const seizoen = seizoenString
@@ -63,9 +69,19 @@ export async function addRecept(formData: FormData) {
       .map((s) => s.trim())
       .filter(Boolean)
 
+    if (bereidingswijze.length === 0) {
+      console.error("No preparation steps provided")
+      redirect("/admin?error=missing_steps")
+    }
+
     // Parse ingrediënten
     const ingredientenString = formData.get("ingredienten") as string
     const ingredientenLines = ingredientenString.split("\n").filter((line) => line.trim())
+
+    if (ingredientenLines.length === 0) {
+      console.error("No ingredients provided")
+      redirect("/admin?error=missing_ingredients")
+    }
 
     // Parse bijgerechten
     const bijgerechtenString = formData.get("bijgerechten") as string
@@ -84,6 +100,8 @@ export async function addRecept(formData: FormData) {
       console.error("Error checking eigenaar column:", error)
     }
 
+    console.log("Adding recipe:", { naam, type, eigenaar, hasEigenaarColumn })
+
     // Voeg het recept toe
     let receptResult
     if (hasEigenaarColumn) {
@@ -101,6 +119,7 @@ export async function addRecept(formData: FormData) {
     }
 
     const receptId = receptResult[0].id
+    console.log("Recipe added with ID:", receptId)
 
     // Voeg ingrediënten toe
     for (const line of ingredientenLines) {
@@ -126,8 +145,12 @@ export async function addRecept(formData: FormData) {
       }
     }
 
+    console.log("Recipe successfully added, revalidating paths")
     revalidatePath("/")
     revalidatePath("/admin")
+    revalidatePath("/zoeken")
+
+    console.log("Redirecting to success page")
     redirect("/admin?success=true")
   } catch (error) {
     console.error("Error adding recept:", error)
@@ -146,6 +169,14 @@ export async function updateRecept(formData: FormData) {
     const personen = Number.parseInt(formData.get("personen") as string)
     const afbeelding_url = formData.get("afbeelding_url") as string
     const eigenaar = (formData.get("eigenaar") as Eigenaar) || "henk"
+
+    console.log("Updating recipe:", { id, naam, type, eigenaar })
+
+    // Validatie
+    if (!id || !naam || !beschrijving || !bereidingstijd || !type) {
+      console.error("Missing required fields for update")
+      redirect("/admin?error=missing_fields")
+    }
 
     // Parse seizoenen (comma separated)
     const seizoenString = formData.get("seizoen") as string
@@ -238,8 +269,13 @@ export async function updateRecept(formData: FormData) {
       }
     }
 
+    console.log("Recipe successfully updated, revalidating paths")
     revalidatePath("/")
     revalidatePath("/admin")
+    revalidatePath("/zoeken")
+    revalidatePath(`/recept/${id}`)
+
+    console.log("Redirecting to updated success page")
     redirect("/admin?updated=true")
   } catch (error) {
     console.error("Error updating recept:", error)
@@ -249,9 +285,16 @@ export async function updateRecept(formData: FormData) {
 
 export async function deleteRecept(receptId: number) {
   try {
+    console.log("Deleting recipe:", receptId)
+
     await sql`DELETE FROM recepten WHERE id = ${receptId}`
+
+    console.log("Recipe successfully deleted, revalidating paths")
     revalidatePath("/")
     revalidatePath("/admin")
+    revalidatePath("/zoeken")
+
+    console.log("Redirecting to deleted success page")
     redirect("/admin?deleted=true")
   } catch (error) {
     console.error("Error deleting recept:", error)

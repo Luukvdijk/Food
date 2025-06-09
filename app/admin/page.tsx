@@ -107,12 +107,26 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
           <AlertDescription>
             {searchParams.error === "recipe_not_found" && "Recept niet gevonden."}
             {searchParams.error === "edit_failed" && "Kon recept niet laden voor bewerking."}
+            {searchParams.error === "add_failed" && "Kon recept niet toevoegen."}
+            {searchParams.error === "update_failed" && "Kon recept niet bijwerken."}
+            {searchParams.error === "delete_failed" && "Kon recept niet verwijderen."}
+            {searchParams.error === "missing_fields" && "Niet alle verplichte velden zijn ingevuld."}
+            {searchParams.error === "missing_steps" && "Geen bereidingsstappen opgegeven."}
+            {searchParams.error === "missing_ingredients" && "Geen ingrediënten opgegeven."}
             {dataError && dataError}
             {searchParams.error &&
               !dataError &&
-              searchParams.error !== "recipe_not_found" &&
-              searchParams.error !== "edit_failed" &&
-              "Er is een fout opgetreden. Probeer het opnieuw."}
+              ![
+                "recipe_not_found",
+                "edit_failed",
+                "add_failed",
+                "update_failed",
+                "delete_failed",
+                "missing_fields",
+                "missing_steps",
+                "missing_ingredients",
+              ].includes(searchParams.error) &&
+              "Er is een onbekende fout opgetreden. Probeer het opnieuw."}
           </AlertDescription>
         </Alert>
       )}
