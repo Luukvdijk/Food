@@ -4,6 +4,7 @@ import { setupDatabase } from "./db-setup"
 import { ReceptCard } from "@/components/recept-card"
 import { Button } from "@/components/ui/button"
 import { redirect } from "next/navigation"
+import { sql } from "@/lib/db"
 
 async function handleSetupDatabase() {
   "use server"
@@ -14,9 +15,45 @@ async function handleSetupDatabase() {
   return result
 }
 
+async function handleMigrateDatabase() {
+  "use server"
+  try {
+    // Add eigenaar column if it doesn't exist
+    await sql`
+      DO $$ 
+      BEGIN
+          IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                         WHERE table_name = 'recepten' AND column_name = 'eigenaar') THEN
+              ALTER TABLE recepten ADD COLUMN eigenaar VARCHAR(50) DEFAULT 'henk';
+          END IF;
+      END $$;
+    `
+
+    // Update existing recepten
+    await sql`UPDATE recepten SET eigenaar = 'henk' WHERE eigenaar IS NULL`
+
+    redirect("/")
+  } catch (error) {
+    console.error("Migration error:", error)
+  }
+}
+
 export default async function Home() {
   // Check database status first
   const dbStatus = await checkDatabaseStatus()
+
+  // Check if eigenaar column exists
+  let hasEigenaarColumn = false
+  try {
+    const columnCheck = await sql`
+      SELECT column_name 
+      FROM information_schema.columns 
+      WHERE table_name = 'recepten' AND column_name = 'eigenaar'
+    `
+    hasEigenaarColumn = columnCheck.length > 0
+  } catch (error) {
+    // Table might not exist yet
+  }
 
   let alleRecepten: any[] = []
 
@@ -52,6 +89,19 @@ export default async function Home() {
             <p className="text-xs text-muted-foreground mt-4">
               Dit voegt 5 heerlijke Nederlandse recepten toe zoals erwtensoep, appeltaart en stamppot.
             </p>
+          </div>
+        )}
+
+        {/* Show migration button if database exists but eigenaar column is missing */}
+        {dbStatus.hasData && !hasEigenaarColumn && (
+          <div className="text-center py-6 bg-blue-50 rounded-lg mt-6">
+            <h3 className="text-lg font-semibold mb-2">Database Update Beschikbaar</h3>
+            <p className="text-muted-foreground mb-4">
+              Er is een nieuwe functie beschikbaar! Klik hieronder om de eigenaar functionaliteit toe te voegen.
+            </p>
+            <form action={handleMigrateDatabase}>
+              <Button type="submit">Database Updaten</Button>
+            </form>
           </div>
         )}
       </section>

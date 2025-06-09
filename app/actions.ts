@@ -5,8 +5,17 @@ import type { FilterOptions, Recept, Ingredient, Bijgerecht, Eigenaar } from "@/
 
 export async function getRandomRecept(eigenaar?: Eigenaar | null): Promise<Recept | null> {
   try {
+    // First check if eigenaar column exists
+    const columnCheck = await sql`
+      SELECT column_name 
+      FROM information_schema.columns 
+      WHERE table_name = 'recepten' AND column_name = 'eigenaar'
+    `
+
+    const hasEigenaarColumn = columnCheck.length > 0
+
     let query
-    if (eigenaar) {
+    if (eigenaar && hasEigenaarColumn) {
       query = sql`
         SELECT * FROM recepten 
         WHERE eigenaar = ${eigenaar}
@@ -27,7 +36,13 @@ export async function getRandomRecept(eigenaar?: Eigenaar | null): Promise<Recep
       return null
     }
 
-    return result[0] as Recept
+    // Add default eigenaar if column doesn't exist
+    const recept = result[0] as Recept
+    if (!hasEigenaarColumn) {
+      recept.eigenaar = "henk"
+    }
+
+    return recept
   } catch (error) {
     console.error("Error fetching random recept:", error)
     return null
@@ -84,13 +99,25 @@ export async function getBijgerechten(receptId: number): Promise<Bijgerecht[]> {
 
 export async function zoekRecepten(options: FilterOptions): Promise<Recept[]> {
   try {
-    if (!options.type && !options.seizoen && !options.eigenaar && !options.zoekterm) {
+    // Check if eigenaar column exists
+    const columnCheck = await sql`
+      SELECT column_name 
+      FROM information_schema.columns 
+      WHERE table_name = 'recepten' AND column_name = 'eigenaar'
+    `
+
+    const hasEigenaarColumn = columnCheck.length > 0
+
+    if (!options.type && !options.seizoen && (!options.eigenaar || !hasEigenaarColumn) && !options.zoekterm) {
       // No filters, return all recipes
       const result = await sql`
         SELECT * FROM recepten 
         ORDER BY naam
       `
-      return result as Recept[]
+      return (result as Recept[]).map((r) => ({
+        ...r,
+        eigenaar: r.eigenaar || "henk",
+      }))
     }
 
     const conditions: string[] = []
@@ -106,7 +133,7 @@ export async function zoekRecepten(options: FilterOptions): Promise<Recept[]> {
       values.push(options.seizoen)
     }
 
-    if (options.eigenaar) {
+    if (options.eigenaar && hasEigenaarColumn) {
       conditions.push(`eigenaar = $${values.length + 1}`)
       values.push(options.eigenaar)
     }
@@ -124,7 +151,10 @@ export async function zoekRecepten(options: FilterOptions): Promise<Recept[]> {
       ORDER BY naam
     `
 
-    return result as Recept[]
+    return (result as Recept[]).map((r) => ({
+      ...r,
+      eigenaar: r.eigenaar || "henk",
+    }))
   } catch (error) {
     console.error("Error searching recepten:", error)
     return []
