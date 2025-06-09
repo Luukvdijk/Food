@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Loader2 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
+import { ImageUpload } from "@/components/image-upload"
 import type { GerechtsType, Eigenaar } from "@/types"
 
 const gerechtsTypes: GerechtsType[] = ["Ontbijt", "Lunch", "Diner", "Dessert", "Snack"]
@@ -25,6 +26,7 @@ export function AddReceptForm() {
   const [selectedMoeilijkheid, setSelectedMoeilijkheid] = useState("Gemiddeld")
   const [selectedEigenaar, setSelectedEigenaar] = useState<Eigenaar>("henk")
   const [hasEigenaarSupport, setHasEigenaarSupport] = useState(true)
+  const [imageUrl, setImageUrl] = useState("")
   const { toast } = useToast()
 
   // Check if eigenaar column exists
@@ -49,6 +51,7 @@ export function AddReceptForm() {
     try {
       formData.set("type", selectedType)
       formData.set("moeilijkheidsgraad", selectedMoeilijkheid)
+      formData.set("afbeelding_url", imageUrl)
       if (hasEigenaarSupport) {
         formData.set("eigenaar", selectedEigenaar)
       }
@@ -77,6 +80,7 @@ export function AddReceptForm() {
           setSelectedType("Diner")
           setSelectedMoeilijkheid("Gemiddeld")
           setSelectedEigenaar("henk")
+          setImageUrl("")
         }, 1000)
       } else {
         // This is an actual error
@@ -225,17 +229,17 @@ export function AddReceptForm() {
                 <Input id="tags" name="tags" placeholder="vegetarisch, snel, gezond" disabled={isSubmitting} />
               </div>
             </div>
+          </CardContent>
+        </Card>
 
-            <div>
-              <Label htmlFor="afbeelding_url">Afbeelding URL (optioneel)</Label>
-              <Input
-                id="afbeelding_url"
-                name="afbeelding_url"
-                type="url"
-                placeholder="https://example.com/image.jpg"
-                disabled={isSubmitting}
-              />
-            </div>
+        {/* Afbeelding Upload */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Recept Afbeelding</CardTitle>
+            <CardDescription>Upload een afbeelding van je recept</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ImageUpload currentImageUrl={imageUrl} onImageChange={setImageUrl} disabled={isSubmitting} />
           </CardContent>
         </Card>
 

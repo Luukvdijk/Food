@@ -11,6 +11,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { ArrowLeft, Loader2 } from "lucide-react"
 import Link from "next/link"
 import { useToast } from "@/hooks/use-toast"
+import { ImageUpload } from "@/components/image-upload"
 import type { GerechtsType, Eigenaar, Recept } from "@/types"
 
 const gerechtsTypes: GerechtsType[] = ["Ontbijt", "Lunch", "Diner", "Dessert", "Snack"]
@@ -31,6 +32,7 @@ export function EditReceptForm({ recept, ingredienten, bijgerechten }: EditRecep
   const [selectedType, setSelectedType] = useState<GerechtsType>(recept.type)
   const [selectedMoeilijkheid, setSelectedMoeilijkheid] = useState(recept.moeilijkheidsgraad)
   const [selectedEigenaar, setSelectedEigenaar] = useState<Eigenaar>((recept.eigenaar as Eigenaar) || "henk")
+  const [imageUrl, setImageUrl] = useState(recept.afbeelding_url || "")
   const { toast } = useToast()
 
   // Check if eigenaar exists in the recept object
@@ -42,6 +44,7 @@ export function EditReceptForm({ recept, ingredienten, bijgerechten }: EditRecep
       formData.set("id", recept.id.toString())
       formData.set("type", selectedType)
       formData.set("moeilijkheidsgraad", selectedMoeilijkheid)
+      formData.set("afbeelding_url", imageUrl)
       if (hasEigenaarSupport) {
         formData.set("eigenaar", selectedEigenaar)
       }
@@ -208,17 +211,17 @@ export function EditReceptForm({ recept, ingredienten, bijgerechten }: EditRecep
                 <Input id="tags" name="tags" defaultValue={recept.tags.join(", ")} disabled={isSubmitting} />
               </div>
             </div>
+          </CardContent>
+        </Card>
 
-            <div>
-              <Label htmlFor="afbeelding_url">Afbeelding URL (optioneel)</Label>
-              <Input
-                id="afbeelding_url"
-                name="afbeelding_url"
-                type="url"
-                defaultValue={recept.afbeelding_url || ""}
-                disabled={isSubmitting}
-              />
-            </div>
+        {/* Afbeelding Upload */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Recept Afbeelding</CardTitle>
+            <CardDescription>Upload een afbeelding van je recept</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ImageUpload currentImageUrl={imageUrl} onImageChange={setImageUrl} disabled={isSubmitting} />
           </CardContent>
         </Card>
 
