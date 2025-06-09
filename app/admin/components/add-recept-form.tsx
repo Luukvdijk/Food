@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { CheckCircle } from "lucide-react"
+import { CheckCircle, Loader2 } from "lucide-react"
 import type { GerechtsType, Eigenaar } from "@/types"
 
 const gerechtsTypes: GerechtsType[] = ["Ontbijt", "Lunch", "Diner", "Dessert", "Snack"]
@@ -56,24 +56,30 @@ export function AddReceptForm() {
 
       await addRecept(formData)
 
-      // If we get here, the action completed successfully
-      setShowSuccess(true)
+      // If we get here without a redirect, something went wrong
+      console.log("Action completed without redirect - this shouldn't happen")
+    } catch (error: any) {
+      // Check if this is a redirect (which is expected and means success)
+      if (error?.digest?.includes("NEXT_REDIRECT") || error?.message === "NEXT_REDIRECT") {
+        // This is actually success - the redirect happened
+        setShowSuccess(true)
 
-      // Reset form after a delay
-      setTimeout(() => {
-        setShowSuccess(false)
-        // Reset form fields
-        const form = document.querySelector("form") as HTMLFormElement
-        if (form) {
-          form.reset()
-        }
-        setSelectedType("Diner")
-        setSelectedMoeilijkheid("Gemiddeld")
-        setSelectedEigenaar("henk")
-      }, 3000)
-    } catch (error) {
-      // This will catch any non-redirect errors
-      console.error("Form submission error:", error)
+        // Reset form after a delay
+        setTimeout(() => {
+          setShowSuccess(false)
+          // Reset form fields
+          const form = document.querySelector("form") as HTMLFormElement
+          if (form) {
+            form.reset()
+          }
+          setSelectedType("Diner")
+          setSelectedMoeilijkheid("Gemiddeld")
+          setSelectedEigenaar("henk")
+        }, 3000)
+      } else {
+        // This is an actual error
+        console.error("Form submission error:", error)
+      }
     } finally {
       setIsSubmitting(false)
     }
@@ -98,11 +104,26 @@ export function AddReceptForm() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="naam">Recept Naam *</Label>
-                <Input id="naam" name="naam" required placeholder="Bijv. Hollandse Erwtensoep" />
+                <Input
+                  id="naam"
+                  name="naam"
+                  required
+                  placeholder="Bijv. Hollandse Erwtensoep"
+                  disabled={isSubmitting}
+                />
               </div>
               <div>
                 <Label htmlFor="personen">Aantal Personen *</Label>
-                <Input id="personen" name="personen" type="number" required defaultValue="4" min="1" max="20" />
+                <Input
+                  id="personen"
+                  name="personen"
+                  type="number"
+                  required
+                  defaultValue="4"
+                  min="1"
+                  max="20"
+                  disabled={isSubmitting}
+                />
               </div>
             </div>
 
@@ -114,17 +135,30 @@ export function AddReceptForm() {
                 required
                 placeholder="Een korte beschrijving van het recept..."
                 rows={3}
+                disabled={isSubmitting}
               />
             </div>
 
             <div className={`grid grid-cols-1 ${hasEigenaarSupport ? "md:grid-cols-4" : "md:grid-cols-3"} gap-4`}>
               <div>
                 <Label htmlFor="bereidingstijd">Bereidingstijd (minuten) *</Label>
-                <Input id="bereidingstijd" name="bereidingstijd" type="number" required placeholder="30" min="1" />
+                <Input
+                  id="bereidingstijd"
+                  name="bereidingstijd"
+                  type="number"
+                  required
+                  placeholder="30"
+                  min="1"
+                  disabled={isSubmitting}
+                />
               </div>
               <div>
                 <Label>Type Gerecht *</Label>
-                <Select value={selectedType} onValueChange={(value) => setSelectedType(value as GerechtsType)}>
+                <Select
+                  value={selectedType}
+                  onValueChange={(value) => setSelectedType(value as GerechtsType)}
+                  disabled={isSubmitting}
+                >
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -139,7 +173,7 @@ export function AddReceptForm() {
               </div>
               <div>
                 <Label>Moeilijkheidsgraad *</Label>
-                <Select value={selectedMoeilijkheid} onValueChange={setSelectedMoeilijkheid}>
+                <Select value={selectedMoeilijkheid} onValueChange={setSelectedMoeilijkheid} disabled={isSubmitting}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -155,7 +189,11 @@ export function AddReceptForm() {
               {hasEigenaarSupport && (
                 <div>
                   <Label>Eigenaar *</Label>
-                  <Select value={selectedEigenaar} onValueChange={(value) => setSelectedEigenaar(value as Eigenaar)}>
+                  <Select
+                    value={selectedEigenaar}
+                    onValueChange={(value) => setSelectedEigenaar(value as Eigenaar)}
+                    disabled={isSubmitting}
+                  >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -179,17 +217,24 @@ export function AddReceptForm() {
                   name="seizoen"
                   placeholder="Lente, Zomer, Herfst, Winter"
                   defaultValue="Lente, Zomer, Herfst, Winter"
+                  disabled={isSubmitting}
                 />
               </div>
               <div>
                 <Label htmlFor="tags">Tags (komma gescheiden)</Label>
-                <Input id="tags" name="tags" placeholder="vegetarisch, snel, gezond" />
+                <Input id="tags" name="tags" placeholder="vegetarisch, snel, gezond" disabled={isSubmitting} />
               </div>
             </div>
 
             <div>
               <Label htmlFor="afbeelding_url">Afbeelding URL (optioneel)</Label>
-              <Input id="afbeelding_url" name="afbeelding_url" type="url" placeholder="https://example.com/image.jpg" />
+              <Input
+                id="afbeelding_url"
+                name="afbeelding_url"
+                type="url"
+                placeholder="https://example.com/image.jpg"
+                disabled={isSubmitting}
+              />
             </div>
           </CardContent>
         </Card>
@@ -206,6 +251,7 @@ export function AddReceptForm() {
               required
               placeholder="Stap 1: Was de groenten grondig&#10;Stap 2: Snijd alle ingrediënten in stukjes&#10;Stap 3: Verhit de olie in een pan"
               rows={8}
+              disabled={isSubmitting}
             />
           </CardContent>
         </Card>
@@ -226,6 +272,7 @@ export function AddReceptForm() {
               required
               placeholder="500 | gram | spliterwten | gedroogd&#10;2 | stuks | uien | gesnipperd&#10;1 | liter | water"
               rows={8}
+              disabled={isSubmitting}
             />
           </CardContent>
         </Card>
@@ -245,13 +292,21 @@ export function AddReceptForm() {
               name="bijgerechten"
               placeholder="Stokbrood | Knapperig vers stokbrood met kruidenboter&#10;Salade | Frisse groene salade"
               rows={4}
+              disabled={isSubmitting}
             />
           </CardContent>
         </Card>
 
         <div className="flex justify-end">
           <Button type="submit" disabled={isSubmitting} size="lg">
-            {isSubmitting ? "Recept toevoegen..." : "Recept Toevoegen"}
+            {isSubmitting ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Recept toevoegen...
+              </>
+            ) : (
+              "Recept Toevoegen"
+            )}
           </Button>
         </div>
       </form>
