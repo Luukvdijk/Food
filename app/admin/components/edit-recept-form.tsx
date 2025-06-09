@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { ArrowLeft } from "lucide-react"
+import { ArrowLeft, Loader2 } from "lucide-react"
 import Link from "next/link"
 import type { GerechtsType, Eigenaar, Recept } from "@/types"
 
@@ -36,13 +36,24 @@ export function EditReceptForm({ recept, ingredienten, bijgerechten }: EditRecep
 
   const handleSubmit = async (formData: FormData) => {
     setIsSubmitting(true)
-    formData.set("id", recept.id.toString())
-    formData.set("type", selectedType)
-    formData.set("moeilijkheidsgraad", selectedMoeilijkheid)
-    if (hasEigenaarSupport) {
-      formData.set("eigenaar", selectedEigenaar)
+    try {
+      formData.set("id", recept.id.toString())
+      formData.set("type", selectedType)
+      formData.set("moeilijkheidsgraad", selectedMoeilijkheid)
+      if (hasEigenaarSupport) {
+        formData.set("eigenaar", selectedEigenaar)
+      }
+      await updateRecept(formData)
+    } catch (error: any) {
+      // Check if this is a redirect (which is expected and means success)
+      if (!(error?.digest?.includes("NEXT_REDIRECT") || error?.message === "NEXT_REDIRECT")) {
+        // This is an actual error
+        console.error("Form submission error:", error)
+      }
+      // If it's a redirect, that's expected behavior for success
+    } finally {
+      setIsSubmitting(false)
     }
-    await updateRecept(formData)
   }
 
   // Format ingrediënten voor textarea
@@ -56,7 +67,7 @@ export function EditReceptForm({ recept, ingredienten, bijgerechten }: EditRecep
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-4">
-        <Button variant="ghost" size="sm" asChild>
+        <Button variant="ghost" size="sm" asChild disabled={isSubmitting}>
           <Link href="/admin">
             <ArrowLeft className="mr-2 h-4 w-4" />
             Terug naar overzicht
@@ -75,7 +86,7 @@ export function EditReceptForm({ recept, ingredienten, bijgerechten }: EditRecep
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="naam">Recept Naam *</Label>
-                <Input id="naam" name="naam" required defaultValue={recept.naam} />
+                <Input id="naam" name="naam" required defaultValue={recept.naam} disabled={isSubmitting} />
               </div>
               <div>
                 <Label htmlFor="personen">Aantal Personen *</Label>
@@ -87,13 +98,21 @@ export function EditReceptForm({ recept, ingredienten, bijgerechten }: EditRecep
                   defaultValue={recept.personen}
                   min="1"
                   max="20"
+                  disabled={isSubmitting}
                 />
               </div>
             </div>
 
             <div>
               <Label htmlFor="beschrijving">Beschrijving *</Label>
-              <Textarea id="beschrijving" name="beschrijving" required defaultValue={recept.beschrijving} rows={3} />
+              <Textarea
+                id="beschrijving"
+                name="beschrijving"
+                required
+                defaultValue={recept.beschrijving}
+                rows={3}
+                disabled={isSubmitting}
+              />
             </div>
 
             <div className={`grid grid-cols-1 ${hasEigenaarSupport ? "md:grid-cols-4" : "md:grid-cols-3"} gap-4`}>
@@ -106,11 +125,16 @@ export function EditReceptForm({ recept, ingredienten, bijgerechten }: EditRecep
                   required
                   defaultValue={recept.bereidingstijd}
                   min="1"
+                  disabled={isSubmitting}
                 />
               </div>
               <div>
                 <Label>Type Gerecht *</Label>
-                <Select value={selectedType} onValueChange={(value) => setSelectedType(value as GerechtsType)}>
+                <Select
+                  value={selectedType}
+                  onValueChange={(value) => setSelectedType(value as GerechtsType)}
+                  disabled={isSubmitting}
+                >
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -125,7 +149,7 @@ export function EditReceptForm({ recept, ingredienten, bijgerechten }: EditRecep
               </div>
               <div>
                 <Label>Moeilijkheidsgraad *</Label>
-                <Select value={selectedMoeilijkheid} onValueChange={setSelectedMoeilijkheid}>
+                <Select value={selectedMoeilijkheid} onValueChange={setSelectedMoeilijkheid} disabled={isSubmitting}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -141,7 +165,11 @@ export function EditReceptForm({ recept, ingredienten, bijgerechten }: EditRecep
               {hasEigenaarSupport && (
                 <div>
                   <Label>Eigenaar *</Label>
-                  <Select value={selectedEigenaar} onValueChange={(value) => setSelectedEigenaar(value as Eigenaar)}>
+                  <Select
+                    value={selectedEigenaar}
+                    onValueChange={(value) => setSelectedEigenaar(value as Eigenaar)}
+                    disabled={isSubmitting}
+                  >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -160,17 +188,23 @@ export function EditReceptForm({ recept, ingredienten, bijgerechten }: EditRecep
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="seizoen">Seizoenen (komma gescheiden)</Label>
-                <Input id="seizoen" name="seizoen" defaultValue={recept.seizoen.join(", ")} />
+                <Input id="seizoen" name="seizoen" defaultValue={recept.seizoen.join(", ")} disabled={isSubmitting} />
               </div>
               <div>
                 <Label htmlFor="tags">Tags (komma gescheiden)</Label>
-                <Input id="tags" name="tags" defaultValue={recept.tags.join(", ")} />
+                <Input id="tags" name="tags" defaultValue={recept.tags.join(", ")} disabled={isSubmitting} />
               </div>
             </div>
 
             <div>
               <Label htmlFor="afbeelding_url">Afbeelding URL (optioneel)</Label>
-              <Input id="afbeelding_url" name="afbeelding_url" type="url" defaultValue={recept.afbeelding_url || ""} />
+              <Input
+                id="afbeelding_url"
+                name="afbeelding_url"
+                type="url"
+                defaultValue={recept.afbeelding_url || ""}
+                disabled={isSubmitting}
+              />
             </div>
           </CardContent>
         </Card>
@@ -182,7 +216,13 @@ export function EditReceptForm({ recept, ingredienten, bijgerechten }: EditRecep
             <CardDescription>Voer elke stap op een nieuwe regel in</CardDescription>
           </CardHeader>
           <CardContent>
-            <Textarea name="bereidingswijze" required defaultValue={recept.bereidingswijze.join("\n")} rows={8} />
+            <Textarea
+              name="bereidingswijze"
+              required
+              defaultValue={recept.bereidingswijze.join("\n")}
+              rows={8}
+              disabled={isSubmitting}
+            />
           </CardContent>
         </Card>
 
@@ -193,7 +233,7 @@ export function EditReceptForm({ recept, ingredienten, bijgerechten }: EditRecep
             <CardDescription>Formaat per regel: hoeveelheid | eenheid | naam | notitie (optioneel)</CardDescription>
           </CardHeader>
           <CardContent>
-            <Textarea name="ingredienten" required defaultValue={ingredientenText} rows={8} />
+            <Textarea name="ingredienten" required defaultValue={ingredientenText} rows={8} disabled={isSubmitting} />
           </CardContent>
         </Card>
 
@@ -204,16 +244,23 @@ export function EditReceptForm({ recept, ingredienten, bijgerechten }: EditRecep
             <CardDescription>Formaat per regel: naam | beschrijving</CardDescription>
           </CardHeader>
           <CardContent>
-            <Textarea name="bijgerechten" defaultValue={bijgerechtenText} rows={4} />
+            <Textarea name="bijgerechten" defaultValue={bijgerechtenText} rows={4} disabled={isSubmitting} />
           </CardContent>
         </Card>
 
         <div className="flex justify-end gap-2">
-          <Button type="button" variant="outline" asChild>
+          <Button type="button" variant="outline" asChild disabled={isSubmitting}>
             <Link href="/admin">Annuleren</Link>
           </Button>
           <Button type="submit" disabled={isSubmitting} size="lg">
-            {isSubmitting ? "Recept bijwerken..." : "Recept Bijwerken"}
+            {isSubmitting ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Recept bijwerken...
+              </>
+            ) : (
+              "Recept Bijwerken"
+            )}
           </Button>
         </div>
       </form>

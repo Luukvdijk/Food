@@ -16,7 +16,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
-import { Trash2, Eye, Clock, Users, Pencil } from "lucide-react"
+import { Trash2, Eye, Clock, Users, Pencil, Loader2 } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 
@@ -33,8 +33,18 @@ export function ReceptenTable({ recepten }: ReceptenTableProps) {
 
   const handleDelete = async (id: number) => {
     setDeletingId(id)
-    await deleteRecept(id)
-    setDeletingId(null)
+    try {
+      await deleteRecept(id)
+    } catch (error: any) {
+      // Check if this is a redirect (which is expected and means success)
+      if (!(error?.digest?.includes("NEXT_REDIRECT") || error?.message === "NEXT_REDIRECT")) {
+        // This is an actual error
+        console.error("Delete error:", error)
+      }
+      // If it's a redirect, that's expected behavior for success
+    } finally {
+      setDeletingId(null)
+    }
   }
 
   const handleEdit = (id: number) => {
@@ -124,7 +134,11 @@ export function ReceptenTable({ recepten }: ReceptenTableProps) {
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
                       <Button variant="outline" size="sm" disabled={deletingId === recept.id}>
-                        <Trash2 className="h-3 w-3" />
+                        {deletingId === recept.id ? (
+                          <Loader2 className="h-3 w-3 animate-spin" />
+                        ) : (
+                          <Trash2 className="h-3 w-3" />
+                        )}
                       </Button>
                     </AlertDialogTrigger>
                     <AlertDialogContent>
