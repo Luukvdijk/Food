@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { ArrowLeft, Loader2 } from "lucide-react"
 import Link from "next/link"
+import { useToast } from "@/hooks/use-toast"
 import type { GerechtsType, Eigenaar, Recept } from "@/types"
 
 const gerechtsTypes: GerechtsType[] = ["Ontbijt", "Lunch", "Diner", "Dessert", "Snack"]
@@ -30,6 +31,7 @@ export function EditReceptForm({ recept, ingredienten, bijgerechten }: EditRecep
   const [selectedType, setSelectedType] = useState<GerechtsType>(recept.type)
   const [selectedMoeilijkheid, setSelectedMoeilijkheid] = useState(recept.moeilijkheidsgraad)
   const [selectedEigenaar, setSelectedEigenaar] = useState<Eigenaar>((recept.eigenaar as Eigenaar) || "henk")
+  const { toast } = useToast()
 
   // Check if eigenaar exists in the recept object
   const hasEigenaarSupport = "eigenaar" in recept
@@ -46,11 +48,22 @@ export function EditReceptForm({ recept, ingredienten, bijgerechten }: EditRecep
       await updateRecept(formData)
     } catch (error: any) {
       // Check if this is a redirect (which is expected and means success)
-      if (!(error?.digest?.includes("NEXT_REDIRECT") || error?.message === "NEXT_REDIRECT")) {
+      if (error?.digest?.includes("NEXT_REDIRECT") || error?.message === "NEXT_REDIRECT") {
+        // This is actually success - the redirect happened
+        toast({
+          title: "Succes!",
+          description: "Recept succesvol bijgewerkt",
+          className: "bg-green-50 border-green-200 text-green-800",
+        })
+      } else {
         // This is an actual error
         console.error("Form submission error:", error)
+        toast({
+          title: "Fout",
+          description: "Er is een fout opgetreden bij het bijwerken van het recept",
+          className: "bg-red-50 border-red-200 text-red-800",
+        })
       }
-      // If it's a redirect, that's expected behavior for success
     } finally {
       setIsSubmitting(false)
     }

@@ -8,8 +8,8 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { CheckCircle, Loader2 } from "lucide-react"
+import { Loader2 } from "lucide-react"
+import { useToast } from "@/hooks/use-toast"
 import type { GerechtsType, Eigenaar } from "@/types"
 
 const gerechtsTypes: GerechtsType[] = ["Ontbijt", "Lunch", "Diner", "Dessert", "Snack"]
@@ -25,7 +25,7 @@ export function AddReceptForm() {
   const [selectedMoeilijkheid, setSelectedMoeilijkheid] = useState("Gemiddeld")
   const [selectedEigenaar, setSelectedEigenaar] = useState<Eigenaar>("henk")
   const [hasEigenaarSupport, setHasEigenaarSupport] = useState(true)
-  const [showSuccess, setShowSuccess] = useState(false)
+  const { toast } = useToast()
 
   // Check if eigenaar column exists
   useEffect(() => {
@@ -45,7 +45,6 @@ export function AddReceptForm() {
 
   const handleSubmit = async (formData: FormData) => {
     setIsSubmitting(true)
-    setShowSuccess(false)
 
     try {
       formData.set("type", selectedType)
@@ -62,11 +61,14 @@ export function AddReceptForm() {
       // Check if this is a redirect (which is expected and means success)
       if (error?.digest?.includes("NEXT_REDIRECT") || error?.message === "NEXT_REDIRECT") {
         // This is actually success - the redirect happened
-        setShowSuccess(true)
+        toast({
+          title: "Succes!",
+          description: "Recept succesvol toegevoegd",
+          className: "bg-green-50 border-green-200 text-green-800",
+        })
 
         // Reset form after a delay
         setTimeout(() => {
-          setShowSuccess(false)
           // Reset form fields
           const form = document.querySelector("form") as HTMLFormElement
           if (form) {
@@ -75,10 +77,15 @@ export function AddReceptForm() {
           setSelectedType("Diner")
           setSelectedMoeilijkheid("Gemiddeld")
           setSelectedEigenaar("henk")
-        }, 3000)
+        }, 1000)
       } else {
         // This is an actual error
         console.error("Form submission error:", error)
+        toast({
+          title: "Fout",
+          description: "Er is een fout opgetreden bij het toevoegen van het recept",
+          className: "bg-red-50 border-red-200 text-red-800",
+        })
       }
     } finally {
       setIsSubmitting(false)
@@ -87,13 +94,6 @@ export function AddReceptForm() {
 
   return (
     <div className="space-y-6">
-      {showSuccess && (
-        <Alert>
-          <CheckCircle className="h-4 w-4" />
-          <AlertDescription>Recept succesvol toegevoegd! Het formulier wordt gereset...</AlertDescription>
-        </Alert>
-      )}
-
       <form action={handleSubmit} className="space-y-6">
         {/* Basis informatie */}
         <Card>
