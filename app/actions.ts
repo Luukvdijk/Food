@@ -1,74 +1,159 @@
 "use server"
 
-import { supabase } from "@/lib/supabase"
+import { sql } from "@/lib/db"
 import type { FilterOptions, Recept, Ingredient, Bijgerecht } from "@/types"
 
 export async function getRandomRecept(): Promise<Recept | null> {
-  const { data, error } = await supabase.from("recepten").select("*").order("id", { ascending: false }).limit(50)
+  try {
+    const result = await sql`
+      SELECT * FROM recepten 
+      ORDER BY RANDOM() 
+      LIMIT 1
+    `
 
-  if (error || !data || data.length === 0) {
+    if (result.length === 0) {
+      return null
+    }
+
+    return result[0] as Recept
+  } catch (error) {
     console.error("Error fetching random recept:", error)
     return null
   }
-
-  const randomIndex = Math.floor(Math.random() * data.length)
-  return data[randomIndex] as Recept
 }
 
 export async function getReceptById(id: number): Promise<Recept | null> {
-  const { data, error } = await supabase.from("recepten").select("*").eq("id", id).single()
+  try {
+    const result = await sql`
+      SELECT * FROM recepten 
+      WHERE id = ${id}
+    `
 
-  if (error || !data) {
+    if (result.length === 0) {
+      return null
+    }
+
+    return result[0] as Recept
+  } catch (error) {
     console.error("Error fetching recept by id:", error)
     return null
   }
-
-  return data as Recept
 }
 
 export async function getIngredienten(receptId: number): Promise<Ingredient[]> {
-  const { data, error } = await supabase.from("ingredienten").select("*").eq("recept_id", receptId)
+  try {
+    const result = await sql`
+      SELECT * FROM ingredienten 
+      WHERE recept_id = ${receptId}
+      ORDER BY id
+    `
 
-  if (error || !data) {
+    return result as Ingredient[]
+  } catch (error) {
     console.error("Error fetching ingredienten:", error)
     return []
   }
-
-  return data as Ingredient[]
 }
 
 export async function getBijgerechten(receptId: number): Promise<Bijgerecht[]> {
-  const { data, error } = await supabase.from("bijgerechten").select("*").eq("recept_id", receptId)
+  try {
+    const result = await sql`
+      SELECT * FROM bijgerechten 
+      WHERE recept_id = ${receptId}
+      ORDER BY id
+    `
 
-  if (error || !data) {
+    return result as Bijgerecht[]
+  } catch (error) {
     console.error("Error fetching bijgerechten:", error)
     return []
   }
-
-  return data as Bijgerecht[]
 }
 
 export async function zoekRecepten(options: FilterOptions): Promise<Recept[]> {
-  let query = supabase.from("recepten").select("*")
+  try {
+    if (!options.type && !options.seizoen && !options.zoekterm) {
+      // No filters, return all recipes
+      const result = await sql`
+        SELECT * FROM recepten 
+        ORDER BY naam
+      `
+      return result as Recept[]
+    }
 
-  if (options.type) {
-    query = query.eq("type", options.type)
-  }
+    const conditions: string[] = []
+    const values: any[] = []
 
-  if (options.seizoen) {
-    query = query.contains("seizoen", [options.seizoen])
-  }
+    if (options.type) {
+      conditions.push(`type = $${values.length + 1}`)
+      values.push(options.type)
+    }
 
-  if (options.zoekterm) {
-    query = query.or(`naam.ilike.%${options.zoekterm}%,beschrijving.ilike.%${options.zoekterm}%`)
-  }
+    if (options.seizoen) {
+      conditions.push(`$${values.length + 1} = ANY(seizoen)`)
+      values.push(options.seizoen)
+    }
 
-  const { data, error } = await query.order("naam")
+    if (options.zoekterm) {
+      conditions.push(`(naam ILIKE $${values.length + 1} OR beschrijving ILIKE $${values.length + 2})`)
+      values.push(`%${options.zoekterm}%`, `%${options.zoekterm}%`)
+    }
 
-  if (error || !data) {
+    const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : ""
+
+    const result = await sql`
+      SELECT * FROM recepten 
+      ${sql.unsafe(whereClause)}
+      ORDER BY naam
+    `
+
+    return result as Recept[]
+  } catch (error) {
     console.error("Error searching recepten:", error)
     return []
   }
+}
 
-  return data as Recept[]
+export async function getAllRecepten(): Promise<Recept[]> {
+  try {
+    const result = await sql`
+      SELECT * FROM recepten 
+      ORDER BY created_at DESC
+    `
+    return result as Recept[]
+  } catch (error) {
+    console.error("Error fetching all recepten:", error)
+    return []
+  }
+}
+
+export async function checkDatabaseStatus(): Promise<{ hasData: boolean; tableExists: boolean }> {
+  try {
+    // Check if table exists
+    const tableCheck = await sql`
+      SELECT EXISTS (
+        SELECT FROM information_schema.tables 
+        WHERE table_schema = 'public' 
+        AND table_name = 'recepten'
+      );
+    `
+
+    const tableExists = tableCheck[0]?.exists || false
+
+    if (!tableExists) {
+      return { hasData: false, tableExists: false }
+    }
+
+    // Check if we have data
+    const dataCheck = await sql`
+      SELECT COUNT(*) as count FROM recepten
+    `
+
+    const hasData = (dataCheck[0]?.count || 0) > 0
+
+    return { hasData, tableExists }
+  } catch (error) {
+    console.error("Error checking database status:", error)
+    return { hasData: false, tableExists: false }
+  }
 }

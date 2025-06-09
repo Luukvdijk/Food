@@ -14,9 +14,15 @@ export function RandomRecept() {
 
   const loadRandomRecept = async () => {
     setLoading(true)
-    const randomRecept = await getRandomRecept()
-    setRecept(randomRecept)
-    setLoading(false)
+    try {
+      const randomRecept = await getRandomRecept()
+      setRecept(randomRecept)
+    } catch (error) {
+      console.error("Error loading random recept:", error)
+      setRecept(null)
+    } finally {
+      setLoading(false)
+    }
   }
 
   useEffect(() => {
@@ -48,11 +54,16 @@ export function RandomRecept() {
           <ReceptCard recept={recept} />
         </div>
       ) : (
-        <p>Geen recepten gevonden.</p>
+        <Card className="w-full max-w-md">
+          <CardContent className="pt-6 text-center">
+            <p className="text-muted-foreground">Nog geen recepten beschikbaar.</p>
+            <p className="text-sm text-muted-foreground mt-2">Zet eerst de database op via de knop hieronder.</p>
+          </CardContent>
+        </Card>
       )}
 
       <Button onClick={loadRandomRecept} className="mt-6" disabled={loading}>
-        Volgend recept
+        {recept ? "Volgend recept" : "Probeer opnieuw"}
       </Button>
     </div>
   )

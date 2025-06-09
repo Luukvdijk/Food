@@ -6,8 +6,8 @@ CREATE TABLE IF NOT EXISTS recepten (
   bereidingstijd INTEGER NOT NULL,
   moeilijkheidsgraad VARCHAR(50) NOT NULL,
   type VARCHAR(50) NOT NULL,
-  seizoen VARCHAR(50)[] NOT NULL,
-  tags VARCHAR(50)[] NOT NULL,
+  seizoen TEXT[] NOT NULL,
+  tags TEXT[] NOT NULL,
   afbeelding_url TEXT,
   bereidingswijze TEXT[] NOT NULL,
   personen INTEGER NOT NULL DEFAULT 4,
@@ -33,3 +33,6 @@ CREATE TABLE IF NOT EXISTS bijgerechten (
   beschrijving TEXT NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
+
+-- Controleer of de tabellen zijn aangemaakt
+SELECT table_name FROM information_schema.tables WHERE table_schema = 'public';

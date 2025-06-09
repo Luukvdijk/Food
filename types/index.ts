@@ -7,7 +7,7 @@ export type Recept = {
   type: GerechtsType
   seizoen: Seizoen[]
   tags: string[]
-  afbeelding_url: string
+  afbeelding_url: string | null
   bereidingswijze: string[]
   personen: number
   created_at: string
@@ -19,7 +19,8 @@ export type Ingredient = {
   naam: string
   hoeveelheid: number
   eenheid: string
-  notitie?: string
+  notitie?: string | null
+  created_at: string
 }
 
 export type Bijgerecht = {
@@ -27,6 +28,7 @@ export type Bijgerecht = {
   recept_id: number
   naam: string
   beschrijving: string
+  created_at: string
 }
 
 export type GerechtsType = "Ontbijt" | "Lunch" | "Diner" | "Dessert" | "Snack"
