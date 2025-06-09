@@ -1,5 +1,4 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { supabaseAdmin } from "@/lib/supabase"
 import { getUser } from "@/lib/auth"
 
 export async function POST(request: NextRequest) {
@@ -35,65 +34,128 @@ export async function POST(request: NextRequest) {
       path: path,
     })
 
+    // Check environment variables with different possible names
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const supabaseServiceKey =
+      process.env.SUPABASE_SERVICE_ROLE_KEY ||
+      process.env.SUPABASE_SERVICE_KEY ||
+      process.env.SUPABASE_SECRET_KEY ||
+      process.env.SUPABASE_SERVICE_ROLE_KEY
+
+    console.log("Environment check:", {
+      hasUrl: !!supabaseUrl,
+      hasServiceKey: !!supabaseServiceKey,
+      urlPreview: supabaseUrl?.substring(0, 30) + "...",
+      serviceKeyPreview: supabaseServiceKey?.substring(0, 20) + "...",
+      availableEnvVars: Object.keys(process.env).filter((key) => key.includes("SUPABASE")),
+    })
+
+    if (!supabaseUrl || !supabaseServiceKey) {
+      return NextResponse.json(
+        {
+          error: "Supabase configuratie ontbreekt",
+          details: {
+            hasUrl: !!supabaseUrl,
+            hasServiceKey: !!supabaseServiceKey,
+            availableEnvVars: Object.keys(process.env).filter((key) => key.includes("SUPABASE")),
+            instructions: [
+              "1. Go to Supabase Dashboard → Settings → API",
+              "2. Copy the 'service_role' key (starts with eyJ...)",
+              "3. Add to Vercel as SUPABASE_SERVICE_ROLE_KEY",
+              "4. Redeploy the application",
+            ],
+          },
+        },
+        { status: 500 },
+      )
+    }
+
     // Convert file to buffer
     const bytes = await file.arrayBuffer()
     const buffer = Buffer.from(bytes)
 
-    console.log("Buffer created, size:", buffer.length)
+    // Create Supabase client directly
+    const { createClient } = await import("@supabase/supabase-js")
 
-    // First, check if bucket exists
-    const { data: buckets, error: bucketsError } = await supabaseAdmin.storage.listBuckets()
-    console.log(
-      "Available buckets:",
-      buckets?.map((b) => b.name),
-    )
+    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false,
+      },
+    })
 
-    if (bucketsError) {
-      console.error("Error listing buckets:", bucketsError)
-      return NextResponse.json({ error: "Fout bij controleren van storage buckets" }, { status: 500 })
-    }
+    console.log("Attempting upload to Supabase...")
 
-    const bucketExists = buckets?.some((bucket) => bucket.name === "recipe-images")
-    if (!bucketExists) {
-      console.error("Bucket 'recipe-images' does not exist")
-      return NextResponse.json({ error: "Storage bucket 'recipe-images' bestaat niet" }, { status: 500 })
-    }
-
-    // Upload to Supabase Storage
+    // Try upload with upsert to avoid conflicts
     const { data, error } = await supabaseAdmin.storage.from("recipe-images").upload(path, buffer, {
       contentType: file.type,
-      upsert: false,
+      upsert: true,
     })
 
     if (error) {
-      console.error("Supabase upload error:", {
-        message: error.message,
-        statusCode: error.statusCode,
-        error: error,
-      })
+      console.error("Supabase upload error:", error)
 
-      // More specific error messages
+      // Handle specific errors with detailed solutions
       if (error.message?.includes("Bucket not found")) {
         return NextResponse.json(
-          { error: "Storage bucket niet gevonden. Controleer Supabase configuratie." },
+          {
+            error: "Storage bucket 'recipe-images' niet gevonden",
+            solution: [
+              "1. Ga naar Supabase Dashboard → Storage",
+              "2. Klik 'New bucket'",
+              "3. Naam: 'recipe-images'",
+              "4. Zet 'Public bucket' aan",
+              "5. Klik 'Create bucket'",
+            ],
+            details: error.message,
+          },
           { status: 500 },
         )
       }
 
-      if (error.message?.includes("Policy")) {
+      if (error.message?.includes("new row violates row-level security") || error.message?.includes("Policy")) {
         return NextResponse.json(
-          { error: "Geen toestemming voor upload. Controleer storage policies." },
+          {
+            error: "Geen toestemming voor upload - Storage policies ontbreken",
+            solution: [
+              "1. Ga naar Supabase Dashboard → Storage → Policies",
+              "2. Klik 'New policy'",
+              "3. Selecteer 'For full customization'",
+              "4. Policy name: 'recipe_images_all'",
+              "5. Target roles: 'public'",
+              "6. USING expression: bucket_id = 'recipe-images'",
+              "7. WITH CHECK expression: bucket_id = 'recipe-images'",
+              "8. Klik 'Review' en dan 'Save policy'",
+            ],
+            sqlAlternative:
+              "CREATE POLICY \"recipe_images_all\" ON storage.objects FOR ALL USING (bucket_id = 'recipe-images') WITH CHECK (bucket_id = 'recipe-images');",
+            details: error.message,
+          },
           { status: 403 },
         )
       }
 
-      if (error.message?.includes("already exists")) {
-        return NextResponse.json({ error: "Bestand bestaat al. Probeer opnieuw." }, { status: 409 })
+      if (error.message?.includes("JWT") || error.message?.includes("Invalid API key")) {
+        return NextResponse.json(
+          {
+            error: "Authenticatie probleem - Service Role Key incorrect",
+            solution: [
+              "1. Ga naar Supabase Dashboard → Settings → API",
+              "2. Kopieer de 'service_role' key (NIET de anon key)",
+              "3. Voeg toe aan Vercel als SUPABASE_SERVICE_ROLE_KEY",
+              "4. Deploy opnieuw",
+            ],
+            details: error.message,
+          },
+          { status: 401 },
+        )
       }
 
       return NextResponse.json(
         {
-          error: `Upload naar storage mislukt: ${error.message}`,
+          error: `Upload mislukt: ${error.message}`,
+          details: error,
+          generalSolution: "Check de 'Test Storage' pagina voor gedetailleerde instructies",
         },
         { status: 500 },
       )
@@ -108,12 +170,17 @@ export async function POST(request: NextRequest) {
 
     console.log("Public URL generated:", publicUrl)
 
-    return NextResponse.json({ publicUrl })
+    return NextResponse.json({
+      publicUrl,
+      success: true,
+      message: "Afbeelding succesvol geüpload!",
+    })
   } catch (error) {
     console.error("Upload error:", error)
     return NextResponse.json(
       {
         error: `Server fout: ${error instanceof Error ? error.message : "Onbekende fout"}`,
+        stack: error instanceof Error ? error.stack : undefined,
       },
       { status: 500 },
     )
