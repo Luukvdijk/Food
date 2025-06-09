@@ -1,5 +1,4 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { supabaseAdmin } from "@/lib/supabase"
 import { getUser } from "@/lib/auth"
 
 export async function POST(request: NextRequest) {
@@ -39,30 +38,33 @@ export async function POST(request: NextRequest) {
     const bytes = await file.arrayBuffer()
     const buffer = Buffer.from(bytes)
 
-    console.log("Buffer created, size:", buffer.length)
+    // Create Supabase client directly here to avoid import issues
+    const { createClient } = await import("@supabase/supabase-js")
 
-    // First, check if bucket exists
-    const { data: buckets, error: bucketsError } = await supabaseAdmin.storage.listBuckets()
-    console.log(
-      "Available buckets:",
-      buckets?.map((b) => b.name),
-    )
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
-    if (bucketsError) {
-      console.error("Error listing buckets:", bucketsError)
-      return NextResponse.json({ error: "Fout bij controleren van storage buckets" }, { status: 500 })
+    if (!supabaseUrl || !supabaseServiceKey) {
+      console.error("Missing Supabase environment variables:", {
+        hasUrl: !!supabaseUrl,
+        hasServiceKey: !!supabaseServiceKey,
+      })
+      return NextResponse.json({ error: "Supabase configuratie ontbreekt" }, { status: 500 })
     }
 
-    const bucketExists = buckets?.some((bucket) => bucket.name === "recipe-images")
-    if (!bucketExists) {
-      console.error("Bucket 'recipe-images' does not exist")
-      return NextResponse.json({ error: "Storage bucket 'recipe-images' bestaat niet" }, { status: 500 })
-    }
+    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false,
+      },
+    })
 
-    // Upload to Supabase Storage
+    console.log("Attempting upload to Supabase...")
+
+    // Try to upload directly without checking buckets first
     const { data, error } = await supabaseAdmin.storage.from("recipe-images").upload(path, buffer, {
       contentType: file.type,
-      upsert: false,
+      upsert: true, // Allow overwriting existing files
     })
 
     if (error) {
@@ -72,28 +74,45 @@ export async function POST(request: NextRequest) {
         error: error,
       })
 
-      // More specific error messages
-      if (error.message?.includes("Bucket not found")) {
+      // More specific error handling
+      if (error.message?.includes("Bucket not found") || error.message?.includes("bucket")) {
         return NextResponse.json(
-          { error: "Storage bucket niet gevonden. Controleer Supabase configuratie." },
+          {
+            error: "Storage bucket niet gevonden. Maak eerst de 'recipe-images' bucket aan in Supabase Dashboard.",
+            details: error.message,
+          },
           { status: 500 },
         )
       }
 
-      if (error.message?.includes("Policy")) {
+      if (
+        error.message?.includes("Policy") ||
+        error.message?.includes("permission") ||
+        error.message?.includes("RLS")
+      ) {
         return NextResponse.json(
-          { error: "Geen toestemming voor upload. Controleer storage policies." },
+          {
+            error: "Geen toestemming voor upload. Controleer storage policies in Supabase.",
+            details: error.message,
+          },
           { status: 403 },
         )
       }
 
-      if (error.message?.includes("already exists")) {
-        return NextResponse.json({ error: "Bestand bestaat al. Probeer opnieuw." }, { status: 409 })
+      if (error.message?.includes("JWT") || error.message?.includes("token")) {
+        return NextResponse.json(
+          {
+            error: "Authenticatie probleem. Controleer SUPABASE_SERVICE_ROLE_KEY.",
+            details: error.message,
+          },
+          { status: 401 },
+        )
       }
 
       return NextResponse.json(
         {
-          error: `Upload naar storage mislukt: ${error.message}`,
+          error: `Upload mislukt: ${error.message}`,
+          details: error,
         },
         { status: 500 },
       )
@@ -114,6 +133,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         error: `Server fout: ${error instanceof Error ? error.message : "Onbekende fout"}`,
+        stack: error instanceof Error ? error.stack : undefined,
       },
       { status: 500 },
     )
