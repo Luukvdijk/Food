@@ -109,113 +109,43 @@ export default function SignInPage() {
             <CardDescription>Log in of registreer voor toegang tot het admin paneel</CardDescription>
           </CardHeader>
           <CardContent>
-            <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="signin">Inloggen</TabsTrigger>
-                <TabsTrigger value="signup">Registreren</TabsTrigger>
-              </TabsList>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {error && (
+                <Alert variant="destructive">
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              )}
 
-              <TabsContent value="signin">
-                <form onSubmit={handleSignIn} className="space-y-4">
-                  {error && (
-                    <Alert variant="destructive">
-                      <AlertDescription>{error}</AlertDescription>
-                    </Alert>
-                  )}
+              <div>
+                <Label htmlFor="email">E-mailadres</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  placeholder="admin@recepten.nl"
+                  disabled={isLoading}
+                />
+              </div>
 
-                  <div>
-                    <Label htmlFor="signin-email">E-mailadres</Label>
-                    <Input
-                      id="signin-email"
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
-                      placeholder="admin@recepten.nl"
-                      disabled={isLoading}
-                    />
-                  </div>
+              <div>
+                <Label htmlFor="password">Wachtwoord</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  placeholder="••••••••"
+                  disabled={isLoading}
+                />
+              </div>
 
-                  <div>
-                    <Label htmlFor="signin-password">Wachtwoord</Label>
-                    <Input
-                      id="signin-password"
-                      type="password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                      placeholder="••••••••"
-                      disabled={isLoading}
-                    />
-                  </div>
-
-                  <Button type="submit" className="w-full" disabled={isLoading}>
-                    {isLoading ? "Inloggen..." : "Inloggen"}
-                  </Button>
-                </form>
-              </TabsContent>
-
-              <TabsContent value="signup">
-                <form onSubmit={handleSignUp} className="space-y-4">
-                  {error && (
-                    <Alert variant="destructive">
-                      <AlertDescription>{error}</AlertDescription>
-                    </Alert>
-                  )}
-
-                  {success && (
-                    <Alert>
-                      <AlertDescription>{success}</AlertDescription>
-                    </Alert>
-                  )}
-
-                  <div>
-                    <Label htmlFor="signup-name">Naam</Label>
-                    <Input
-                      id="signup-name"
-                      type="text"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      required
-                      placeholder="Je naam"
-                      disabled={isLoading}
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="signup-email">E-mailadres</Label>
-                    <Input
-                      id="signup-email"
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
-                      placeholder="je@email.nl"
-                      disabled={isLoading}
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="signup-password">Wachtwoord</Label>
-                    <Input
-                      id="signup-password"
-                      type="password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                      placeholder="••••••••"
-                      disabled={isLoading}
-                      minLength={6}
-                    />
-                    <p className="text-xs text-muted-foreground mt-1">Minimaal 6 karakters</p>
-                  </div>
-
-                  <Button type="submit" className="w-full" disabled={isLoading}>
-                    {isLoading ? "Registreren..." : "Account Aanmaken"}
-                  </Button>
-                </form>
-              </TabsContent>
-            </Tabs>
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading ? "Inloggen..." : "Inloggen"}
+              </Button>
+            </form>
           </CardContent>
         </Card>
       </div>
