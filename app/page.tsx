@@ -8,16 +8,11 @@ import { sql } from "@/lib/db"
 
 async function handleSetupDatabase() {
   "use server"
-  try {
-    const result = await setupDatabase()
-    if (result.success) {
-      redirect("/")
-    }
-    return result
-  } catch (error) {
-    console.error("Setup error:", error)
-    return { success: false, message: "Database setup failed" }
+  const result = await setupDatabase()
+  if (result.success) {
+    redirect("/")
   }
+  return result
 }
 
 async function handleMigrateDatabase() {
@@ -44,61 +39,26 @@ async function handleMigrateDatabase() {
 }
 
 export default async function Home() {
-  let dbStatus = { hasData: false, tableExists: false }
+  // Check database status first
+  const dbStatus = await checkDatabaseStatus()
+
+  // Check if eigenaar column exists
   let hasEigenaarColumn = false
-  let alleRecepten: any[] = []
-  let hasError = false
-
   try {
-    // Check database status first
-    dbStatus = await checkDatabaseStatus()
-
-    // Check if eigenaar column exists
-    try {
-      const columnCheck = await sql`
-        SELECT column_name 
-        FROM information_schema.columns 
-        WHERE table_name = 'recepten' AND column_name = 'eigenaar'
-      `
-      hasEigenaarColumn = columnCheck.length > 0
-    } catch (error) {
-      // Table might not exist yet
-      console.log("Column check failed, table might not exist")
-    }
-
-    if (dbStatus.hasData) {
-      alleRecepten = await getAllRecepten()
-    }
+    const columnCheck = await sql`
+      SELECT column_name 
+      FROM information_schema.columns 
+      WHERE table_name = 'recepten' AND column_name = 'eigenaar'
+    `
+    hasEigenaarColumn = columnCheck.length > 0
   } catch (error) {
-    console.error("Error loading page data:", error)
-    hasError = true
+    // Table might not exist yet
   }
 
-  // If there's an error, show a simple error state
-  if (hasError) {
-    return (
-      <div className="space-y-12">
-        <section className="text-center py-12 bg-red-50 rounded-lg">
-          <h2 className="text-2xl font-bold mb-4 text-red-800">Database Connection Error</h2>
-          <p className="text-red-600 mb-6">
-            There seems to be an issue connecting to the database. Please check your environment variables.
-          </p>
-          <div className="space-y-2 text-sm text-red-600">
-            <p>Make sure you have set up:</p>
-            <ul className="list-disc list-inside space-y-1">
-              <li>DATABASE_URL environment variable</li>
-              <li>Valid Neon database connection</li>
-              <li>Proper database permissions</li>
-            </ul>
-          </div>
-          <form action={handleSetupDatabase} className="mt-6">
-            <Button type="submit" variant="outline">
-              Try Setup Database
-            </Button>
-          </form>
-        </section>
-      </div>
-    )
+  let alleRecepten: any[] = []
+
+  if (dbStatus.hasData) {
+    alleRecepten = await getAllRecepten().catch(() => [])
   }
 
   return (

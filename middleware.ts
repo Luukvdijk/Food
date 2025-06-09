@@ -2,13 +2,14 @@ import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
 
 export async function middleware(request: NextRequest) {
-  // Alleen admin routes beschermen
+  // Only protect admin routes
   if (request.nextUrl.pathname.startsWith("/admin")) {
     const authToken = request.cookies.get("auth-token")
 
     if (!authToken || authToken.value !== "authenticated") {
-      // Redirect naar login pagina
-      return NextResponse.redirect(new URL("/auth/signin", request.url))
+      // Redirect to login page
+      const loginUrl = new URL("/auth/signin", request.url)
+      return NextResponse.redirect(loginUrl)
     }
   }
 

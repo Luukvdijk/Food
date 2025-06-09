@@ -13,6 +13,7 @@ export async function GET() {
       user: isAuthenticated ? { name: "Admin", email: "admin@recepten.nl" } : null,
     })
   } catch (error) {
+    console.error("Auth status error:", error)
     return NextResponse.json({ isAuthenticated: false, user: null })
   }
 }

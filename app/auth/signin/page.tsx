@@ -33,14 +33,17 @@ export default function SignInPage() {
         body: JSON.stringify({ email, password }),
       })
 
-      if (response.ok) {
-        router.push("/admin")
+      const data = await response.json()
+
+      if (response.ok && data.success) {
+        // Successful login, redirect to admin
+        window.location.href = "/admin"
       } else {
-        const data = await response.json()
         setError(data.error || "Inloggen mislukt")
       }
     } catch (error) {
-      setError("Er is een fout opgetreden")
+      console.error("Login error:", error)
+      setError("Er is een fout opgetreden bij het inloggen")
     } finally {
       setIsLoading(false)
     }
@@ -79,7 +82,8 @@ export default function SignInPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  placeholder="admin@example.com"
+                  placeholder="admin@recepten.nl"
+                  disabled={isLoading}
                 />
               </div>
 
@@ -92,6 +96,7 @@ export default function SignInPage() {
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   placeholder="••••••••"
+                  disabled={isLoading}
                 />
               </div>
 
