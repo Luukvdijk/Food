@@ -28,15 +28,9 @@ async function handleSignOut() {
 }
 
 export default async function AdminPage({ searchParams }: AdminPageProps) {
-  // Check authentication first
-  let user
-  try {
-    user = await getUser()
-    if (!user) {
-      redirect("/auth/signin")
-    }
-  } catch (error) {
-    console.error("Auth error:", error)
+  // Check authentication first - don't catch redirect errors
+  const user = await getUser()
+  if (!user) {
     redirect("/auth/signin")
   }
 
@@ -110,7 +104,16 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
       {(searchParams.error || dataError) && (
         <Alert variant="destructive" className="mb-6">
           <XCircle className="h-4 w-4" />
-          <AlertDescription>{dataError || "Er is een fout opgetreden. Probeer het opnieuw."}</AlertDescription>
+          <AlertDescription>
+            {searchParams.error === "recipe_not_found" && "Recept niet gevonden."}
+            {searchParams.error === "edit_failed" && "Kon recept niet laden voor bewerking."}
+            {dataError && dataError}
+            {searchParams.error &&
+              !dataError &&
+              searchParams.error !== "recipe_not_found" &&
+              searchParams.error !== "edit_failed" &&
+              "Er is een fout opgetreden. Probeer het opnieuw."}
+          </AlertDescription>
         </Alert>
       )}
 
