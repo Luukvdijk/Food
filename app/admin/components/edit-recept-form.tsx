@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { ArrowLeft } from "lucide-react"
+import Link from "next/link"
 import type { GerechtsType, Eigenaar, Recept } from "@/types"
 
 const gerechtsTypes: GerechtsType[] = ["Ontbijt", "Lunch", "Diner", "Dessert", "Snack"]
@@ -22,10 +23,9 @@ interface EditReceptFormProps {
   recept: Recept
   ingredienten: any[]
   bijgerechten: any[]
-  onCancel: () => void
 }
 
-export function EditReceptForm({ recept, ingredienten, bijgerechten, onCancel }: EditReceptFormProps) {
+export function EditReceptForm({ recept, ingredienten, bijgerechten }: EditReceptFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [selectedType, setSelectedType] = useState<GerechtsType>(recept.type)
   const [selectedMoeilijkheid, setSelectedMoeilijkheid] = useState(recept.moeilijkheidsgraad)
@@ -56,9 +56,11 @@ export function EditReceptForm({ recept, ingredienten, bijgerechten, onCancel }:
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-4">
-        <Button variant="ghost" size="sm" onClick={onCancel}>
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Terug naar overzicht
+        <Button variant="ghost" size="sm" asChild>
+          <Link href="/admin">
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Terug naar overzicht
+          </Link>
         </Button>
         <h2 className="text-2xl font-bold">Recept Bewerken: {recept.naam}</h2>
       </div>
@@ -207,8 +209,8 @@ export function EditReceptForm({ recept, ingredienten, bijgerechten, onCancel }:
         </Card>
 
         <div className="flex justify-end gap-2">
-          <Button type="button" variant="outline" onClick={onCancel}>
-            Annuleren
+          <Button type="button" variant="outline" asChild>
+            <Link href="/admin">Annuleren</Link>
           </Button>
           <Button type="submit" disabled={isSubmitting} size="lg">
             {isSubmitting ? "Recept bijwerken..." : "Recept Bijwerken"}
