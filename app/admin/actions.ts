@@ -71,12 +71,29 @@ export async function addRecept(formData: FormData) {
     const bijgerechtenString = formData.get("bijgerechten") as string
     const bijgerechtenLines = bijgerechtenString.split("\n").filter((line) => line.trim())
 
-    // Voeg het recept toe
-    const receptResult = await sql`
-      INSERT INTO recepten (naam, beschrijving, bereidingstijd, moeilijkheidsgraad, type, seizoen, tags, afbeelding_url, bereidingswijze, personen, eigenaar)
-      VALUES (${naam}, ${beschrijving}, ${bereidingstijd}, ${moeilijkheidsgraad}, ${type}, ${seizoen}, ${tags}, ${afbeelding_url || null}, ${bereidingswijze}, ${personen}, ${eigenaar})
-      RETURNING id
+    // Check if eigenaar column exists
+    const columnCheck = await sql`
+      SELECT column_name 
+      FROM information_schema.columns 
+      WHERE table_name = 'recepten' AND column_name = 'eigenaar'
     `
+    const hasEigenaarColumn = columnCheck.length > 0
+
+    // Voeg het recept toe
+    let receptResult
+    if (hasEigenaarColumn) {
+      receptResult = await sql`
+        INSERT INTO recepten (naam, beschrijving, bereidingstijd, moeilijkheidsgraad, type, seizoen, tags, afbeelding_url, bereidingswijze, personen, eigenaar)
+        VALUES (${naam}, ${beschrijving}, ${bereidingstijd}, ${moeilijkheidsgraad}, ${type}, ${seizoen}, ${tags}, ${afbeelding_url || null}, ${bereidingswijze}, ${personen}, ${eigenaar})
+        RETURNING id
+      `
+    } else {
+      receptResult = await sql`
+        INSERT INTO recepten (naam, beschrijving, bereidingstijd, moeilijkheidsgraad, type, seizoen, tags, afbeelding_url, bereidingswijze, personen)
+        VALUES (${naam}, ${beschrijving}, ${bereidingstijd}, ${moeilijkheidsgraad}, ${type}, ${seizoen}, ${tags}, ${afbeelding_url || null}, ${bereidingswijze}, ${personen})
+        RETURNING id
+      `
+    }
 
     const receptId = receptResult[0].id
 
@@ -123,7 +140,7 @@ export async function updateRecept(formData: FormData) {
     const type = formData.get("type") as GerechtsType
     const personen = Number.parseInt(formData.get("personen") as string)
     const afbeelding_url = formData.get("afbeelding_url") as string
-    const eigenaar = formData.get("eigenaar") as Eigenaar
+    const eigenaar = (formData.get("eigenaar") as Eigenaar) || "henk"
 
     // Parse seizoenen (comma separated)
     const seizoenString = formData.get("seizoen") as string
@@ -154,15 +171,34 @@ export async function updateRecept(formData: FormData) {
     const bijgerechtenString = formData.get("bijgerechten") as string
     const bijgerechtenLines = bijgerechtenString.split("\n").filter((line) => line.trim())
 
-    // Update het recept
-    await sql`
-      UPDATE recepten 
-      SET naam = ${naam}, beschrijving = ${beschrijving}, bereidingstijd = ${bereidingstijd}, 
-          moeilijkheidsgraad = ${moeilijkheidsgraad}, type = ${type}, seizoen = ${seizoen}, 
-          tags = ${tags}, afbeelding_url = ${afbeelding_url || null}, bereidingswijze = ${bereidingswijze}, 
-          personen = ${personen}, eigenaar = ${eigenaar}
-      WHERE id = ${id}
+    // Check if eigenaar column exists
+    const columnCheck = await sql`
+      SELECT column_name 
+      FROM information_schema.columns 
+      WHERE table_name = 'recepten' AND column_name = 'eigenaar'
     `
+    const hasEigenaarColumn = columnCheck.length > 0
+
+    // Update het recept
+    if (hasEigenaarColumn) {
+      await sql`
+        UPDATE recepten 
+        SET naam = ${naam}, beschrijving = ${beschrijving}, bereidingstijd = ${bereidingstijd}, 
+            moeilijkheidsgraad = ${moeilijkheidsgraad}, type = ${type}, seizoen = ${seizoen}, 
+            tags = ${tags}, afbeelding_url = ${afbeelding_url || null}, bereidingswijze = ${bereidingswijze}, 
+            personen = ${personen}, eigenaar = ${eigenaar}
+        WHERE id = ${id}
+      `
+    } else {
+      await sql`
+        UPDATE recepten 
+        SET naam = ${naam}, beschrijving = ${beschrijving}, bereidingstijd = ${bereidingstijd}, 
+            moeilijkheidsgraad = ${moeilijkheidsgraad}, type = ${type}, seizoen = ${seizoen}, 
+            tags = ${tags}, afbeelding_url = ${afbeelding_url || null}, bereidingswijze = ${bereidingswijze}, 
+            personen = ${personen}
+        WHERE id = ${id}
+      `
+    }
 
     // Verwijder bestaande ingrediënten en bijgerechten
     await sql`DELETE FROM ingredienten WHERE recept_id = ${id}`
@@ -215,16 +251,41 @@ export async function deleteRecept(receptId: number) {
 
 export async function getAllReceptenAdmin() {
   try {
-    const result = await sql`
-      SELECT r.*, 
-             COUNT(i.id) as ingredient_count,
-             COUNT(b.id) as bijgerecht_count
-      FROM recepten r
-      LEFT JOIN ingredienten i ON r.id = i.recept_id
-      LEFT JOIN bijgerechten b ON r.id = b.recept_id
-      GROUP BY r.id
-      ORDER BY r.created_at DESC
+    // Check if eigenaar column exists
+    const columnCheck = await sql`
+      SELECT column_name 
+      FROM information_schema.columns 
+      WHERE table_name = 'recepten' AND column_name = 'eigenaar'
     `
+    const hasEigenaarColumn = columnCheck.length > 0
+
+    let result
+    if (hasEigenaarColumn) {
+      result = await sql`
+        SELECT r.*, 
+               COUNT(i.id) as ingredient_count,
+               COUNT(b.id) as bijgerecht_count
+        FROM recepten r
+        LEFT JOIN ingredienten i ON r.id = i.recept_id
+        LEFT JOIN bijgerechten b ON r.id = b.recept_id
+        GROUP BY r.id
+        ORDER BY r.created_at DESC
+      `
+    } else {
+      result = await sql`
+        SELECT r.*, 
+               COUNT(i.id) as ingredient_count,
+               COUNT(b.id) as bijgerecht_count
+        FROM recepten r
+        LEFT JOIN ingredienten i ON r.id = i.recept_id
+        LEFT JOIN bijgerechten b ON r.id = b.recept_id
+        GROUP BY r.id
+        ORDER BY r.created_at DESC
+      `
+      // Add default eigenaar
+      result = result.map((r: any) => ({ ...r, eigenaar: "henk" }))
+    }
+
     return result
   } catch (error) {
     console.error("Error fetching recepten for admin:", error)
@@ -237,6 +298,19 @@ export async function getReceptForEdit(id: number) {
     const [recept] = await sql`SELECT * FROM recepten WHERE id = ${id}`
     const ingredienten = await sql`SELECT * FROM ingredienten WHERE recept_id = ${id} ORDER BY id`
     const bijgerechten = await sql`SELECT * FROM bijgerechten WHERE recept_id = ${id} ORDER BY id`
+
+    // Check if eigenaar column exists
+    const columnCheck = await sql`
+      SELECT column_name 
+      FROM information_schema.columns 
+      WHERE table_name = 'recepten' AND column_name = 'eigenaar'
+    `
+    const hasEigenaarColumn = columnCheck.length > 0
+
+    // Add default eigenaar if column doesn't exist
+    if (!hasEigenaarColumn && recept) {
+      recept.eigenaar = "henk"
+    }
 
     return {
       recept,

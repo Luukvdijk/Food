@@ -27,6 +27,9 @@ interface ReceptenTableProps {
 export function ReceptenTable({ recepten, onEdit }: ReceptenTableProps) {
   const [deletingId, setDeletingId] = useState<number | null>(null)
 
+  // Check if eigenaar column exists in the data
+  const hasEigenaarColumn = recepten.length > 0 && "eigenaar" in recepten[0]
+
   const handleDelete = async (id: number) => {
     setDeletingId(id)
     await deleteRecept(id)
@@ -61,7 +64,7 @@ export function ReceptenTable({ recepten, onEdit }: ReceptenTableProps) {
         <TableHeader>
           <TableRow>
             <TableHead>Naam</TableHead>
-            <TableHead>Eigenaar</TableHead>
+            {hasEigenaarColumn && <TableHead>Eigenaar</TableHead>}
             <TableHead>Type</TableHead>
             <TableHead>Tijd</TableHead>
             <TableHead>Personen</TableHead>
@@ -79,11 +82,13 @@ export function ReceptenTable({ recepten, onEdit }: ReceptenTableProps) {
                   <div className="text-sm text-muted-foreground line-clamp-1">{recept.beschrijving}</div>
                 </div>
               </TableCell>
-              <TableCell>
-                <Badge className={getEigenaarColor(recept.eigenaar)}>
-                  {recept.eigenaar === "henk" ? "Henk" : "Pepie & Luulie"}
-                </Badge>
-              </TableCell>
+              {hasEigenaarColumn && (
+                <TableCell>
+                  <Badge className={getEigenaarColor(recept.eigenaar)}>
+                    {recept.eigenaar === "henk" ? "Henk" : "Pepie & Luulie"}
+                  </Badge>
+                </TableCell>
+              )}
               <TableCell>
                 <Badge variant="outline">{recept.type}</Badge>
               </TableCell>

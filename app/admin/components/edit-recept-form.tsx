@@ -29,14 +29,19 @@ export function EditReceptForm({ recept, ingredienten, bijgerechten, onCancel }:
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [selectedType, setSelectedType] = useState<GerechtsType>(recept.type)
   const [selectedMoeilijkheid, setSelectedMoeilijkheid] = useState(recept.moeilijkheidsgraad)
-  const [selectedEigenaar, setSelectedEigenaar] = useState<Eigenaar>(recept.eigenaar as Eigenaar)
+  const [selectedEigenaar, setSelectedEigenaar] = useState<Eigenaar>((recept.eigenaar as Eigenaar) || "henk")
+
+  // Check if eigenaar exists in the recept object
+  const hasEigenaarSupport = "eigenaar" in recept
 
   const handleSubmit = async (formData: FormData) => {
     setIsSubmitting(true)
     formData.set("id", recept.id.toString())
     formData.set("type", selectedType)
     formData.set("moeilijkheidsgraad", selectedMoeilijkheid)
-    formData.set("eigenaar", selectedEigenaar)
+    if (hasEigenaarSupport) {
+      formData.set("eigenaar", selectedEigenaar)
+    }
     await updateRecept(formData)
   }
 
@@ -89,7 +94,7 @@ export function EditReceptForm({ recept, ingredienten, bijgerechten, onCancel }:
               <Textarea id="beschrijving" name="beschrijving" required defaultValue={recept.beschrijving} rows={3} />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className={`grid grid-cols-1 ${hasEigenaarSupport ? "md:grid-cols-4" : "md:grid-cols-3"} gap-4`}>
               <div>
                 <Label htmlFor="bereidingstijd">Bereidingstijd (minuten) *</Label>
                 <Input
@@ -131,21 +136,23 @@ export function EditReceptForm({ recept, ingredienten, bijgerechten, onCancel }:
                   </SelectContent>
                 </Select>
               </div>
-              <div>
-                <Label>Eigenaar *</Label>
-                <Select value={selectedEigenaar} onValueChange={(value) => setSelectedEigenaar(value as Eigenaar)}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {eigenaren.map((eigenaar) => (
-                      <SelectItem key={eigenaar.value} value={eigenaar.value}>
-                        {eigenaar.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+              {hasEigenaarSupport && (
+                <div>
+                  <Label>Eigenaar *</Label>
+                  <Select value={selectedEigenaar} onValueChange={(value) => setSelectedEigenaar(value as Eigenaar)}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {eigenaren.map((eigenaar) => (
+                        <SelectItem key={eigenaar.value} value={eigenaar.value}>
+                          {eigenaar.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

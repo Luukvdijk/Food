@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { addRecept } from "../actions"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -22,12 +22,31 @@ export function AddReceptForm() {
   const [selectedType, setSelectedType] = useState<GerechtsType>("Diner")
   const [selectedMoeilijkheid, setSelectedMoeilijkheid] = useState("Gemiddeld")
   const [selectedEigenaar, setSelectedEigenaar] = useState<Eigenaar>("henk")
+  const [hasEigenaarSupport, setHasEigenaarSupport] = useState(true)
+
+  // Check if eigenaar column exists
+  useEffect(() => {
+    const checkEigenaarSupport = async () => {
+      try {
+        const response = await fetch("/api/check-eigenaar-support")
+        const data = await response.json()
+        setHasEigenaarSupport(data.hasEigenaarSupport)
+      } catch (error) {
+        console.error("Error checking eigenaar support:", error)
+        setHasEigenaarSupport(false)
+      }
+    }
+
+    checkEigenaarSupport()
+  }, [])
 
   const handleSubmit = async (formData: FormData) => {
     setIsSubmitting(true)
     formData.set("type", selectedType)
     formData.set("moeilijkheidsgraad", selectedMoeilijkheid)
-    formData.set("eigenaar", selectedEigenaar)
+    if (hasEigenaarSupport) {
+      formData.set("eigenaar", selectedEigenaar)
+    }
     await addRecept(formData)
   }
 
@@ -61,7 +80,7 @@ export function AddReceptForm() {
             />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className={`grid grid-cols-1 ${hasEigenaarSupport ? "md:grid-cols-4" : "md:grid-cols-3"} gap-4`}>
             <div>
               <Label htmlFor="bereidingstijd">Bereidingstijd (minuten) *</Label>
               <Input id="bereidingstijd" name="bereidingstijd" type="number" required placeholder="30" min="1" />
@@ -96,21 +115,23 @@ export function AddReceptForm() {
                 </SelectContent>
               </Select>
             </div>
-            <div>
-              <Label>Eigenaar *</Label>
-              <Select value={selectedEigenaar} onValueChange={(value) => setSelectedEigenaar(value as Eigenaar)}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {eigenaren.map((eigenaar) => (
-                    <SelectItem key={eigenaar.value} value={eigenaar.value}>
-                      {eigenaar.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            {hasEigenaarSupport && (
+              <div>
+                <Label>Eigenaar *</Label>
+                <Select value={selectedEigenaar} onValueChange={(value) => setSelectedEigenaar(value as Eigenaar)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {eigenaren.map((eigenaar) => (
+                      <SelectItem key={eigenaar.value} value={eigenaar.value}>
+                        {eigenaar.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
