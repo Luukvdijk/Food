@@ -18,14 +18,15 @@ import {
 } from "@/components/ui/alert-dialog"
 import { Trash2, Eye, Clock, Users, Pencil } from "lucide-react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 
 interface ReceptenTableProps {
   recepten: any[]
-  onEdit?: (id: number) => void
 }
 
-export function ReceptenTable({ recepten, onEdit }: ReceptenTableProps) {
+export function ReceptenTable({ recepten }: ReceptenTableProps) {
   const [deletingId, setDeletingId] = useState<number | null>(null)
+  const router = useRouter()
 
   // Check if eigenaar column exists in the data
   const hasEigenaarColumn = recepten.length > 0 && "eigenaar" in recepten[0]
@@ -34,6 +35,10 @@ export function ReceptenTable({ recepten, onEdit }: ReceptenTableProps) {
     setDeletingId(id)
     await deleteRecept(id)
     setDeletingId(null)
+  }
+
+  const handleEdit = (id: number) => {
+    router.push(`/admin?edit=${id}`)
   }
 
   if (recepten.length === 0) {
@@ -113,11 +118,9 @@ export function ReceptenTable({ recepten, onEdit }: ReceptenTableProps) {
                       <Eye className="h-3 w-3" />
                     </Link>
                   </Button>
-                  {onEdit && (
-                    <Button variant="outline" size="sm" onClick={() => onEdit(recept.id)}>
-                      <Pencil className="h-3 w-3" />
-                    </Button>
-                  )}
+                  <Button variant="outline" size="sm" onClick={() => handleEdit(recept.id)}>
+                    <Pencil className="h-3 w-3" />
+                  </Button>
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
                       <Button variant="outline" size="sm" disabled={deletingId === recept.id}>

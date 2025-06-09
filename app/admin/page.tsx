@@ -145,7 +145,6 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
           recept={editData.recept}
           ingredienten={editData.ingredienten}
           bijgerechten={editData.bijgerechten}
-          onCancel={() => redirect("/admin")}
         />
       ) : (
         <>
@@ -196,7 +195,7 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
                   <CardDescription>Beheer je bestaande recepten</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <ReceptenTable recepten={recepten} onEdit={(id) => redirect(`/admin?edit=${id}`)} />
+                  <ReceptenTable recepten={recepten} />
                 </CardContent>
               </Card>
             </TabsContent>
