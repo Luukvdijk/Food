@@ -6,9 +6,8 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Upload, Camera, LinkIcon, X, Loader2, AlertCircle } from "lucide-react"
+import { Upload, Camera, LinkIcon, X, Loader2 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
-import { Alert, AlertDescription } from "@/components/ui/alert"
 import Image from "next/image"
 
 interface ImageUploadProps {
@@ -21,7 +20,6 @@ export function ImageUpload({ currentImageUrl, onImageChange, disabled }: ImageU
   const [isUploading, setIsUploading] = useState(false)
   const [previewUrl, setPreviewUrl] = useState(currentImageUrl || "")
   const [urlInput, setUrlInput] = useState("")
-  const [uploadError, setUploadError] = useState("")
   const fileInputRef = useRef<HTMLInputElement>(null)
   const cameraInputRef = useRef<HTMLInputElement>(null)
   const { toast } = useToast()
@@ -52,15 +50,11 @@ export function ImageUpload({ currentImageUrl, onImageChange, disabled }: ImageU
   const handleFileUpload = async (file: File) => {
     if (!file) return
 
-    setUploadError("")
-
     // Validate file type
     if (!file.type.startsWith("image/")) {
-      const error = "Alleen afbeeldingen zijn toegestaan"
-      setUploadError(error)
       toast({
         title: "Fout",
-        description: error,
+        description: "Alleen afbeeldingen zijn toegestaan",
         className: "bg-red-50 border-red-200 text-red-800",
       })
       return
@@ -68,11 +62,9 @@ export function ImageUpload({ currentImageUrl, onImageChange, disabled }: ImageU
 
     // Validate file size (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
-      const error = "Afbeelding mag maximaal 5MB zijn"
-      setUploadError(error)
       toast({
         title: "Fout",
-        description: error,
+        description: "Afbeelding mag maximaal 5MB zijn",
         className: "bg-red-50 border-red-200 text-red-800",
       })
       return
@@ -84,7 +76,6 @@ export function ImageUpload({ currentImageUrl, onImageChange, disabled }: ImageU
       const imageUrl = await uploadToSupabase(file)
       setPreviewUrl(imageUrl)
       onImageChange(imageUrl)
-      setUploadError("")
 
       toast({
         title: "Succes!",
@@ -94,7 +85,6 @@ export function ImageUpload({ currentImageUrl, onImageChange, disabled }: ImageU
     } catch (error) {
       console.error("Upload error:", error)
       const errorMessage = error instanceof Error ? error.message : "Fout bij uploaden van afbeelding"
-      setUploadError(errorMessage)
 
       toast({
         title: "Upload Fout",
@@ -109,8 +99,6 @@ export function ImageUpload({ currentImageUrl, onImageChange, disabled }: ImageU
   const handleUrlSubmit = () => {
     if (!urlInput.trim()) return
 
-    setUploadError("")
-
     // Basic URL validation
     try {
       new URL(urlInput)
@@ -124,11 +112,9 @@ export function ImageUpload({ currentImageUrl, onImageChange, disabled }: ImageU
         className: "bg-green-50 border-green-200 text-green-800",
       })
     } catch {
-      const error = "Ongeldige URL"
-      setUploadError(error)
       toast({
         title: "Fout",
-        description: error,
+        description: "Ongeldige URL",
         className: "bg-red-50 border-red-200 text-red-800",
       })
     }
@@ -138,19 +124,11 @@ export function ImageUpload({ currentImageUrl, onImageChange, disabled }: ImageU
     setPreviewUrl("")
     onImageChange("")
     setUrlInput("")
-    setUploadError("")
   }
 
   return (
     <div className="space-y-4">
       <Label>Recept Afbeelding</Label>
-
-      {uploadError && (
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>{uploadError}</AlertDescription>
-        </Alert>
-      )}
 
       {previewUrl && (
         <Card>
