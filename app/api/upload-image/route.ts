@@ -37,13 +37,17 @@ export async function POST(request: NextRequest) {
     // Check environment variables with different possible names
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
     const supabaseServiceKey =
-      process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_SECRET_KEY
+      process.env.SUPABASE_SERVICE_ROLE_KEY ||
+      process.env.SUPABASE_SERVICE_KEY ||
+      process.env.SUPABASE_SECRET_KEY ||
+      process.env.SUPABASE_SERVICE_ROLE_KEY
 
     console.log("Environment check:", {
       hasUrl: !!supabaseUrl,
       hasServiceKey: !!supabaseServiceKey,
       urlPreview: supabaseUrl?.substring(0, 30) + "...",
-      serviceKeyPreview: supabaseServiceKey?.substring(0, 10) + "...",
+      serviceKeyPreview: supabaseServiceKey?.substring(0, 20) + "...",
+      availableEnvVars: Object.keys(process.env).filter((key) => key.includes("SUPABASE")),
     })
 
     if (!supabaseUrl || !supabaseServiceKey) {
@@ -53,7 +57,13 @@ export async function POST(request: NextRequest) {
           details: {
             hasUrl: !!supabaseUrl,
             hasServiceKey: !!supabaseServiceKey,
-            envVars: Object.keys(process.env).filter((key) => key.includes("SUPABASE")),
+            availableEnvVars: Object.keys(process.env).filter((key) => key.includes("SUPABASE")),
+            instructions: [
+              "1. Go to Supabase Dashboard → Settings → API",
+              "2. Copy the 'service_role' key (starts with eyJ...)",
+              "3. Add to Vercel as SUPABASE_SERVICE_ROLE_KEY",
+              "4. Redeploy the application",
+            ],
           },
         },
         { status: 500 },
@@ -85,34 +95,56 @@ export async function POST(request: NextRequest) {
     if (error) {
       console.error("Supabase upload error:", error)
 
-      // Handle specific errors
+      // Handle specific errors with detailed solutions
       if (error.message?.includes("Bucket not found")) {
         return NextResponse.json(
           {
             error: "Storage bucket 'recipe-images' niet gevonden",
-            solution: "Ga naar Supabase Dashboard → Storage → Buckets en maak een bucket aan met naam 'recipe-images'",
+            solution: [
+              "1. Ga naar Supabase Dashboard → Storage",
+              "2. Klik 'New bucket'",
+              "3. Naam: 'recipe-images'",
+              "4. Zet 'Public bucket' aan",
+              "5. Klik 'Create bucket'",
+            ],
             details: error.message,
           },
           { status: 500 },
         )
       }
 
-      if (error.message?.includes("new row violates row-level security")) {
+      if (error.message?.includes("new row violates row-level security") || error.message?.includes("Policy")) {
         return NextResponse.json(
           {
-            error: "Geen toestemming voor upload",
-            solution: "Controleer de storage policies in Supabase Dashboard → Storage → Policies",
+            error: "Geen toestemming voor upload - Storage policies ontbreken",
+            solution: [
+              "1. Ga naar Supabase Dashboard → Storage → Policies",
+              "2. Klik 'New policy'",
+              "3. Selecteer 'For full customization'",
+              "4. Policy name: 'recipe_images_all'",
+              "5. Target roles: 'public'",
+              "6. USING expression: bucket_id = 'recipe-images'",
+              "7. WITH CHECK expression: bucket_id = 'recipe-images'",
+              "8. Klik 'Review' en dan 'Save policy'",
+            ],
+            sqlAlternative:
+              "CREATE POLICY \"recipe_images_all\" ON storage.objects FOR ALL USING (bucket_id = 'recipe-images') WITH CHECK (bucket_id = 'recipe-images');",
             details: error.message,
           },
           { status: 403 },
         )
       }
 
-      if (error.message?.includes("JWT")) {
+      if (error.message?.includes("JWT") || error.message?.includes("Invalid API key")) {
         return NextResponse.json(
           {
-            error: "Authenticatie probleem",
-            solution: "Controleer of SUPABASE_SERVICE_ROLE_KEY correct is ingesteld",
+            error: "Authenticatie probleem - Service Role Key incorrect",
+            solution: [
+              "1. Ga naar Supabase Dashboard → Settings → API",
+              "2. Kopieer de 'service_role' key (NIET de anon key)",
+              "3. Voeg toe aan Vercel als SUPABASE_SERVICE_ROLE_KEY",
+              "4. Deploy opnieuw",
+            ],
             details: error.message,
           },
           { status: 401 },
@@ -123,6 +155,7 @@ export async function POST(request: NextRequest) {
         {
           error: `Upload mislukt: ${error.message}`,
           details: error,
+          generalSolution: "Check de 'Test Storage' pagina voor gedetailleerde instructies",
         },
         { status: 500 },
       )
@@ -137,7 +170,11 @@ export async function POST(request: NextRequest) {
 
     console.log("Public URL generated:", publicUrl)
 
-    return NextResponse.json({ publicUrl })
+    return NextResponse.json({
+      publicUrl,
+      success: true,
+      message: "Afbeelding succesvol geüpload!",
+    })
   } catch (error) {
     console.error("Upload error:", error)
     return NextResponse.json(
