@@ -7,6 +7,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { CheckCircle, XCircle } from "lucide-react"
 import Link from "next/link"
+import { getUser } from "@/lib/auth"
+import { redirect } from "next/navigation"
+import { IngredientsManager } from "./components/ingredients-manager"
 
 interface AdminPageProps {
   searchParams: {
@@ -16,7 +19,19 @@ interface AdminPageProps {
   }
 }
 
+async function handleSignOut() {
+  "use server"
+
+  // Simple redirect to signout API
+  redirect("/api/auth/signout-redirect")
+}
+
 export default async function AdminPage({ searchParams }: AdminPageProps) {
+  const user = await getUser()
+  if (!user) {
+    redirect("/auth/signin")
+  }
+
   const recepten = await getAllReceptenAdmin()
 
   return (
@@ -24,11 +39,18 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
       <div className="flex justify-between items-center mb-8">
         <div>
           <h1 className="text-3xl font-bold">Admin Dashboard</h1>
-          <p className="text-muted-foreground">Beheer je recepten collectie</p>
+          <p className="text-muted-foreground">Welkom terug, {user.name}!</p>
         </div>
-        <Button asChild variant="outline">
-          <Link href="/">← Terug naar website</Link>
-        </Button>
+        <div className="flex gap-2">
+          <Button asChild variant="outline">
+            <Link href="/">← Terug naar website</Link>
+          </Button>
+          <form action={handleSignOut}>
+            <Button type="submit" variant="ghost">
+              Uitloggen
+            </Button>
+          </form>
+        </div>
       </div>
 
       {/* Status berichten */}
@@ -89,6 +111,7 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
       <Tabs defaultValue="overview" className="space-y-6">
         <TabsList>
           <TabsTrigger value="overview">Overzicht</TabsTrigger>
+          <TabsTrigger value="ingredients">Ingrediënten</TabsTrigger>
           <TabsTrigger value="add">Recept Toevoegen</TabsTrigger>
         </TabsList>
 
@@ -100,6 +123,18 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
             </CardHeader>
             <CardContent>
               <ReceptenTable recepten={recepten} />
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="ingredients">
+          <Card>
+            <CardHeader>
+              <CardTitle>Ingrediënten Beheer</CardTitle>
+              <CardDescription>Beheer ingrediënten van alle recepten</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <IngredientsManager />
             </CardContent>
           </Card>
         </TabsContent>

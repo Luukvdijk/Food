@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Search, Settings } from "lucide-react"
 import { Input } from "@/components/ui/input"
@@ -11,7 +11,22 @@ import Link from "next/link"
 
 export function Header() {
   const [zoekterm, setZoekterm] = useState("")
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
   const router = useRouter()
+
+  useEffect(() => {
+    // Check login status client-side
+    const checkAuth = async () => {
+      try {
+        const response = await fetch("/api/auth/status")
+        const data = await response.json()
+        setIsLoggedIn(data.isAuthenticated)
+      } catch (error) {
+        setIsLoggedIn(false)
+      }
+    }
+    checkAuth()
+  }, [])
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
@@ -44,12 +59,26 @@ export function Header() {
             </Button>
           </form>
 
-          <Button asChild variant="outline" size="sm">
-            <Link href="/admin">
-              <Settings className="h-4 w-4 mr-2" />
-              Admin
-            </Link>
-          </Button>
+          <div className="flex items-center gap-2">
+            {isLoggedIn ? (
+              <>
+                <span className="text-sm text-muted-foreground hidden md:inline">Ingelogd als Admin</span>
+                <Button asChild variant="outline" size="sm">
+                  <Link href="/admin">
+                    <Settings className="h-4 w-4 mr-2" />
+                    Admin
+                  </Link>
+                </Button>
+              </>
+            ) : (
+              <Button asChild variant="outline" size="sm">
+                <Link href="/auth/signin">
+                  <Settings className="h-4 w-4 mr-2" />
+                  Admin Login
+                </Link>
+              </Button>
+            )}
+          </div>
         </div>
       </div>
     </header>
