@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { CheckCircle, XCircle, AlertTriangle, Settings, ExternalLink } from "lucide-react"
+import { CheckCircle, XCircle, AlertTriangle } from "lucide-react"
 import Link from "next/link"
 import { getUser } from "@/lib/auth"
 import { redirect } from "next/navigation"
@@ -69,13 +69,6 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
         </div>
         <div className="flex gap-2">
           <Button asChild variant="outline">
-            <Link href="/api/test-storage" target="_blank">
-              <Settings className="mr-2 h-4 w-4" />
-              Test Storage
-              <ExternalLink className="ml-1 h-3 w-3" />
-            </Link>
-          </Button>
-          <Button asChild variant="outline">
             <Link href="/">← Terug naar website</Link>
           </Button>
           <form action={handleSignOut}>
@@ -137,21 +130,6 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
           </AlertDescription>
         </Alert>
       )}
-
-      {/* Storage Setup Instructions */}
-      <Alert className="mb-6 bg-blue-50 border-blue-200">
-        <AlertTriangle className="h-4 w-4 text-blue-600" />
-        <AlertDescription className="text-blue-800">
-          <div className="space-y-2">
-            <strong>Image Upload Setup Required:</strong>
-            <div className="text-sm">
-              <p>1. Klik "Test Storage" hierboven om de configuratie te controleren</p>
-              <p>2. Volg de instructies in de test pagina om Supabase Storage in te stellen</p>
-              <p>3. Maak de 'recipe-images' bucket aan in je Supabase Dashboard</p>
-            </div>
-          </div>
-        </AlertDescription>
-      </Alert>
 
       {/* Database error fallback */}
       {dataError ? (
