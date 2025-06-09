@@ -2,61 +2,86 @@ import { NextResponse } from "next/server"
 
 export async function GET() {
   try {
-    console.log("Testing Supabase environment...")
-
-    // Check environment variables
-    const envCheck = {
-      NEXT_PUBLIC_SUPABASE_URL: !!process.env.NEXT_PUBLIC_SUPABASE_URL,
-      NEXT_PUBLIC_SUPABASE_ANON_KEY: !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-      SUPABASE_SERVICE_ROLE_KEY: !!process.env.SUPABASE_SERVICE_ROLE_KEY,
-      url: process.env.NEXT_PUBLIC_SUPABASE_URL?.substring(0, 50) + "...",
+    // Check all possible environment variable names
+    const envVars = {
+      NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+      SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
+      SUPABASE_SERVICE_KEY: process.env.SUPABASE_SERVICE_KEY,
+      SUPABASE_SECRET_KEY: process.env.SUPABASE_SECRET_KEY,
     }
 
-    console.log("Environment check:", envCheck)
+    const envCheck = Object.entries(envVars).reduce(
+      (acc, [key, value]) => {
+        acc[key] = {
+          exists: !!value,
+          preview: value ? value.substring(0, 20) + "..." : "Not set",
+        }
+        return acc
+      },
+      {} as Record<string, any>,
+    )
 
-    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    // Find the service key
+    const serviceKey = envVars.SUPABASE_SERVICE_ROLE_KEY || envVars.SUPABASE_SERVICE_KEY || envVars.SUPABASE_SECRET_KEY
+
+    if (!envVars.NEXT_PUBLIC_SUPABASE_URL || !serviceKey) {
       return NextResponse.json({
         error: "Missing required environment variables",
         environment: envCheck,
+        allEnvVars: Object.keys(process.env).filter((key) => key.includes("SUPABASE")),
+        instructions: [
+          "1. Go to Supabase Dashboard → Settings → API",
+          "2. Copy the 'service_role' key (not anon key)",
+          "3. Add it to Vercel as SUPABASE_SERVICE_ROLE_KEY",
+          "4. Redeploy your application",
+        ],
       })
     }
 
-    // Try to create Supabase client
+    // Test Supabase connection
     const { createClient } = await import("@supabase/supabase-js")
 
-    const supabaseAdmin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY, {
+    const supabaseAdmin = createClient(envVars.NEXT_PUBLIC_SUPABASE_URL, serviceKey, {
       auth: {
         autoRefreshToken: false,
         persistSession: false,
       },
     })
 
-    console.log("Supabase client created successfully")
-
-    // Test a simple operation
+    // Test storage access
     let storageTest = null
     let storageError = null
 
     try {
-      // Try to get public URL (this doesn't require special permissions)
-      const { data } = supabaseAdmin.storage.from("recipe-images").getPublicUrl("test.jpg")
-      storageTest = { publicUrlGenerated: !!data.publicUrl, sampleUrl: data.publicUrl }
+      // Try to list buckets
+      const { data: buckets, error } = await supabaseAdmin.storage.listBuckets()
+
+      if (error) {
+        storageError = error.message
+      } else {
+        storageTest = {
+          bucketsFound: buckets?.length || 0,
+          buckets: buckets?.map((b) => ({ name: b.name, public: b.public })),
+          hasRecipeImagesBucket: buckets?.some((b) => b.name === "recipe-images"),
+        }
+      }
     } catch (error) {
       storageError = error instanceof Error ? error.message : "Unknown error"
     }
 
     return NextResponse.json({
       environment: envCheck,
-      supabaseClient: "Created successfully",
+      serviceKeyFound: !!serviceKey,
       storageTest,
       storageError,
-      instructions: {
-        step1: "Ga naar Supabase Dashboard → Storage",
-        step2: "Maak een nieuwe bucket aan genaamd 'recipe-images'",
-        step3: "Zet de bucket op 'Public'",
-        step4: "Ga naar Storage → Policies",
-        step5: "Voeg policies toe voor authenticated uploads en public downloads",
-      },
+      nextSteps: storageError
+        ? [
+            "1. Check if 'recipe-images' bucket exists in Supabase Dashboard",
+            "2. Ensure bucket is set to 'public'",
+            "3. Check storage policies allow uploads",
+          ]
+        : ["Environment looks good!", "Try uploading an image now."],
     })
   } catch (error) {
     console.error("Storage test error:", error)

@@ -34,23 +34,38 @@ export async function POST(request: NextRequest) {
       path: path,
     })
 
+    // Check environment variables with different possible names
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const supabaseServiceKey =
+      process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_SECRET_KEY
+
+    console.log("Environment check:", {
+      hasUrl: !!supabaseUrl,
+      hasServiceKey: !!supabaseServiceKey,
+      urlPreview: supabaseUrl?.substring(0, 30) + "...",
+      serviceKeyPreview: supabaseServiceKey?.substring(0, 10) + "...",
+    })
+
+    if (!supabaseUrl || !supabaseServiceKey) {
+      return NextResponse.json(
+        {
+          error: "Supabase configuratie ontbreekt",
+          details: {
+            hasUrl: !!supabaseUrl,
+            hasServiceKey: !!supabaseServiceKey,
+            envVars: Object.keys(process.env).filter((key) => key.includes("SUPABASE")),
+          },
+        },
+        { status: 500 },
+      )
+    }
+
     // Convert file to buffer
     const bytes = await file.arrayBuffer()
     const buffer = Buffer.from(bytes)
 
-    // Create Supabase client directly here to avoid import issues
+    // Create Supabase client directly
     const { createClient } = await import("@supabase/supabase-js")
-
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
-
-    if (!supabaseUrl || !supabaseServiceKey) {
-      console.error("Missing Supabase environment variables:", {
-        hasUrl: !!supabaseUrl,
-        hasServiceKey: !!supabaseServiceKey,
-      })
-      return NextResponse.json({ error: "Supabase configuratie ontbreekt" }, { status: 500 })
-    }
 
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
       auth: {
@@ -61,48 +76,43 @@ export async function POST(request: NextRequest) {
 
     console.log("Attempting upload to Supabase...")
 
-    // Try to upload directly without checking buckets first
+    // Try upload with upsert to avoid conflicts
     const { data, error } = await supabaseAdmin.storage.from("recipe-images").upload(path, buffer, {
       contentType: file.type,
-      upsert: true, // Allow overwriting existing files
+      upsert: true,
     })
 
     if (error) {
-      console.error("Supabase upload error:", {
-        message: error.message,
-        statusCode: error.statusCode,
-        error: error,
-      })
+      console.error("Supabase upload error:", error)
 
-      // More specific error handling
-      if (error.message?.includes("Bucket not found") || error.message?.includes("bucket")) {
+      // Handle specific errors
+      if (error.message?.includes("Bucket not found")) {
         return NextResponse.json(
           {
-            error: "Storage bucket niet gevonden. Maak eerst de 'recipe-images' bucket aan in Supabase Dashboard.",
+            error: "Storage bucket 'recipe-images' niet gevonden",
+            solution: "Ga naar Supabase Dashboard → Storage → Buckets en maak een bucket aan met naam 'recipe-images'",
             details: error.message,
           },
           { status: 500 },
         )
       }
 
-      if (
-        error.message?.includes("Policy") ||
-        error.message?.includes("permission") ||
-        error.message?.includes("RLS")
-      ) {
+      if (error.message?.includes("new row violates row-level security")) {
         return NextResponse.json(
           {
-            error: "Geen toestemming voor upload. Controleer storage policies in Supabase.",
+            error: "Geen toestemming voor upload",
+            solution: "Controleer de storage policies in Supabase Dashboard → Storage → Policies",
             details: error.message,
           },
           { status: 403 },
         )
       }
 
-      if (error.message?.includes("JWT") || error.message?.includes("token")) {
+      if (error.message?.includes("JWT")) {
         return NextResponse.json(
           {
-            error: "Authenticatie probleem. Controleer SUPABASE_SERVICE_ROLE_KEY.",
+            error: "Authenticatie probleem",
+            solution: "Controleer of SUPABASE_SERVICE_ROLE_KEY correct is ingesteld",
             details: error.message,
           },
           { status: 401 },
