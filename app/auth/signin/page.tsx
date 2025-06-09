@@ -9,17 +9,21 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ArrowLeft } from "lucide-react"
 import Link from "next/link"
 
 export default function SignInPage() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const [name, setName] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
+  const [success, setSuccess] = useState("")
+  const [activeTab, setActiveTab] = useState("signin")
   const router = useRouter()
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
     setError("")
@@ -49,6 +53,44 @@ export default function SignInPage() {
     }
   }
 
+  const handleSignUp = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setIsLoading(true)
+    setError("")
+    setSuccess("")
+
+    try {
+      const response = await fetch("/api/auth/signup", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password, name }),
+      })
+
+      const data = await response.json()
+
+      if (response.ok && data.success) {
+        setSuccess("Account aangemaakt! Controleer je email voor verificatie.")
+        setEmail("")
+        setPassword("")
+        setName("")
+        // Switch to signin tab after successful registration
+        setTimeout(() => {
+          setActiveTab("signin")
+          setSuccess("")
+        }, 3000)
+      } else {
+        setError(data.error || "Registratie mislukt")
+      }
+    } catch (error) {
+      console.error("Signup error:", error)
+      setError("Er is een fout opgetreden bij het registreren")
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
@@ -63,8 +105,8 @@ export default function SignInPage() {
 
         <Card>
           <CardHeader className="text-center">
-            <CardTitle className="text-2xl">Admin Inloggen</CardTitle>
-            <CardDescription>Log in om toegang te krijgen tot het admin paneel</CardDescription>
+            <CardTitle className="text-2xl">Admin Toegang</CardTitle>
+            <CardDescription>Log in of registreer voor toegang tot het admin paneel</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
