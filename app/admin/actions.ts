@@ -31,6 +31,10 @@ export interface BijgerechtFormData {
   beschrijving: string
 }
 
+function isRedirectError(error: any): boolean {
+  return error?.digest?.includes("NEXT_REDIRECT") || error?.message === "NEXT_REDIRECT"
+}
+
 export async function addRecept(formData: FormData) {
   try {
     const naam = formData.get("naam") as string
@@ -44,7 +48,7 @@ export async function addRecept(formData: FormData) {
 
     // Validatie
     if (!naam || !beschrijving || !bereidingstijd || !type) {
-      console.error("Missing required fields")
+      console.log("Validation failed: Missing required fields")
       redirect("/admin?error=missing_fields")
     }
 
@@ -70,7 +74,7 @@ export async function addRecept(formData: FormData) {
       .filter(Boolean)
 
     if (bereidingswijze.length === 0) {
-      console.error("No preparation steps provided")
+      console.log("Validation failed: No preparation steps provided")
       redirect("/admin?error=missing_steps")
     }
 
@@ -79,7 +83,7 @@ export async function addRecept(formData: FormData) {
     const ingredientenLines = ingredientenString.split("\n").filter((line) => line.trim())
 
     if (ingredientenLines.length === 0) {
-      console.error("No ingredients provided")
+      console.log("Validation failed: No ingredients provided")
       redirect("/admin?error=missing_ingredients")
     }
 
@@ -151,11 +155,18 @@ export async function addRecept(formData: FormData) {
     revalidatePath("/zoeken")
 
     console.log("Redirecting to success page")
-    redirect("/admin?success=true")
   } catch (error) {
-    console.error("Error adding recept:", error)
-    redirect("/admin?error=add_failed")
+    // Don't log redirect errors as they are expected
+    if (!isRedirectError(error)) {
+      console.error("Error adding recept:", error)
+      redirect("/admin?error=add_failed")
+    }
+    // Re-throw redirect errors so they work properly
+    throw error
   }
+
+  // This will only execute if no redirect happened above
+  redirect("/admin?success=true")
 }
 
 export async function updateRecept(formData: FormData) {
@@ -174,7 +185,7 @@ export async function updateRecept(formData: FormData) {
 
     // Validatie
     if (!id || !naam || !beschrijving || !bereidingstijd || !type) {
-      console.error("Missing required fields for update")
+      console.log("Validation failed: Missing required fields for update")
       redirect("/admin?error=missing_fields")
     }
 
@@ -276,11 +287,18 @@ export async function updateRecept(formData: FormData) {
     revalidatePath(`/recept/${id}`)
 
     console.log("Redirecting to updated success page")
-    redirect("/admin?updated=true")
   } catch (error) {
-    console.error("Error updating recept:", error)
-    redirect("/admin?error=update_failed")
+    // Don't log redirect errors as they are expected
+    if (!isRedirectError(error)) {
+      console.error("Error updating recept:", error)
+      redirect("/admin?error=update_failed")
+    }
+    // Re-throw redirect errors so they work properly
+    throw error
   }
+
+  // This will only execute if no redirect happened above
+  redirect("/admin?updated=true")
 }
 
 export async function deleteRecept(receptId: number) {
@@ -295,11 +313,18 @@ export async function deleteRecept(receptId: number) {
     revalidatePath("/zoeken")
 
     console.log("Redirecting to deleted success page")
-    redirect("/admin?deleted=true")
   } catch (error) {
-    console.error("Error deleting recept:", error)
-    redirect("/admin?error=delete_failed")
+    // Don't log redirect errors as they are expected
+    if (!isRedirectError(error)) {
+      console.error("Error deleting recept:", error)
+      redirect("/admin?error=delete_failed")
+    }
+    // Re-throw redirect errors so they work properly
+    throw error
   }
+
+  // This will only execute if no redirect happened above
+  redirect("/admin?deleted=true")
 }
 
 export async function getAllReceptenAdmin() {
