@@ -1,23 +1,25 @@
 import { Filters } from "@/components/filters"
 import { ReceptCard } from "@/components/recept-card"
 import { zoekRecepten } from "../actions"
-import type { FilterOptions, GerechtsType, Seizoen } from "@/types"
+import type { FilterOptions, GerechtsType, Seizoen, Eigenaar } from "@/types"
 
 interface SearchPageProps {
   searchParams: {
     q?: string
     type?: GerechtsType
     seizoen?: Seizoen
+    eigenaar?: Eigenaar
   }
 }
 
 export default async function ZoekenPage({ searchParams }: SearchPageProps) {
-  const { q, type, seizoen } = searchParams
+  const { q, type, seizoen, eigenaar } = searchParams
 
   const filterOptions: FilterOptions = {
     zoekterm: q,
     type,
     seizoen,
+    eigenaar,
   }
 
   const recepten = await zoekRecepten(filterOptions)

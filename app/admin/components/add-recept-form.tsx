@@ -8,20 +8,26 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import type { GerechtsType } from "@/types"
+import type { GerechtsType, Eigenaar } from "@/types"
 
 const gerechtsTypes: GerechtsType[] = ["Ontbijt", "Lunch", "Diner", "Dessert", "Snack"]
 const moeilijkheidsgraden = ["Makkelijk", "Gemiddeld", "Moeilijk"]
+const eigenaren: { value: Eigenaar; label: string }[] = [
+  { value: "henk", label: "Henk" },
+  { value: "pepie en luulie", label: "Pepie & Luulie" },
+]
 
 export function AddReceptForm() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [selectedType, setSelectedType] = useState<GerechtsType>("Diner")
   const [selectedMoeilijkheid, setSelectedMoeilijkheid] = useState("Gemiddeld")
+  const [selectedEigenaar, setSelectedEigenaar] = useState<Eigenaar>("henk")
 
   const handleSubmit = async (formData: FormData) => {
     setIsSubmitting(true)
     formData.set("type", selectedType)
     formData.set("moeilijkheidsgraad", selectedMoeilijkheid)
+    formData.set("eigenaar", selectedEigenaar)
     await addRecept(formData)
   }
 
@@ -55,7 +61,7 @@ export function AddReceptForm() {
             />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div>
               <Label htmlFor="bereidingstijd">Bereidingstijd (minuten) *</Label>
               <Input id="bereidingstijd" name="bereidingstijd" type="number" required placeholder="30" min="1" />
@@ -85,6 +91,21 @@ export function AddReceptForm() {
                   {moeilijkheidsgraden.map((niveau) => (
                     <SelectItem key={niveau} value={niveau}>
                       {niveau}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Eigenaar *</Label>
+              <Select value={selectedEigenaar} onValueChange={(value) => setSelectedEigenaar(value as Eigenaar)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {eigenaren.map((eigenaar) => (
+                    <SelectItem key={eigenaar.value} value={eigenaar.value}>
+                      {eigenaar.label}
                     </SelectItem>
                   ))}
                 </SelectContent>

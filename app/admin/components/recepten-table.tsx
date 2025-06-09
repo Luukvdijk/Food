@@ -16,14 +16,15 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
-import { Trash2, Eye, Clock, Users } from "lucide-react"
+import { Trash2, Eye, Clock, Users, Pencil } from "lucide-react"
 import Link from "next/link"
 
 interface ReceptenTableProps {
   recepten: any[]
+  onEdit?: (id: number) => void
 }
 
-export function ReceptenTable({ recepten }: ReceptenTableProps) {
+export function ReceptenTable({ recepten, onEdit }: ReceptenTableProps) {
   const [deletingId, setDeletingId] = useState<number | null>(null)
 
   const handleDelete = async (id: number) => {
@@ -43,12 +44,24 @@ export function ReceptenTable({ recepten }: ReceptenTableProps) {
     )
   }
 
+  const getEigenaarColor = (eigenaar: string) => {
+    switch (eigenaar) {
+      case "henk":
+        return "bg-blue-100 text-blue-800"
+      case "pepie en luulie":
+        return "bg-pink-100 text-pink-800"
+      default:
+        return "bg-gray-100 text-gray-800"
+    }
+  }
+
   return (
     <div className="rounded-md border">
       <Table>
         <TableHeader>
           <TableRow>
             <TableHead>Naam</TableHead>
+            <TableHead>Eigenaar</TableHead>
             <TableHead>Type</TableHead>
             <TableHead>Tijd</TableHead>
             <TableHead>Personen</TableHead>
@@ -65,6 +78,11 @@ export function ReceptenTable({ recepten }: ReceptenTableProps) {
                   <div className="font-semibold">{recept.naam}</div>
                   <div className="text-sm text-muted-foreground line-clamp-1">{recept.beschrijving}</div>
                 </div>
+              </TableCell>
+              <TableCell>
+                <Badge className={getEigenaarColor(recept.eigenaar)}>
+                  {recept.eigenaar === "henk" ? "Henk" : "Pepie & Luulie"}
+                </Badge>
               </TableCell>
               <TableCell>
                 <Badge variant="outline">{recept.type}</Badge>
@@ -90,6 +108,11 @@ export function ReceptenTable({ recepten }: ReceptenTableProps) {
                       <Eye className="h-3 w-3" />
                     </Link>
                   </Button>
+                  {onEdit && (
+                    <Button variant="outline" size="sm" onClick={() => onEdit(recept.id)}>
+                      <Pencil className="h-3 w-3" />
+                    </Button>
+                  )}
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
                       <Button variant="outline" size="sm" disabled={deletingId === recept.id}>

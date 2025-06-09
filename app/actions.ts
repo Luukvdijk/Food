@@ -1,15 +1,27 @@
 "use server"
 
 import { sql } from "@/lib/db"
-import type { FilterOptions, Recept, Ingredient, Bijgerecht } from "@/types"
+import type { FilterOptions, Recept, Ingredient, Bijgerecht, Eigenaar } from "@/types"
 
-export async function getRandomRecept(): Promise<Recept | null> {
+export async function getRandomRecept(eigenaar?: Eigenaar | null): Promise<Recept | null> {
   try {
-    const result = await sql`
-      SELECT * FROM recepten 
-      ORDER BY RANDOM() 
-      LIMIT 1
-    `
+    let query
+    if (eigenaar) {
+      query = sql`
+        SELECT * FROM recepten 
+        WHERE eigenaar = ${eigenaar}
+        ORDER BY RANDOM() 
+        LIMIT 1
+      `
+    } else {
+      query = sql`
+        SELECT * FROM recepten 
+        ORDER BY RANDOM() 
+        LIMIT 1
+      `
+    }
+
+    const result = await query
 
     if (result.length === 0) {
       return null
@@ -72,7 +84,7 @@ export async function getBijgerechten(receptId: number): Promise<Bijgerecht[]> {
 
 export async function zoekRecepten(options: FilterOptions): Promise<Recept[]> {
   try {
-    if (!options.type && !options.seizoen && !options.zoekterm) {
+    if (!options.type && !options.seizoen && !options.eigenaar && !options.zoekterm) {
       // No filters, return all recipes
       const result = await sql`
         SELECT * FROM recepten 
@@ -92,6 +104,11 @@ export async function zoekRecepten(options: FilterOptions): Promise<Recept[]> {
     if (options.seizoen) {
       conditions.push(`$${values.length + 1} = ANY(seizoen)`)
       values.push(options.seizoen)
+    }
+
+    if (options.eigenaar) {
+      conditions.push(`eigenaar = $${values.length + 1}`)
+      values.push(options.eigenaar)
     }
 
     if (options.zoekterm) {

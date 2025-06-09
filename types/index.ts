@@ -10,6 +10,7 @@ export type Recept = {
   afbeelding_url: string | null
   bereidingswijze: string[]
   personen: number
+  eigenaar: string
   created_at: string
 }
 
@@ -35,8 +36,11 @@ export type GerechtsType = "Ontbijt" | "Lunch" | "Diner" | "Dessert" | "Snack"
 
 export type Seizoen = "Lente" | "Zomer" | "Herfst" | "Winter"
 
+export type Eigenaar = "henk" | "pepie en luulie"
+
 export type FilterOptions = {
   type?: GerechtsType
   seizoen?: Seizoen
+  eigenaar?: Eigenaar
   zoekterm?: string
 }
