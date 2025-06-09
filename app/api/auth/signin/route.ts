@@ -3,7 +3,7 @@ import { type NextRequest, NextResponse } from "next/server"
 // Demo gebruiker - in productie zou dit uit een database komen
 const DEMO_USER = {
   email: "admin@recepten.nl",
-  password: "admin123",
+  password: "Bonappetit",
   id: "1",
   name: "Admin",
 }
