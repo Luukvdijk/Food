@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { ReceptCard } from "@/components/recept-card"
 import { Skeleton } from "@/components/ui/skeleton"
-import type { Recept } from "@/types"
+import { RandomReceptFilters } from "./random-recept-filters"
+import type { Recept, FilterOptions } from "@/types"
 
 interface RandomReceptProps {
   initialRecept: Recept | null
@@ -15,18 +16,38 @@ interface RandomReceptProps {
 export function RandomRecept({ initialRecept }: RandomReceptProps) {
   const [recept, setRecept] = useState<Recept | null>(initialRecept)
   const [loading, setLoading] = useState(false)
+  const [filters, setFilters] = useState<FilterOptions>({})
+  const [noResults, setNoResults] = useState(false)
   const router = useRouter()
 
   const getRandomRecept = async () => {
     setLoading(true)
+    setNoResults(false)
+
     try {
-      const response = await fetch("/api/random-recept")
+      // Build query string from filters
+      const queryParams = new URLSearchParams()
+      if (filters.type) queryParams.set("type", filters.type)
+      if (filters.seizoen) queryParams.set("seizoen", filters.seizoen)
+      if (filters.eigenaar) queryParams.set("eigenaar", filters.eigenaar)
+
+      const queryString = queryParams.toString()
+      const url = `/api/random-recept${queryString ? `?${queryString}` : ""}`
+
+      const response = await fetch(url)
       if (!response.ok) throw new Error("Failed to fetch random recipe")
 
       const data = await response.json()
-      setRecept(data)
+
+      if (data === null) {
+        setNoResults(true)
+        setRecept(null)
+      } else {
+        setRecept(data)
+      }
     } catch (error) {
       console.error("Error fetching random recipe:", error)
+      setNoResults(true)
     } finally {
       setLoading(false)
     }
@@ -38,9 +59,18 @@ export function RandomRecept({ initialRecept }: RandomReceptProps) {
     }
   }
 
+  const handleFiltersChange = (newFilters: FilterOptions) => {
+    setFilters(newFilters)
+    // Reset the current recipe when filters change
+    setRecept(null)
+    setNoResults(false)
+  }
+
   return (
-    <div className="flex flex-col items-center w-full max-w-md">
-      <h2 className="text-2xl font-bold mb-6">Recept van de dag</h2>
+    <div className="flex flex-col items-center w-full max-w-md space-y-6">
+      <h2 className="text-2xl font-bold">Recept van de dag</h2>
+
+      <RandomReceptFilters onFiltersChange={handleFiltersChange} />
 
       {loading ? (
         <Card className="w-full">
@@ -68,7 +98,20 @@ export function RandomRecept({ initialRecept }: RandomReceptProps) {
       ) : (
         <Card className="w-full">
           <CardContent className="pt-6 text-center">
-            <p className="text-muted-foreground">Geen recepten gevonden. Voeg eerst recepten toe.</p>
+            {noResults ? (
+              <p className="text-muted-foreground">Geen recepten gevonden met deze filters. Probeer andere filters.</p>
+            ) : (
+              <div className="space-y-4">
+                <p className="text-muted-foreground">
+                  {Object.keys(filters).length > 0
+                    ? "Klik op de knop om een willekeurig recept te vinden met je filters."
+                    : "Kies filters hierboven of klik direct op de knop voor een willekeurig recept."}
+                </p>
+                <Button onClick={getRandomRecept} size="lg">
+                  Toon willekeurig recept
+                </Button>
+              </div>
+            )}
           </CardContent>
         </Card>
       )}
