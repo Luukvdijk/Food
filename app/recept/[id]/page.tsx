@@ -7,7 +7,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import { IngredientenLijst } from "@/components/ingredienten-lijst"
 import { Bijgerechten } from "@/components/bijgerechten"
-import { getReceptById, getIngredienten, getBijgerechten } from "@/app/actions"
+import { supabase } from "@/lib/db"
 
 interface ReceptPageProps {
   params: {
@@ -22,14 +22,35 @@ export default async function ReceptPage({ params }: ReceptPageProps) {
     return notFound()
   }
 
-  const recept = await getReceptById(id)
+  // Get recipe details using Supabase
+  const { data: recept, error: receptError } = await supabase.from("recepten").select("*").eq("id", id).single()
 
-  if (!recept) {
+  if (receptError || !recept) {
+    console.error("Error fetching recipe:", receptError)
     return notFound()
   }
 
-  const ingredienten = await getIngredienten(id)
-  const bijgerechten = await getBijgerechten(id)
+  // Get ingredients using Supabase
+  const { data: ingredienten, error: ingredientenError } = await supabase
+    .from("ingredienten")
+    .select("*")
+    .eq("recept_id", id)
+    .order("id")
+
+  if (ingredientenError) {
+    console.error("Error fetching ingredients:", ingredientenError)
+  }
+
+  // Get side dishes using Supabase
+  const { data: bijgerechten, error: bijgerechtenError } = await supabase
+    .from("bijgerechten")
+    .select("*")
+    .eq("recept_id", id)
+    .order("id")
+
+  if (bijgerechtenError) {
+    console.error("Error fetching side dishes:", bijgerechtenError)
+  }
 
   return (
     <div>
@@ -59,16 +80,18 @@ export default async function ReceptPage({ params }: ReceptPageProps) {
 
           <div className="flex flex-wrap gap-2 mb-6">
             <Badge variant="outline">{recept.type}</Badge>
-            {recept.seizoen.map((s) => (
-              <Badge key={s} variant="secondary">
-                {s}
-              </Badge>
-            ))}
-            {recept.tags.map((tag) => (
-              <Badge key={tag} variant="outline">
-                {tag}
-              </Badge>
-            ))}
+            {recept.seizoen &&
+              recept.seizoen.map((s: string) => (
+                <Badge key={s} variant="secondary">
+                  {s}
+                </Badge>
+              ))}
+            {recept.tags &&
+              recept.tags.map((tag: string) => (
+                <Badge key={tag} variant="outline">
+                  {tag}
+                </Badge>
+              ))}
           </div>
 
           <div className="flex items-center gap-6 text-sm text-muted-foreground mb-6">
@@ -90,20 +113,21 @@ export default async function ReceptPage({ params }: ReceptPageProps) {
 
           <h2 className="text-xl font-semibold mb-4">Bereidingswijze</h2>
           <ol className="space-y-4 mb-8">
-            {recept.bereidingswijze.map((stap, index) => (
-              <li key={index} className="ml-6 list-decimal">
-                <p>{stap}</p>
-              </li>
-            ))}
+            {recept.bereidingswijze &&
+              recept.bereidingswijze.map((stap: string, index: number) => (
+                <li key={index} className="ml-6 list-decimal">
+                  <p>{stap}</p>
+                </li>
+              ))}
           </ol>
 
-          <Bijgerechten bijgerechten={bijgerechten} />
+          <Bijgerechten bijgerechten={bijgerechten || []} />
         </div>
 
         <div>
           <Card>
             <CardContent className="pt-6">
-              <IngredientenLijst ingredienten={ingredienten} defaultPersonen={recept.personen} />
+              <IngredientenLijst ingredienten={ingredienten || []} defaultPersonen={recept.personen} />
             </CardContent>
           </Card>
         </div>
