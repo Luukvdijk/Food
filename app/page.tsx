@@ -38,6 +38,30 @@ async function handleMigrateDatabase() {
   }
 }
 
+// Add this server action at the top of the file, after the existing server actions
+async function handleMigrateFromSupabase() {
+  "use server"
+  try {
+    // Import the migration function
+    const { migrateFromSupabase } = await import("@/scripts/migrate-from-supabase")
+
+    // Run the migration
+    const result = await migrateFromSupabase()
+
+    if (result.success) {
+      redirect("/")
+    }
+
+    return result
+  } catch (error) {
+    console.error("Migration error:", error)
+    return {
+      success: false,
+      message: `Error migrating data: ${error instanceof Error ? error.message : "Unknown error"}`,
+    }
+  }
+}
+
 export default async function Home() {
   // Check database status first
   const dbStatus = await checkDatabaseStatus()
@@ -101,6 +125,19 @@ export default async function Home() {
             </p>
             <form action={handleMigrateDatabase}>
               <Button type="submit">Database Updaten</Button>
+            </form>
+          </div>
+        )}
+        {dbStatus.hasData && (
+          <div className="text-center py-6 bg-green-50 rounded-lg mt-6">
+            <h3 className="text-lg font-semibold mb-2">Importeer Recepten van Supabase</h3>
+            <p className="text-muted-foreground mb-4">
+              Heb je recepten in Supabase die je wilt importeren? Klik hieronder om ze te importeren.
+            </p>
+            <form action={handleMigrateFromSupabase}>
+              <Button type="submit" variant="outline" className="bg-green-100">
+                Importeer van Supabase
+              </Button>
             </form>
           </div>
         )}
