@@ -1,7 +1,6 @@
 "use client"
 
 import { useState } from "react"
-import { Badge } from "@/components/ui/badge"
 import { Star, Minus, Plus, Users } from "lucide-react"
 import Image from "next/image"
 import { IngredientsPopup } from "./ingredients-popup"
@@ -20,6 +19,7 @@ interface HeroSectionProps {
 export function HeroSection({ recept }: HeroSectionProps) {
   const [servings, setServings] = useState(1)
   const [showIngredientsPopup, setShowIngredientsPopup] = useState(false)
+  const [hoverStates, setHoverStates] = useState<Record<string, boolean>>({})
 
   const incrementServings = () => setServings((prev) => prev + 1)
   const decrementServings = () => setServings((prev) => Math.max(1, prev - 1))
@@ -32,6 +32,13 @@ export function HeroSection({ recept }: HeroSectionProps) {
     if (recept) {
       setShowIngredientsPopup(true)
     }
+  }
+
+  const handleBadgeHover = (id: string, isHovering: boolean) => {
+    setHoverStates((prev) => ({
+      ...prev,
+      [id]: isHovering,
+    }))
   }
 
   if (!recept) {
@@ -57,19 +64,60 @@ export function HeroSection({ recept }: HeroSectionProps) {
               <h1 className="text-6xl font-bold leading-tight">{recept.naam}</h1>
 
               {/* Tags */}
-              <div className="flex flex-wrap gap-3">
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "12px" }}>
                 {recept.seizoen.map((seizoen) => (
-                  <Badge key={seizoen} variant="secondary" className="bg-[#eee1d1] text-black px-4 py-2 text-sm">
+                  <span
+                    key={seizoen}
+                    style={{
+                      backgroundColor: hoverStates[`seizoen-${seizoen}`] ? "#d1c7b8" : "#eee1d1",
+                      color: "#286058",
+                      padding: "8px 16px",
+                      borderRadius: "4px",
+                      fontSize: "14px",
+                      fontWeight: "500",
+                      transition: "background-color 0.2s ease",
+                      cursor: "default",
+                    }}
+                    onMouseEnter={() => handleBadgeHover(`seizoen-${seizoen}`, true)}
+                    onMouseLeave={() => handleBadgeHover(`seizoen-${seizoen}`, false)}
+                  >
                     {seizoen}
-                  </Badge>
+                  </span>
                 ))}
-                <Badge variant="secondary" className="bg-[#eee1d1] text-black px-4 py-2 text-sm">
+                <span
+                  style={{
+                    backgroundColor: hoverStates["type"] ? "#d1c7b8" : "#eee1d1",
+                    color: "#286058",
+                    padding: "8px 16px",
+                    borderRadius: "4px",
+                    fontSize: "14px",
+                    fontWeight: "500",
+                    transition: "background-color 0.2s ease",
+                    cursor: "default",
+                  }}
+                  onMouseEnter={() => handleBadgeHover("type", true)}
+                  onMouseLeave={() => handleBadgeHover("type", false)}
+                >
                   {recept.type}
-                </Badge>
+                </span>
                 {recept.tags.slice(0, 1).map((tag) => (
-                  <Badge key={tag} variant="secondary" className="bg-[#eee1d1] text-black px-4 py-2 text-sm">
+                  <span
+                    key={tag}
+                    style={{
+                      backgroundColor: hoverStates[`tag-${tag}`] ? "#d1c7b8" : "#eee1d1",
+                      color: "#286058",
+                      padding: "8px 16px",
+                      borderRadius: "4px",
+                      fontSize: "14px",
+                      fontWeight: "500",
+                      transition: "background-color 0.2s ease",
+                      cursor: "default",
+                    }}
+                    onMouseEnter={() => handleBadgeHover(`tag-${tag}`, true)}
+                    onMouseLeave={() => handleBadgeHover(`tag-${tag}`, false)}
+                  >
                     {tag}
-                  </Badge>
+                  </span>
                 ))}
               </div>
 
