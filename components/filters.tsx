@@ -3,9 +3,6 @@
 import { useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Check, ChevronsUpDown } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { cn } from "@/lib/utils"
 import type { GerechtsType, Seizoen, Eigenaar } from "@/types"
 
@@ -41,110 +38,159 @@ export function Filters() {
     router.push(`/zoeken?${params.toString()}`)
   }
 
+  const buttonStyle = {
+    backgroundColor: "#eee1d1",
+    color: "#286058",
+    border: "1px solid #286058",
+  }
+
+  const dropdownStyle = {
+    backgroundColor: "#eee1d1",
+    border: "1px solid #286058",
+  }
+
   return (
     <div className="flex flex-wrap gap-4 mb-6">
-      <Popover open={openType} onOpenChange={setOpenType}>
-        <PopoverTrigger asChild>
-          <Button variant="outline" role="combobox" aria-expanded={openType} className="justify-between w-[200px]">
-            {currentType || "Type gerecht"}
-            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-[200px] p-0">
-          <Command>
-            <CommandInput placeholder="Zoek type..." />
-            <CommandList>
-              <CommandEmpty>Geen type gevonden.</CommandEmpty>
-              <CommandGroup>
-                {gerechtsTypes.map((type) => (
-                  <CommandItem
-                    key={type}
-                    value={type}
-                    onSelect={() => {
-                      updateFilters("type", currentType === type ? null : type)
-                      setOpenType(false)
-                    }}
-                  >
-                    <Check className={cn("mr-2 h-4 w-4", currentType === type ? "opacity-100" : "opacity-0")} />
-                    {type}
-                  </CommandItem>
-                ))}
-              </CommandGroup>
-            </CommandList>
-          </Command>
-        </PopoverContent>
-      </Popover>
+      {/* Type Filter */}
+      <div className="relative">
+        <button
+          onClick={() => setOpenType(!openType)}
+          style={buttonStyle}
+          className="flex items-center justify-between w-[200px] px-3 py-2 rounded-md text-sm font-medium hover:opacity-80 transition-opacity"
+        >
+          {currentType || "Type gerecht"}
+          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+        </button>
+        {openType && (
+          <div
+            style={dropdownStyle}
+            className="absolute top-full left-0 mt-1 w-[200px] rounded-md shadow-lg z-50 max-h-60 overflow-auto"
+          >
+            <div className="p-2">
+              <input
+                type="text"
+                placeholder="Zoek type..."
+                className="w-full px-2 py-1 text-sm border rounded"
+                style={{ backgroundColor: "white", color: "#286058" }}
+              />
+            </div>
+            <div className="py-1">
+              {gerechtsTypes.map((type) => (
+                <button
+                  key={type}
+                  onClick={() => {
+                    updateFilters("type", currentType === type ? null : type)
+                    setOpenType(false)
+                  }}
+                  className="flex items-center w-full px-3 py-2 text-sm hover:bg-white/50 transition-colors"
+                  style={{ color: "#286058" }}
+                >
+                  <Check className={cn("mr-2 h-4 w-4", currentType === type ? "opacity-100" : "opacity-0")} />
+                  {type}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
 
-      <Popover open={openSeizoen} onOpenChange={setOpenSeizoen}>
-        <PopoverTrigger asChild>
-          <Button variant="outline" role="combobox" aria-expanded={openSeizoen} className="justify-between w-[200px]">
-            {currentSeizoen || "Seizoen"}
-            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-[200px] p-0">
-          <Command>
-            <CommandInput placeholder="Zoek seizoen..." />
-            <CommandList>
-              <CommandEmpty>Geen seizoen gevonden.</CommandEmpty>
-              <CommandGroup>
-                {seizoenen.map((seizoen) => (
-                  <CommandItem
-                    key={seizoen}
-                    value={seizoen}
-                    onSelect={() => {
-                      updateFilters("seizoen", currentSeizoen === seizoen ? null : seizoen)
-                      setOpenSeizoen(false)
-                    }}
-                  >
-                    <Check className={cn("mr-2 h-4 w-4", currentSeizoen === seizoen ? "opacity-100" : "opacity-0")} />
-                    {seizoen}
-                  </CommandItem>
-                ))}
-              </CommandGroup>
-            </CommandList>
-          </Command>
-        </PopoverContent>
-      </Popover>
+      {/* Seizoen Filter */}
+      <div className="relative">
+        <button
+          onClick={() => setOpenSeizoen(!openSeizoen)}
+          style={buttonStyle}
+          className="flex items-center justify-between w-[200px] px-3 py-2 rounded-md text-sm font-medium hover:opacity-80 transition-opacity"
+        >
+          {currentSeizoen || "Seizoen"}
+          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+        </button>
+        {openSeizoen && (
+          <div
+            style={dropdownStyle}
+            className="absolute top-full left-0 mt-1 w-[200px] rounded-md shadow-lg z-50 max-h-60 overflow-auto"
+          >
+            <div className="p-2">
+              <input
+                type="text"
+                placeholder="Zoek seizoen..."
+                className="w-full px-2 py-1 text-sm border rounded"
+                style={{ backgroundColor: "white", color: "#286058" }}
+              />
+            </div>
+            <div className="py-1">
+              {seizoenen.map((seizoen) => (
+                <button
+                  key={seizoen}
+                  onClick={() => {
+                    updateFilters("seizoen", currentSeizoen === seizoen ? null : seizoen)
+                    setOpenSeizoen(false)
+                  }}
+                  className="flex items-center w-full px-3 py-2 text-sm hover:bg-white/50 transition-colors"
+                  style={{ color: "#286058" }}
+                >
+                  <Check className={cn("mr-2 h-4 w-4", currentSeizoen === seizoen ? "opacity-100" : "opacity-0")} />
+                  {seizoen}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
 
-      <Popover open={openEigenaar} onOpenChange={setOpenEigenaar}>
-        <PopoverTrigger asChild>
-          <Button variant="outline" role="combobox" aria-expanded={openEigenaar} className="justify-between w-[200px]">
-            {currentEigenaar ? eigenaren.find((e) => e.value === currentEigenaar)?.label : "Eigenaar"}
-            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-[200px] p-0">
-          <Command>
-            <CommandInput placeholder="Zoek eigenaar..." />
-            <CommandList>
-              <CommandEmpty>Geen eigenaar gevonden.</CommandEmpty>
-              <CommandGroup>
-                {eigenaren.map((eigenaar) => (
-                  <CommandItem
-                    key={eigenaar.value}
-                    value={eigenaar.value}
-                    onSelect={() => {
-                      updateFilters("eigenaar", currentEigenaar === eigenaar.value ? null : eigenaar.value)
-                      setOpenEigenaar(false)
-                    }}
-                  >
-                    <Check
-                      className={cn("mr-2 h-4 w-4", currentEigenaar === eigenaar.value ? "opacity-100" : "opacity-0")}
-                    />
-                    {eigenaar.label}
-                  </CommandItem>
-                ))}
-              </CommandGroup>
-            </CommandList>
-          </Command>
-        </PopoverContent>
-      </Popover>
+      {/* Eigenaar Filter */}
+      <div className="relative">
+        <button
+          onClick={() => setOpenEigenaar(!openEigenaar)}
+          style={buttonStyle}
+          className="flex items-center justify-between w-[200px] px-3 py-2 rounded-md text-sm font-medium hover:opacity-80 transition-opacity"
+        >
+          {currentEigenaar ? eigenaren.find((e) => e.value === currentEigenaar)?.label : "Eigenaar"}
+          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+        </button>
+        {openEigenaar && (
+          <div
+            style={dropdownStyle}
+            className="absolute top-full left-0 mt-1 w-[200px] rounded-md shadow-lg z-50 max-h-60 overflow-auto"
+          >
+            <div className="p-2">
+              <input
+                type="text"
+                placeholder="Zoek eigenaar..."
+                className="w-full px-2 py-1 text-sm border rounded"
+                style={{ backgroundColor: "white", color: "#286058" }}
+              />
+            </div>
+            <div className="py-1">
+              {eigenaren.map((eigenaar) => (
+                <button
+                  key={eigenaar.value}
+                  onClick={() => {
+                    updateFilters("eigenaar", currentEigenaar === eigenaar.value ? null : eigenaar.value)
+                    setOpenEigenaar(false)
+                  }}
+                  className="flex items-center w-full px-3 py-2 text-sm hover:bg-white/50 transition-colors"
+                  style={{ color: "#286058" }}
+                >
+                  <Check
+                    className={cn("mr-2 h-4 w-4", currentEigenaar === eigenaar.value ? "opacity-100" : "opacity-0")}
+                  />
+                  {eigenaar.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
 
+      {/* Clear Filters Button */}
       {(currentType || currentSeizoen || currentEigenaar || currentZoekterm) && (
-        <Button variant="ghost" onClick={() => router.push("/zoeken")}>
+        <button
+          onClick={() => router.push("/zoeken")}
+          className="px-4 py-2 rounded-md text-sm font-medium hover:opacity-80 transition-opacity"
+          style={{ backgroundColor: "#e75129", color: "white" }}
+        >
           Filters wissen
-        </Button>
+        </button>
       )}
     </div>
   )
