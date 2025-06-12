@@ -4,7 +4,8 @@ import type React from "react"
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { Search, Settings } from "lucide-react"
+import { Search, Settings, Moon, Sun } from "lucide-react"
+import { useTheme } from "next-themes"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
@@ -12,9 +13,12 @@ import Link from "next/link"
 export function Header() {
   const [zoekterm, setZoekterm] = useState("")
   const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [mounted, setMounted] = useState(false)
   const router = useRouter()
+  const { theme, setTheme } = useTheme()
 
   useEffect(() => {
+    setMounted(true)
     // Check login status client-side
     const checkAuth = async () => {
       try {
@@ -33,6 +37,14 @@ export function Header() {
     if (zoekterm.trim()) {
       router.push(`/zoeken?q=${encodeURIComponent(zoekterm)}`)
     }
+  }
+
+  const toggleTheme = () => {
+    setTheme(theme === "dark" ? "light" : "dark")
+  }
+
+  if (!mounted) {
+    return null
   }
 
   return (
@@ -60,6 +72,10 @@ export function Header() {
           </form>
 
           <div className="flex items-center gap-2">
+            <Button variant="outline" size="icon" onClick={toggleTheme} aria-label="Toggle theme">
+              {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+            </Button>
+
             {isLoggedIn ? (
               <>
                 <span className="text-sm text-muted-foreground hidden md:inline">Ingelogd als Admin</span>
