@@ -49,8 +49,17 @@ export function IngredientsManager() {
       width: "100%",
       maxWidth: "20rem",
       cursor: "pointer",
-      outline: "none",
+      outline: "none !important",
       transition: "border-color 0.2s ease, box-shadow 0.2s ease",
+      WebkitAppearance: "none",
+      MozAppearance: "none",
+      appearance: "none",
+      backgroundImage:
+        'url(\'data:image/svg+xml;charset=US-ASCII,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 4 5"><path fill="%23286058" d="M2 0L0 2h4zm0 5L0 3h4z"/></svg>\')',
+      backgroundRepeat: "no-repeat",
+      backgroundPosition: "right 0.7rem center",
+      backgroundSize: "0.65rem auto",
+      paddingRight: "2.5rem",
     },
     table: {
       width: "100%",
@@ -239,6 +248,16 @@ export function IngredientsManager() {
 
   return (
     <>
+      <style jsx global>{`
+  select:focus {
+    outline: none !important;
+    border-color: #eee1d1 !important;
+    box-shadow: 0 0 0 3px rgba(238, 225, 209, 0.3) !important;
+  }
+  select::-ms-expand {
+    display: none;
+  }
+`}</style>
       <style jsx>{`
         .ingredients-container {
           display: flex;
