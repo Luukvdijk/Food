@@ -1,112 +1,160 @@
 "use client"
 
 import type React from "react"
-import { useState } from "react"
-import Link from "next/link"
-import { useRouter } from "next/router"
+import { useState, useEffect } from "react"
+import { Search, ChevronDown, Settings } from "lucide-react"
+import { useRouter } from "next/navigation"
+import { FilterPopup, type FilterOptions } from "./filter-popup"
 
-const ModernHeader = () => {
-  const [searchQuery, setSearchQuery] = useState("")
+export function ModernHeader() {
+  const [zoekterm, setZoekterm] = useState("")
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [showFilters, setShowFilters] = useState(false)
+  const [filters, setFilters] = useState<FilterOptions>({})
   const router = useRouter()
 
-  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") {
-      router.push(`/recepten?q=${searchQuery}`)
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const response = await fetch("/api/auth/status")
+        const data = await response.json()
+        setIsLoggedIn(data.isAuthenticated)
+      } catch (error) {
+        setIsLoggedIn(false)
+      }
+    }
+    checkAuth()
+  }, [])
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (zoekterm.trim()) {
+      router.push(`/zoeken?q=${encodeURIComponent(zoekterm)}`)
     }
   }
 
-  return (
-    <header
-      style={{
-        backgroundColor: "#f9fafb",
-        padding: "1rem 0",
-        borderBottom: "1px solid #e5e7eb",
-      }}
-    >
-      <div
-        style={{
-          maxWidth: "1200px",
-          margin: "0 auto",
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          padding: "0 1rem",
-        }}
-      >
-        <Link
-          href="/"
-          style={{
-            fontSize: "1.5rem",
-            fontWeight: "bold",
-            color: "#286058",
-            textDecoration: "none",
-          }}
-        >
-          Receptenboek
-        </Link>
+  const handleFiltersChange = (newFilters: FilterOptions) => {
+    setFilters(newFilters)
+    // Apply filters to random recipe
+    window.location.reload()
+  }
 
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-          }}
-        >
-          <div
-            style={{
-              marginRight: "1rem",
-              width: "200px",
-            }}
-          >
-            <input
-              type="text"
-              placeholder="Zoek recepten..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onKeyPress={handleKeyPress}
-              style={{
-                width: "100%",
-                padding: "8px 12px",
-                border: "1px solid #d1d5db",
-                borderRadius: "6px",
-                fontSize: "14px",
-                backgroundColor: "white",
-                color: "#286058",
-                outline: "none",
-                transition: "border-color 0.2s ease, box-shadow 0.2s ease",
-              }}
-              onFocus={(e) => {
-                e.target.style.borderColor = "#286058"
-                e.target.style.boxShadow = "0 0 0 2px rgba(40, 96, 88, 0.2)"
-              }}
-              onBlur={(e) => {
-                e.target.style.borderColor = "#d1d5db"
-                e.target.style.boxShadow = "none"
-              }}
-            />
+  return (
+    <>
+      <header className="bg-[#286058] text-white relative overflow-hidden w-full">
+        <div className="w-full py-6 px-8 relative z-10">
+          <div className="flex items-center justify-between">
+            {/* Filters */}
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              className="flex items-center gap-2 text-[#e75129] font-medium text-lg"
+            >
+              Filters
+              <ChevronDown className="h-5 w-5" />
+            </button>
+
+            {/* Search */}
+            <form onSubmit={handleSearch} className="relative">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                <input
+                  type="search"
+                  placeholder="Zoek jouw gerecht"
+                  value={zoekterm}
+                  onChange={(e) => setZoekterm(e.target.value)}
+                  style={{
+                    paddingLeft: "2.5rem",
+                    paddingRight: "1rem",
+                    paddingTop: "0.5rem",
+                    paddingBottom: "0.5rem",
+                    width: "20rem",
+                    backgroundColor: "rgba(255, 255, 255, 0.1)",
+                    border: "1px solid rgba(255, 255, 255, 0.2)",
+                    borderRadius: "0.375rem",
+                    color: "white",
+                    fontSize: "1rem",
+                    outline: "none",
+                    transition: "all 0.2s ease",
+                  }}
+                  onFocus={(e) => {
+                    e.target.style.backgroundColor = "rgba(255, 255, 255, 0.2)"
+                    e.target.style.borderColor = "#eee1d1"
+                    e.target.style.boxShadow = "0 0 0 2px rgba(238, 225, 209, 0.3)"
+                  }}
+                  onBlur={(e) => {
+                    e.target.style.backgroundColor = "rgba(255, 255, 255, 0.1)"
+                    e.target.style.borderColor = "rgba(255, 255, 255, 0.2)"
+                    e.target.style.boxShadow = "none"
+                  }}
+                />
+              </div>
+            </form>
+
+            {/* Admin */}
+            <div className="flex items-center gap-2">
+              {isLoggedIn ? (
+                <button
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "0.5rem",
+                    padding: "0.5rem 1rem",
+                    backgroundColor: "transparent",
+                    color: "white",
+                    border: "none",
+                    borderRadius: "0.375rem",
+                    cursor: "pointer",
+                    transition: "background-color 0.2s ease",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = "rgba(255, 255, 255, 0.1)"
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = "transparent"
+                  }}
+                  onClick={() => router.push("/admin")}
+                >
+                  <Settings className="h-4 w-4" />
+                  Admin
+                </button>
+              ) : (
+                <button
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "0.5rem",
+                    padding: "0.5rem 1rem",
+                    backgroundColor: "transparent",
+                    color: "white",
+                    border: "none",
+                    borderRadius: "0.375rem",
+                    cursor: "pointer",
+                    transition: "background-color 0.2s ease",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = "rgba(255, 255, 255, 0.1)"
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = "transparent"
+                  }}
+                  onClick={() => router.push("/auth/signin")}
+                >
+                  <Settings className="h-4 w-4" />
+                  Admin Login
+                </button>
+              )}
+            </div>
           </div>
-          <Link
-            href="/recept-toevoegen"
-            style={{
-              backgroundColor: "#286058",
-              color: "white",
-              padding: "0.5rem 1rem",
-              borderRadius: "6px",
-              textDecoration: "none",
-              fontSize: "0.875rem",
-              lineHeight: "1.25rem",
-              fontWeight: "500",
-              transition: "background-color 0.2s ease",
-              "&:hover": {
-                backgroundColor: "#1e403a",
-              },
-            }}
-          >
-            Recept Toevoegen
-          </Link>
         </div>
-      </div>
-    </header>
+      </header>
+
+      {/* Filter Popup */}
+      <FilterPopup
+        isOpen={showFilters}
+        onClose={() => setShowFilters(false)}
+        onFiltersChange={handleFiltersChange}
+        currentFilters={filters}
+      />
+    </>
   )
 }
-
-export default ModernHeader
