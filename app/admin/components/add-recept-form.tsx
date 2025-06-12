@@ -7,7 +7,6 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Loader2 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { ImageUpload } from "@/components/image-upload"
@@ -100,11 +99,14 @@ export function AddReceptForm() {
     <div className="space-y-6">
       <form action={handleSubmit} className="space-y-6">
         {/* Basis informatie */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Basis Informatie</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
+        <div
+          style={{ backgroundColor: "#eee1d1", color: "#286058", border: "1px solid #d1d5db" }}
+          className="rounded-lg overflow-hidden mb-6"
+        >
+          <div className="p-6 border-b border-gray-200">
+            <h3 className="text-lg font-semibold">Basis Informatie</h3>
+          </div>
+          <div className="p-6 space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="naam">Recept Naam *</Label>
@@ -114,6 +116,8 @@ export function AddReceptForm() {
                   required
                   placeholder="Bijv. Hollandse Erwtensoep"
                   disabled={isSubmitting}
+                  style={{ backgroundColor: "white", border: "1px solid #d1d5db", color: "#286058" }}
+                  className="w-full px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
                 />
               </div>
               <div>
@@ -127,6 +131,8 @@ export function AddReceptForm() {
                   min="1"
                   max="20"
                   disabled={isSubmitting}
+                  style={{ backgroundColor: "white", border: "1px solid #d1d5db", color: "#286058" }}
+                  className="w-full px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
                 />
               </div>
             </div>
@@ -140,6 +146,8 @@ export function AddReceptForm() {
                 placeholder="Een korte beschrijving van het recept..."
                 rows={3}
                 disabled={isSubmitting}
+                style={{ backgroundColor: "white", border: "1px solid #d1d5db", color: "#286058" }}
+                className="w-full px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
               />
             </div>
 
@@ -154,6 +162,8 @@ export function AddReceptForm() {
                   placeholder="30"
                   min="1"
                   disabled={isSubmitting}
+                  style={{ backgroundColor: "white", border: "1px solid #d1d5db", color: "#286058" }}
+                  className="w-full px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
                 />
               </div>
               <div>
@@ -222,87 +232,120 @@ export function AddReceptForm() {
                   placeholder="Lente, Zomer, Herfst, Winter"
                   defaultValue="Lente, Zomer, Herfst, Winter"
                   disabled={isSubmitting}
+                  style={{ backgroundColor: "white", border: "1px solid #d1d5db", color: "#286058" }}
+                  className="w-full px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
                 />
               </div>
               <div>
                 <Label htmlFor="tags">Tags (komma gescheiden)</Label>
-                <Input id="tags" name="tags" placeholder="vegetarisch, snel, gezond" disabled={isSubmitting} />
+                <Input
+                  id="tags"
+                  name="tags"
+                  placeholder="vegetarisch, snel, gezond"
+                  disabled={isSubmitting}
+                  style={{ backgroundColor: "white", border: "1px solid #d1d5db", color: "#286058" }}
+                  className="w-full px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                />
               </div>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
         {/* Afbeelding Upload */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Recept Afbeelding</CardTitle>
-            <CardDescription>Upload een afbeelding van je recept</CardDescription>
-          </CardHeader>
-          <CardContent>
+        <div
+          style={{ backgroundColor: "#eee1d1", color: "#286058", border: "1px solid #d1d5db" }}
+          className="rounded-lg overflow-hidden mb-6"
+        >
+          <div className="p-6 border-b border-gray-200">
+            <h3 className="text-lg font-semibold">Recept Afbeelding</h3>
+            <p className="text-sm text-gray-500">Upload een afbeelding van je recept</p>
+          </div>
+          <div className="p-6 space-y-4">
             <ImageUpload currentImageUrl={imageUrl} onImageChange={setImageUrl} disabled={isSubmitting} />
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
         {/* Bereidingswijze */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Bereidingswijze</CardTitle>
-            <CardDescription>Voer elke stap op een nieuwe regel in</CardDescription>
-          </CardHeader>
-          <CardContent>
+        <div
+          style={{ backgroundColor: "#eee1d1", color: "#286058", border: "1px solid #d1d5db" }}
+          className="rounded-lg overflow-hidden mb-6"
+        >
+          <div className="p-6 border-b border-gray-200">
+            <h3 className="text-lg font-semibold">Bereidingswijze</h3>
+            <p className="text-sm text-gray-500">Voer elke stap op een nieuwe regel in</p>
+          </div>
+          <div className="p-6 space-y-4">
             <Textarea
               name="bereidingswijze"
               required
               placeholder="Stap 1: Was de groenten grondig&#10;Stap 2: Snijd alle ingrediënten in stukjes&#10;Stap 3: Verhit de olie in een pan"
               rows={8}
               disabled={isSubmitting}
+              style={{ backgroundColor: "white", border: "1px solid #d1d5db", color: "#286058" }}
+              className="w-full px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
             />
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
         {/* Ingrediënten */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Ingrediënten</CardTitle>
-            <CardDescription>
+        <div
+          style={{ backgroundColor: "#eee1d1", color: "#286058", border: "1px solid #d1d5db" }}
+          className="rounded-lg overflow-hidden mb-6"
+        >
+          <div className="p-6 border-b border-gray-200">
+            <h3 className="text-lg font-semibold">Ingrediënten</h3>
+            <p className="text-sm text-gray-500">
               Formaat per regel: hoeveelheid | eenheid | naam | notitie (optioneel)
               <br />
               Bijvoorbeeld: 500 | gram | spliterwten | gedroogd
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
+            </p>
+          </div>
+          <div className="p-6 space-y-4">
             <Textarea
               name="ingredienten"
               required
               placeholder="500 | gram | spliterwten | gedroogd&#10;2 | stuks | uien | gesnipperd&#10;1 | liter | water"
               rows={8}
               disabled={isSubmitting}
+              style={{ backgroundColor: "white", border: "1px solid #d1d5db", color: "#286058" }}
+              className="w-full px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
             />
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
         {/* Bijgerechten */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Bijgerechten (optioneel)</CardTitle>
-            <CardDescription>
+        <div
+          style={{ backgroundColor: "#eee1d1", color: "#286058", border: "1px solid #d1d5db" }}
+          className="rounded-lg overflow-hidden mb-6"
+        >
+          <div className="p-6 border-b border-gray-200">
+            <h3 className="text-lg font-semibold">Bijgerechten (optioneel)</h3>
+            <p className="text-sm text-gray-500">
               Formaat per regel: naam | beschrijving
               <br />
               Bijvoorbeeld: Stokbrood | Knapperig vers stokbrood met kruidenboter
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
+            </p>
+          </div>
+          <div className="p-6 space-y-4">
             <Textarea
               name="bijgerechten"
               placeholder="Stokbrood | Knapperig vers stokbrood met kruidenboter&#10;Salade | Frisse groene salade"
               rows={4}
               disabled={isSubmitting}
+              style={{ backgroundColor: "white", border: "1px solid #d1d5db", color: "#286058" }}
+              className="w-full px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
             />
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
         <div className="flex justify-end">
-          <Button type="submit" disabled={isSubmitting} size="lg">
+          <Button
+            type="submit"
+            disabled={isSubmitting}
+            size="lg"
+            style={{ backgroundColor: "#e75129", color: "white" }}
+            className="px-6 py-3 rounded-md hover:opacity-90 transition-opacity disabled:opacity-50"
+          >
             {isSubmitting ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />

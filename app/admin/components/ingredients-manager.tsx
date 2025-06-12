@@ -146,13 +146,16 @@ export function IngredientsManager() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" style={{ color: "#286058" }}>
       {/* Filter */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Filter op Recept</CardTitle>
-        </CardHeader>
-        <CardContent>
+      <div
+        style={{ backgroundColor: "#eee1d1", color: "#286058", border: "1px solid #d1d5db" }}
+        className="rounded-lg overflow-hidden"
+      >
+        <div className="p-6 border-b border-gray-200">
+          <h3 className="text-lg font-semibold mb-2">Filter op Recept</h3>
+        </div>
+        <div className="p-6">
           <Select value={selectedReceptId} onValueChange={setSelectedReceptId}>
             <SelectTrigger className="w-full md:w-1/3">
               <SelectValue />
@@ -166,8 +169,8 @@ export function IngredientsManager() {
               ))}
             </SelectContent>
           </Select>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {/* Ingrediënten tabel */}
       <Card>
@@ -178,7 +181,7 @@ export function IngredientsManager() {
           {filteredIngredienten.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">Geen ingrediënten gevonden</div>
           ) : (
-            <div className="rounded-md border">
+            <div style={{ backgroundColor: "#eee1d1", border: "1px solid #d1d5db" }} className="rounded-md">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -202,6 +205,7 @@ export function IngredientsManager() {
                             value={editForm.naam}
                             onChange={(e) => setEditForm({ ...editForm, naam: e.target.value })}
                             className="w-full"
+                            style={{ backgroundColor: "white", border: "1px solid #d1d5db", color: "#286058" }}
                           />
                         ) : (
                           ingredient.naam
@@ -217,6 +221,7 @@ export function IngredientsManager() {
                               setEditForm({ ...editForm, hoeveelheid: Number.parseFloat(e.target.value) })
                             }
                             className="w-20"
+                            style={{ backgroundColor: "white", border: "1px solid #d1d5db", color: "#286058" }}
                           />
                         ) : (
                           ingredient.hoeveelheid
@@ -228,6 +233,7 @@ export function IngredientsManager() {
                             value={editForm.eenheid}
                             onChange={(e) => setEditForm({ ...editForm, eenheid: e.target.value })}
                             className="w-20"
+                            style={{ backgroundColor: "white", border: "1px solid #d1d5db", color: "#286058" }}
                           />
                         ) : (
                           ingredient.eenheid
@@ -240,6 +246,7 @@ export function IngredientsManager() {
                             onChange={(e) => setEditForm({ ...editForm, notitie: e.target.value })}
                             className="w-32"
                             placeholder="Optioneel"
+                            style={{ backgroundColor: "white", border: "1px solid #d1d5db", color: "#286058" }}
                           />
                         ) : (
                           ingredient.notitie || "-"
@@ -249,7 +256,12 @@ export function IngredientsManager() {
                         <div className="flex items-center gap-2">
                           {editingId === ingredient.id ? (
                             <>
-                              <Button size="sm" onClick={() => saveEdit(ingredient.id)} className="h-8 w-8 p-0">
+                              <Button
+                                size="sm"
+                                onClick={() => saveEdit(ingredient.id)}
+                                className="h-8 w-8 p-0"
+                                style={{ backgroundColor: "#e75129", color: "white" }}
+                              >
                                 <Save className="h-3 w-3" />
                               </Button>
                               <Button size="sm" variant="outline" onClick={cancelEdit} className="h-8 w-8 p-0">
@@ -263,6 +275,8 @@ export function IngredientsManager() {
                                 variant="outline"
                                 onClick={() => startEdit(ingredient)}
                                 className="h-8 w-8 p-0"
+                                style={{ backgroundColor: "#e75129", color: "white" }}
+                                className="px-3 py-1 rounded hover:opacity-90 transition-opacity"
                               >
                                 <Pencil className="h-3 w-3" />
                               </Button>
@@ -271,6 +285,8 @@ export function IngredientsManager() {
                                 variant="outline"
                                 onClick={() => deleteIngredient(ingredient.id)}
                                 className="h-8 w-8 p-0"
+                                style={{ backgroundColor: "#e75129", color: "white" }}
+                                className="px-3 py-1 rounded hover:opacity-90 transition-opacity"
                               >
                                 <Trash2 className="h-3 w-3" />
                               </Button>
