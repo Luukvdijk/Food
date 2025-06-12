@@ -1,9 +1,17 @@
-import { NextResponse } from "next/server"
+import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs"
 import { cookies } from "next/headers"
+import { NextResponse } from "next/server"
 
 export async function GET() {
-  const cookieStore = cookies()
-  cookieStore.delete("auth-token")
+  try {
+    const cookieStore = cookies()
+    const supabase = createRouteHandlerClient({ cookies: () => cookieStore })
 
-  return NextResponse.redirect(new URL("/auth/signin", process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"))
+    await supabase.auth.signOut()
+
+    return NextResponse.redirect(new URL("/auth/signin", process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"))
+  } catch (error) {
+    console.error("Signout redirect error:", error)
+    return NextResponse.redirect(new URL("/auth/signin", process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"))
+  }
 }

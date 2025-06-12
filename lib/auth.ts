@@ -1,15 +1,26 @@
+import { createServerComponentClient } from "@supabase/auth-helpers-nextjs"
 import { cookies } from "next/headers"
 
 export async function getUser() {
   try {
     const cookieStore = cookies()
-    const authToken = cookieStore.get("auth-token")
+    const supabase = createServerComponentClient({ cookies: () => cookieStore })
 
-    if (authToken?.value === "authenticated") {
+    const {
+      data: { session },
+      error,
+    } = await supabase.auth.getSession()
+
+    if (error) {
+      console.error("Error getting session:", error)
+      return null
+    }
+
+    if (session?.user) {
       return {
-        id: "1",
-        email: "admin@recepten.nl",
-        name: "Admin",
+        id: session.user.id,
+        email: session.user.email || "",
+        name: session.user.user_metadata?.full_name || session.user.email || "Admin",
       }
     }
 

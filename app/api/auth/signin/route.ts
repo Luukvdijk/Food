@@ -1,12 +1,6 @@
+import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs"
+import { cookies } from "next/headers"
 import { type NextRequest, NextResponse } from "next/server"
-
-// Demo gebruiker - in productie zou dit uit een database komen
-const DEMO_USER = {
-  email: "admin@recepten.nl",
-  password: "Bonappetit",
-  id: "1",
-  name: "Admin",
-}
 
 export async function POST(request: NextRequest) {
   try {
@@ -17,30 +11,31 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Email en wachtwoord zijn verplicht" }, { status: 400 })
     }
 
-    // Simpele authenticatie check (in productie zou dit beveiligd zijn)
-    if (email === DEMO_USER.email && password === DEMO_USER.password) {
-      // Set een cookie voor de sessie
-      const response = NextResponse.json({
-        success: true,
-        user: {
-          id: DEMO_USER.id,
-          name: DEMO_USER.name,
-          email: DEMO_USER.email,
-        },
-      })
+    const cookieStore = cookies()
+    const supabase = createRouteHandlerClient({ cookies: () => cookieStore })
 
-      response.cookies.set("auth-token", "authenticated", {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
-        maxAge: 60 * 60 * 24 * 7, // 7 dagen
-        path: "/",
-      })
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    })
 
-      return response
-    } else {
+    if (error) {
+      console.error("Supabase auth error:", error)
       return NextResponse.json({ error: "Ongeldige inloggegevens" }, { status: 401 })
     }
+
+    if (data.user) {
+      return NextResponse.json({
+        success: true,
+        user: {
+          id: data.user.id,
+          email: data.user.email,
+          name: data.user.user_metadata?.full_name || data.user.email,
+        },
+      })
+    }
+
+    return NextResponse.json({ error: "Inloggen mislukt" }, { status: 401 })
   } catch (error) {
     console.error("Signin error:", error)
     return NextResponse.json({ error: "Server fout" }, { status: 500 })

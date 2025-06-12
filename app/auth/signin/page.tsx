@@ -26,7 +26,7 @@ export default function SignInPage() {
         const response = await fetch("/api/auth/status")
         if (response.ok) {
           const data = await response.json()
-          if (data.authenticated) {
+          if (data.isAuthenticated) {
             router.push("/admin")
           }
         }
@@ -55,11 +55,9 @@ export default function SignInPage() {
       const data = await response.json()
 
       if (response.ok && data.success) {
-        // Wait a moment for the cookie to be set
-        setTimeout(() => {
-          router.push("/admin")
-          router.refresh()
-        }, 100)
+        // Successful login, redirect to admin
+        router.push("/admin")
+        router.refresh()
       } else {
         setError(data.error || "Inloggen mislukt")
       }
@@ -86,7 +84,7 @@ export default function SignInPage() {
         <Card>
           <CardHeader className="text-center">
             <CardTitle className="text-2xl">Admin Inloggen</CardTitle>
-            <CardDescription>Log in om toegang te krijgen tot het admin paneel</CardDescription>
+            <CardDescription>Log in met je Supabase account om toegang te krijgen tot het admin paneel</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -104,7 +102,7 @@ export default function SignInPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  placeholder="admin@recepten.nl"
+                  placeholder="je@email.com"
                   disabled={isLoading}
                 />
               </div>
@@ -126,6 +124,10 @@ export default function SignInPage() {
                 {isLoading ? "Inloggen..." : "Inloggen"}
               </Button>
             </form>
+
+            <div className="mt-4 text-sm text-muted-foreground text-center">
+              <p>Accounts worden beheerd via Supabase Dashboard</p>
+            </div>
           </CardContent>
         </Card>
       </div>
