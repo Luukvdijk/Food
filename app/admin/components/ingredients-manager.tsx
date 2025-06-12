@@ -1,12 +1,6 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
 import { Pencil, Trash2, Save, X } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import type { Ingredient, Recept } from "@/types"
@@ -28,6 +22,113 @@ export function IngredientsManager() {
   })
   const [isLoading, setIsLoading] = useState(true)
   const { toast } = useToast()
+
+  // Style constants
+  const styles = {
+    container: {
+      backgroundColor: "#eee1d1",
+      color: "#286058",
+      border: "1px solid #d1d5db",
+      borderRadius: "0.5rem",
+      overflow: "hidden",
+      marginBottom: "1.5rem",
+    },
+    header: {
+      padding: "1.5rem",
+      borderBottom: "1px solid #d1d5db",
+    },
+    content: {
+      padding: "1.5rem",
+    },
+    select: {
+      backgroundColor: "white",
+      color: "#286058",
+      border: "1px solid #d1d5db",
+      borderRadius: "0.375rem",
+      padding: "0.5rem",
+      width: "100%",
+      maxWidth: "20rem",
+      cursor: "pointer",
+      outline: "none !important",
+      transition: "border-color 0.2s ease, box-shadow 0.2s ease",
+      WebkitAppearance: "none",
+      MozAppearance: "none",
+      appearance: "none",
+      backgroundImage:
+        'url(\'data:image/svg+xml;charset=US-ASCII,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 4 5"><path fill="%23286058" d="M2 0L0 2h4zm0 5L0 3h4z"/></svg>\')',
+      backgroundRepeat: "no-repeat",
+      backgroundPosition: "right 0.7rem center",
+      backgroundSize: "0.65rem auto",
+      paddingRight: "2.5rem",
+    },
+    table: {
+      width: "100%",
+      borderCollapse: "collapse" as const,
+    },
+    tableHeader: {
+      backgroundColor: "#eee1d1",
+      color: "#286058",
+      fontWeight: "600",
+      textAlign: "left" as const,
+      padding: "0.75rem 1rem",
+      borderBottom: "1px solid #d1d5db",
+    },
+    tableCell: {
+      padding: "0.75rem 1rem",
+      borderBottom: "1px solid #d1d5db",
+      color: "#286058",
+    },
+    tableRow: {
+      backgroundColor: "#eee1d1",
+      transition: "background-color 0.2s ease",
+    },
+    badge: {
+      backgroundColor: "#286058",
+      color: "white",
+      padding: "0.25rem 0.5rem",
+      borderRadius: "9999px",
+      fontSize: "0.75rem",
+      fontWeight: "500",
+    },
+    input: {
+      backgroundColor: "white",
+      color: "#286058",
+      border: "1px solid #d1d5db",
+      borderRadius: "0.375rem",
+      padding: "0.5rem",
+      width: "100%",
+    },
+    buttonOrange: {
+      backgroundColor: "#e75129",
+      color: "white",
+      width: "32px",
+      height: "32px",
+      padding: "0",
+      borderRadius: "4px",
+      border: "none",
+      cursor: "pointer",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      transition: "background-color 0.2s ease",
+    },
+    buttonCream: {
+      backgroundColor: "#eee1d1",
+      color: "#286058",
+      width: "32px",
+      height: "32px",
+      padding: "0",
+      borderRadius: "4px",
+      border: "1px solid #d1d5db",
+      cursor: "pointer",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      transition: "background-color 0.2s ease",
+    },
+  }
+
+  const [rowHoverStates, setRowHoverStates] = useState<{ [key: number]: boolean }>({})
 
   useEffect(() => {
     loadData()
@@ -142,150 +243,216 @@ export function IngredientsManager() {
   }
 
   if (isLoading) {
-    return <div className="text-center py-8">Laden...</div>
+    return <div style={{ textAlign: "center", padding: "2rem", color: "#286058" }}>Laden...</div>
   }
 
   return (
-    <div className="space-y-6">
-      {/* Filter */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Filter op Recept</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Select value={selectedReceptId} onValueChange={setSelectedReceptId}>
-            <SelectTrigger className="w-full md:w-1/3">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Alle recepten</SelectItem>
-              {recepten.map((recept) => (
-                <SelectItem key={recept.id} value={recept.id.toString()}>
-                  {recept.naam}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </CardContent>
-      </Card>
+    <>
+      <style jsx global>{`
+  select:focus {
+    outline: none !important;
+    border-color: #eee1d1 !important;
+    box-shadow: 0 0 0 3px rgba(238, 225, 209, 0.3) !important;
+  }
+  select::-ms-expand {
+    display: none;
+  }
+`}</style>
+      <style jsx>{`
+        .ingredients-container {
+          display: flex;
+          flex-direction: column;
+          gap: 1.5rem;
+          color: #286058;
+        }
+        .table-responsive {
+          overflow-x: auto;
+        }
+        .select-container {
+          width: 100%;
+          max-width: 20rem;
+        }
+        @media (min-width: 768px) {
+          .select-container {
+            width: 33.333333%;
+          }
+        }
+      `}</style>
 
-      {/* Ingrediënten tabel */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Ingrediënten ({filteredIngredienten.length})</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {filteredIngredienten.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">Geen ingrediënten gevonden</div>
-          ) : (
-            <div className="rounded-md border">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Recept</TableHead>
-                    <TableHead>Naam</TableHead>
-                    <TableHead>Hoeveelheid</TableHead>
-                    <TableHead>Eenheid</TableHead>
-                    <TableHead>Notitie</TableHead>
-                    <TableHead>Acties</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredIngredienten.map((ingredient) => (
-                    <TableRow key={ingredient.id}>
-                      <TableCell>
-                        <Badge variant="outline">{ingredient.recept_naam}</Badge>
-                      </TableCell>
-                      <TableCell>
-                        {editingId === ingredient.id ? (
-                          <Input
-                            value={editForm.naam}
-                            onChange={(e) => setEditForm({ ...editForm, naam: e.target.value })}
-                            className="w-full"
-                          />
-                        ) : (
-                          ingredient.naam
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        {editingId === ingredient.id ? (
-                          <Input
-                            type="number"
-                            step="0.1"
-                            value={editForm.hoeveelheid}
-                            onChange={(e) =>
-                              setEditForm({ ...editForm, hoeveelheid: Number.parseFloat(e.target.value) })
-                            }
-                            className="w-20"
-                          />
-                        ) : (
-                          ingredient.hoeveelheid
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        {editingId === ingredient.id ? (
-                          <Input
-                            value={editForm.eenheid}
-                            onChange={(e) => setEditForm({ ...editForm, eenheid: e.target.value })}
-                            className="w-20"
-                          />
-                        ) : (
-                          ingredient.eenheid
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        {editingId === ingredient.id ? (
-                          <Input
-                            value={editForm.notitie}
-                            onChange={(e) => setEditForm({ ...editForm, notitie: e.target.value })}
-                            className="w-32"
-                            placeholder="Optioneel"
-                          />
-                        ) : (
-                          ingredient.notitie || "-"
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          {editingId === ingredient.id ? (
-                            <>
-                              <Button size="sm" onClick={() => saveEdit(ingredient.id)} className="h-8 w-8 p-0">
-                                <Save className="h-3 w-3" />
-                              </Button>
-                              <Button size="sm" variant="outline" onClick={cancelEdit} className="h-8 w-8 p-0">
-                                <X className="h-3 w-3" />
-                              </Button>
-                            </>
-                          ) : (
-                            <>
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => startEdit(ingredient)}
-                                className="h-8 w-8 p-0"
-                              >
-                                <Pencil className="h-3 w-3" />
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => deleteIngredient(ingredient.id)}
-                                className="h-8 w-8 p-0"
-                              >
-                                <Trash2 className="h-3 w-3" />
-                              </Button>
-                            </>
-                          )}
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+      <div className="ingredients-container">
+        {/* Filter */}
+        <div style={styles.container}>
+          <div style={styles.header}>
+            <h3 style={{ fontSize: "1.125rem", fontWeight: "600", marginBottom: "0.5rem" }}>Filter op Recept</h3>
+          </div>
+          <div style={styles.content}>
+            <div className="select-container">
+              <select
+                value={selectedReceptId}
+                onChange={(e) => setSelectedReceptId(e.target.value)}
+                style={styles.select}
+                onFocus={(e) => {
+                  e.currentTarget.style.borderColor = "#eee1d1"
+                  e.currentTarget.style.boxShadow = "0 0 0 3px rgba(238, 225, 209, 0.3)"
+                }}
+                onBlur={(e) => {
+                  e.currentTarget.style.borderColor = "#d1d5db"
+                  e.currentTarget.style.boxShadow = "none"
+                }}
+              >
+                <option value="all">Alle recepten</option>
+                {recepten.map((recept) => (
+                  <option key={recept.id} value={recept.id.toString()}>
+                    {recept.naam}
+                  </option>
+                ))}
+              </select>
             </div>
-          )}
-        </CardContent>
-      </Card>
-    </div>
+          </div>
+        </div>
+
+        {/* Ingrediënten tabel */}
+        <div style={styles.container}>
+          <div style={styles.header}>
+            <h3 style={{ fontSize: "1.125rem", fontWeight: "600" }}>Ingrediënten ({filteredIngredienten.length})</h3>
+          </div>
+          <div style={styles.content}>
+            {filteredIngredienten.length === 0 ? (
+              <div style={{ textAlign: "center", padding: "2rem", color: "#6b7280" }}>Geen ingrediënten gevonden</div>
+            ) : (
+              <div className="table-responsive">
+                <table style={styles.table}>
+                  <thead>
+                    <tr>
+                      <th style={styles.tableHeader}>Recept</th>
+                      <th style={styles.tableHeader}>Naam</th>
+                      <th style={styles.tableHeader}>Hoeveelheid</th>
+                      <th style={styles.tableHeader}>Eenheid</th>
+                      <th style={styles.tableHeader}>Notitie</th>
+                      <th style={styles.tableHeader}>Acties</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredIngredienten.map((ingredient) => {
+                      const rowHover = rowHoverStates[ingredient.id] || false
+                      return (
+                        <tr
+                          key={ingredient.id}
+                          style={{
+                            ...styles.tableRow,
+                            backgroundColor: rowHover ? "#f1ece2" : "#eee1d1",
+                          }}
+                          onMouseEnter={() => setRowHoverStates({ ...rowHoverStates, [ingredient.id]: true })}
+                          onMouseLeave={() => setRowHoverStates({ ...rowHoverStates, [ingredient.id]: false })}
+                        >
+                          <td style={styles.tableCell}>
+                            <span style={styles.badge}>{ingredient.recept_naam}</span>
+                          </td>
+                          <td style={styles.tableCell}>
+                            {editingId === ingredient.id ? (
+                              <input
+                                type="text"
+                                value={editForm.naam}
+                                onChange={(e) => setEditForm({ ...editForm, naam: e.target.value })}
+                                style={styles.input}
+                              />
+                            ) : (
+                              ingredient.naam
+                            )}
+                          </td>
+                          <td style={styles.tableCell}>
+                            {editingId === ingredient.id ? (
+                              <input
+                                type="number"
+                                step="0.1"
+                                value={editForm.hoeveelheid}
+                                onChange={(e) =>
+                                  setEditForm({ ...editForm, hoeveelheid: Number.parseFloat(e.target.value) })
+                                }
+                                style={{ ...styles.input, width: "80px" }}
+                              />
+                            ) : (
+                              ingredient.hoeveelheid
+                            )}
+                          </td>
+                          <td style={styles.tableCell}>
+                            {editingId === ingredient.id ? (
+                              <input
+                                type="text"
+                                value={editForm.eenheid}
+                                onChange={(e) => setEditForm({ ...editForm, eenheid: e.target.value })}
+                                style={{ ...styles.input, width: "80px" }}
+                              />
+                            ) : (
+                              ingredient.eenheid
+                            )}
+                          </td>
+                          <td style={styles.tableCell}>
+                            {editingId === ingredient.id ? (
+                              <input
+                                type="text"
+                                value={editForm.notitie}
+                                onChange={(e) => setEditForm({ ...editForm, notitie: e.target.value })}
+                                style={{ ...styles.input, width: "120px" }}
+                                placeholder="Optioneel"
+                              />
+                            ) : (
+                              ingredient.notitie || "-"
+                            )}
+                          </td>
+                          <td style={styles.tableCell}>
+                            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                              {editingId === ingredient.id ? (
+                                <>
+                                  <button
+                                    onClick={() => saveEdit(ingredient.id)}
+                                    style={styles.buttonOrange}
+                                    onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#d63e1a")}
+                                    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#e75129")}
+                                  >
+                                    <Save className="h-3 w-3" />
+                                  </button>
+                                  <button
+                                    onClick={cancelEdit}
+                                    style={styles.buttonCream}
+                                    onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#d1c7b8")}
+                                    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#eee1d1")}
+                                  >
+                                    <X className="h-3 w-3" />
+                                  </button>
+                                </>
+                              ) : (
+                                <>
+                                  <button
+                                    onClick={() => startEdit(ingredient)}
+                                    style={styles.buttonOrange}
+                                    onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#d63e1a")}
+                                    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#e75129")}
+                                  >
+                                    <Pencil className="h-3 w-3" />
+                                  </button>
+                                  <button
+                                    onClick={() => deleteIngredient(ingredient.id)}
+                                    style={styles.buttonOrange}
+                                    onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#d63e1a")}
+                                    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#e75129")}
+                                  >
+                                    <Trash2 className="h-3 w-3" />
+                                  </button>
+                                </>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      )
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </>
   )
 }

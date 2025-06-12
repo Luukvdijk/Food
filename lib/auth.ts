@@ -1,18 +1,32 @@
-import { cookies } from "next/headers"
+import { getServerClient } from "./supabase-singleton"
 
 export async function getUser() {
-  const cookieStore = cookies()
-  const authToken = cookieStore.get("auth-token")
+  try {
+    const supabase = getServerClient()
 
-  if (authToken?.value === "authenticated") {
-    return {
-      id: "1",
-      email: "admin@recepten.nl",
-      name: "Admin",
+    const {
+      data: { session },
+      error,
+    } = await supabase.auth.getSession()
+
+    if (error) {
+      console.error("Error getting session:", error)
+      return null
     }
-  }
 
-  return null
+    if (session?.user) {
+      return {
+        id: session.user.id,
+        email: session.user.email || "",
+        name: session.user.user_metadata?.full_name || session.user.email || "Admin",
+      }
+    }
+
+    return null
+  } catch (error) {
+    console.error("Error getting user:", error)
+    return null
+  }
 }
 
 export async function requireAuth() {

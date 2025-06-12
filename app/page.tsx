@@ -1,110 +1,64 @@
-import { RandomRecept } from "@/components/random-recept"
-import { getAllRecepten, checkDatabaseStatus } from "./actions"
-import { setupDatabase } from "./db-setup"
-import { ReceptCard } from "@/components/recept-card"
-import { Button } from "@/components/ui/button"
-import { redirect } from "next/navigation"
-import { sql } from "@/lib/db"
+import { supabase } from "@/lib/db"
+import { ModernHeader } from "@/components/modern-header"
+import { HeroSection } from "@/components/hero-section"
 
-async function handleSetupDatabase() {
-  "use server"
-  const result = await setupDatabase()
-  if (result.success) {
-    redirect("/")
-  }
-  return result
-}
-
-async function handleMigrateDatabase() {
-  "use server"
+async function getRandomReceptForInitialLoad() {
   try {
-    // Add eigenaar column if it doesn't exist
-    await sql`
-      DO $$ 
-      BEGIN
-          IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
-                         WHERE table_name = 'recepten' AND column_name = 'eigenaar') THEN
-              ALTER TABLE recepten ADD COLUMN eigenaar VARCHAR(50) DEFAULT 'henk';
-          END IF;
-      END $$;
-    `
+    const { count, error: countError } = await supabase.from("recepten").select("*", { count: "exact", head: true })
 
-    // Update existing recepten
-    await sql`UPDATE recepten SET eigenaar = 'henk' WHERE eigenaar IS NULL`
+    if (countError) throw countError
+    if (!count || count === 0) return null
 
-    redirect("/")
+    const randomOffset = Math.floor(Math.random() * count)
+    const { data, error } = await supabase.from("recepten").select("*").range(randomOffset, randomOffset).single()
+
+    if (error) throw error
+    return data
   } catch (error) {
-    console.error("Migration error:", error)
+    console.error("Error fetching random recept:", error)
+    return null
   }
 }
 
 export default async function Home() {
-  // Check database status first
-  const dbStatus = await checkDatabaseStatus()
-
-  // Check if eigenaar column exists
-  let hasEigenaarColumn = false
-  try {
-    const columnCheck = await sql`
-      SELECT column_name 
-      FROM information_schema.columns 
-      WHERE table_name = 'recepten' AND column_name = 'eigenaar'
-    `
-    hasEigenaarColumn = columnCheck.length > 0
-  } catch (error) {
-    // Table might not exist yet
-  }
-
-  let alleRecepten: any[] = []
-
-  if (dbStatus.hasData) {
-    alleRecepten = await getAllRecepten().catch(() => [])
-  }
+  const randomRecept = await getRandomReceptForInitialLoad()
 
   return (
-    <div className="space-y-12">
-      <section className="flex justify-center">
-        <RandomRecept />
-      </section>
+    <div className="min-h-screen w-full">
+      <ModernHeader />
+      <HeroSection recept={randomRecept} />
 
-      <section>
-        <h2 className="text-2xl font-bold mb-6">Alle recepten</h2>
-        {alleRecepten.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {alleRecepten.map((recept) => (
-              <ReceptCard key={recept.id} recept={recept} />
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-12 bg-muted rounded-lg">
-            <h3 className="text-xl font-semibold mb-2">Welkom bij Lekkere Recepten!</h3>
-            <p className="text-muted-foreground mb-4">
-              {!dbStatus.tableExists
-                ? "De database tabellen bestaan nog niet. Klik op de knop hieronder om de database op te zetten."
-                : "Er zijn nog geen recepten in de database. Klik op de knop hieronder om voorbeeldrecepten toe te voegen."}
-            </p>
-            <form action={handleSetupDatabase}>
-              <Button type="submit">{!dbStatus.tableExists ? "Database opzetten" : "Voorbeelddata toevoegen"}</Button>
-            </form>
-            <p className="text-xs text-muted-foreground mt-4">
-              Dit voegt 5 heerlijke Nederlandse recepten toe zoals erwtensoep, appeltaart en stamppot.
-            </p>
-          </div>
-        )}
+      {/* Curved transition section */}
+      <div className="bg-[#eee1d1] relative w-full">
+        <div className="h-24 bg-[#286058] curved-section"></div>
 
-        {/* Show migration button if database exists but eigenaar column is missing */}
-        {dbStatus.hasData && !hasEigenaarColumn && (
-          <div className="text-center py-6 bg-blue-50 rounded-lg mt-6">
-            <h3 className="text-lg font-semibold mb-2">Database Update Beschikbaar</h3>
-            <p className="text-muted-foreground mb-4">
-              Er is een nieuwe functie beschikbaar! Klik hieronder om de eigenaar functionaliteit toe te voegen.
-            </p>
-            <form action={handleMigrateDatabase}>
-              <Button type="submit">Database Updaten</Button>
-            </form>
+        <div className="w-full py-16 px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl font-bold text-[#286058] mb-2">Samen met</h2>
+            <div className="w-24 h-1 bg-[#e75129] mx-auto"></div>
           </div>
-        )}
-      </section>
+
+          {/* Empty state for bijgerechten */}
+          <div className="text-center py-12">
+            <div className="max-w-2xl mx-auto">
+              <div className="text-6xl mb-6">🍽️</div>
+              <h3 className="text-2xl font-semibold mb-4 text-[#286058]">Perfect op zichzelf</h3>
+              <p className="text-gray-600 text-lg mb-8">
+                Dit recept is heerlijk zoals het is! Geen bijgerechten nodig.
+              </p>
+            </div>
+          </div>
+
+          {/* Search prompt */}
+          <div className="text-center mt-16 py-12 bg-white/50 rounded-lg max-w-4xl mx-auto">
+            <h3 className="text-2xl font-bold text-[#286058] mb-4">Op zoek naar meer recepten?</h3>
+            <p className="text-gray-700 text-lg mb-6">
+              Gebruik de zoekbalk bovenaan om alle beschikbare recepten te ontdekken!
+            </p>
+            <div className="text-[#e75129] font-medium">💡 Tip: Zoek op ingrediënten, gerechtstype of seizoen</div>
+          </div>
+        </div>
+      </div>
     </div>
   )
 }
