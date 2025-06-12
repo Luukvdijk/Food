@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useTransition } from "react"
+import { useState, useTransition, useEffect } from "react"
 import { Star, Minus, Plus, Users } from "lucide-react"
 import Image from "next/image"
 import { IngredientsPopup } from "./ingredients-popup"
@@ -24,6 +24,28 @@ export function HeroSection({ recept }: HeroSectionProps) {
   const [hoverStates, setHoverStates] = useState<Record<string, boolean>>({})
   const [isPending, startTransition] = useTransition()
   const router = useRouter()
+  const [minHeight, setMinHeight] = useState("calc(100vh - 80px)")
+
+  // Adjust height based on screen size
+  useEffect(() => {
+    const handleResize = () => {
+      const isMobile = window.innerWidth < 768
+      if (isMobile) {
+        setMinHeight("auto") // Auto height on mobile to prevent cutoff
+      } else {
+        setMinHeight("calc(100vh - 80px)")
+      }
+    }
+
+    // Initial check
+    handleResize()
+
+    // Add event listener
+    window.addEventListener("resize", handleResize)
+
+    // Cleanup
+    return () => window.removeEventListener("resize", handleResize)
+  }, [])
 
   const incrementServings = () => setServings((prev) => prev + 1)
   const decrementServings = () => setServings((prev) => Math.max(1, prev - 1))
@@ -57,8 +79,8 @@ export function HeroSection({ recept }: HeroSectionProps) {
   if (!recept) {
     return (
       <section
-        className="bg-[#286058] text-white relative overflow-hidden w-full flex items-center"
-        style={{ height: "calc(100vh - 80px)" }}
+        className="bg-[#286058] text-white relative overflow-hidden w-full flex items-center py-16 md:py-0"
+        style={{ minHeight: minHeight }}
       >
         <div className="w-full py-12 px-8 relative z-10">
           <div className="text-center">
@@ -73,14 +95,14 @@ export function HeroSection({ recept }: HeroSectionProps) {
   return (
     <>
       <section
-        className="bg-[#286058] text-white relative overflow-hidden w-full flex items-center"
-        style={{ height: "calc(100vh - 80px)" }}
+        className="bg-[#286058] text-white relative overflow-hidden w-full flex items-center py-16 md:py-0"
+        style={{ minHeight: minHeight }}
       >
         <div className="w-full py-12 px-8 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center max-w-7xl mx-auto">
             {/* Left Content */}
             <div className="space-y-8">
-              <h1 className="text-6xl font-bold leading-tight">{recept.naam}</h1>
+              <h1 className="text-5xl md:text-6xl font-bold leading-tight">{recept.naam}</h1>
 
               {/* Tags */}
               <div style={{ display: "flex", flexWrap: "wrap", gap: "12px" }}>
@@ -141,7 +163,7 @@ export function HeroSection({ recept }: HeroSectionProps) {
               </div>
 
               {/* Controls */}
-              <div className="flex items-center gap-6">
+              <div className="flex flex-wrap items-center gap-6">
                 <button
                   onClick={handleNewRecipe}
                   disabled={isPending}
@@ -232,9 +254,9 @@ export function HeroSection({ recept }: HeroSectionProps) {
             {/* Right Content - Recipe Image */}
             <div className="relative flex justify-center items-center">
               {/* Slightly larger overlay container */}
-              <div className="relative w-72 h-72 cursor-pointer group" onClick={handleImageClick}>
+              <div className="relative w-64 h-64 md:w-72 md:h-72 cursor-pointer group" onClick={handleImageClick}>
                 {/* Main image */}
-                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 rounded-full overflow-hidden">
+                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-56 h-56 md:w-64 md:h-64 rounded-full overflow-hidden">
                   <Image
                     src={recept.afbeelding_url || "/placeholder.svg?height=400&width=400&query=delicious food"}
                     alt={recept.naam}
@@ -274,7 +296,7 @@ export function HeroSection({ recept }: HeroSectionProps) {
               <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2">
                 <div className="flex gap-2">
                   {[1, 2, 3, 4, 5].map((star) => (
-                    <Star key={star} className="h-8 w-8 fill-[#e75129] text-[#e75129]" />
+                    <Star key={star} className="h-6 w-6 md:h-8 md:w-8 fill-[#e75129] text-[#e75129]" />
                   ))}
                 </div>
               </div>
