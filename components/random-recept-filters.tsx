@@ -1,11 +1,9 @@
 "use client"
 
 import { useState } from "react"
-import { Check, ChevronsUpDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { cn } from "@/lib/utils"
+import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import type { GerechtsType, Seizoen, Eigenaar, FilterOptions } from "@/types"
 
 const gerechtsTypes: GerechtsType[] = ["Ontbijt", "Lunch", "Diner", "Dessert", "Snack"]
@@ -20,29 +18,50 @@ interface RandomReceptFiltersProps {
 }
 
 export function RandomReceptFilters({ onFiltersChange }: RandomReceptFiltersProps) {
-  const [openType, setOpenType] = useState(false)
-  const [openSeizoen, setOpenSeizoen] = useState(false)
-  const [openEigenaar, setOpenEigenaar] = useState(false)
+  const [selectedType, setSelectedType] = useState<GerechtsType | "">(null)
+  const [selectedSeizoen, setSelectedSeizoen] = useState<Seizoen | "">(null)
+  const [selectedEigenaar, setSelectedEigenaar] = useState<Eigenaar | "">(null)
 
-  const [selectedType, setSelectedType] = useState<GerechtsType | null>(null)
-  const [selectedSeizoen, setSelectedSeizoen] = useState<Seizoen | null>(null)
-  const [selectedEigenaar, setSelectedEigenaar] = useState<Eigenaar | null>(null)
-
-  const updateFilters = (
-    type: GerechtsType | null = selectedType,
-    seizoen: Seizoen | null = selectedSeizoen,
-    eigenaar: Eigenaar | null = selectedEigenaar,
-  ) => {
-    setSelectedType(type)
-    setSelectedSeizoen(seizoen)
-    setSelectedEigenaar(eigenaar)
-
+  const updateFilters = () => {
     const filters: FilterOptions = {}
-    if (type) filters.type = type
-    if (seizoen) filters.seizoen = seizoen
-    if (eigenaar) filters.eigenaar = eigenaar
+    if (selectedType) filters.type = selectedType
+    if (selectedSeizoen) filters.seizoen = selectedSeizoen
+    if (selectedEigenaar) filters.eigenaar = selectedEigenaar
 
     onFiltersChange(filters)
+  }
+
+  const handleTypeChange = (value: string) => {
+    setSelectedType(value as GerechtsType | null)
+    setTimeout(() => {
+      const filters: FilterOptions = {}
+      if (value) filters.type = value as GerechtsType
+      if (selectedSeizoen) filters.seizoen = selectedSeizoen
+      if (selectedEigenaar) filters.eigenaar = selectedEigenaar
+      onFiltersChange(filters)
+    }, 0)
+  }
+
+  const handleSeizoenChange = (value: string) => {
+    setSelectedSeizoen(value as Seizoen | null)
+    setTimeout(() => {
+      const filters: FilterOptions = {}
+      if (selectedType) filters.type = selectedType
+      if (value) filters.seizoen = value as Seizoen
+      if (selectedEigenaar) filters.eigenaar = selectedEigenaar
+      onFiltersChange(filters)
+    }, 0)
+  }
+
+  const handleEigenaarChange = (value: string) => {
+    setSelectedEigenaar(value as Eigenaar | null)
+    setTimeout(() => {
+      const filters: FilterOptions = {}
+      if (selectedType) filters.type = selectedType
+      if (selectedSeizoen) filters.seizoen = selectedSeizoen
+      if (value) filters.eigenaar = value as Eigenaar
+      onFiltersChange(filters)
+    }, 0)
   }
 
   const resetFilters = () => {
@@ -57,120 +76,66 @@ export function RandomReceptFilters({ onFiltersChange }: RandomReceptFiltersProp
   return (
     <div className="space-y-4 w-full max-w-md">
       <h3 className="text-sm font-medium text-center">Filter op:</h3>
-      <div className="flex flex-wrap gap-2 justify-center">
-        <Popover open={openType} onOpenChange={setOpenType}>
-          <PopoverTrigger asChild>
-            <Button variant="outline" role="combobox" aria-expanded={openType} className="justify-between">
-              {selectedType || "Type gerecht"}
-              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-[200px] p-0">
-            <Command>
-              <CommandInput placeholder="Zoek type..." />
-              <CommandList>
-                <CommandEmpty>Geen type gevonden.</CommandEmpty>
-                <CommandGroup>
-                  {gerechtsTypes.map((type) => (
-                    <CommandItem
-                      key={type}
-                      value={type}
-                      onSelect={() => {
-                        updateFilters(selectedType === type ? null : type)
-                        setOpenType(false)
-                      }}
-                    >
-                      <Check className={cn("mr-2 h-4 w-4", selectedType === type ? "opacity-100" : "opacity-0")} />
-                      {type}
-                    </CommandItem>
-                  ))}
-                </CommandGroup>
-              </CommandList>
-            </Command>
-          </PopoverContent>
-        </Popover>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="type-select">Type gerecht</Label>
+          <Select value={selectedType} onValueChange={handleTypeChange}>
+            <SelectTrigger id="type-select">
+              <SelectValue placeholder="Alle types" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={null}>Alle types</SelectItem>
+              {gerechtsTypes.map((type) => (
+                <SelectItem key={type} value={type}>
+                  {type}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
 
-        <Popover open={openSeizoen} onOpenChange={setOpenSeizoen}>
-          <PopoverTrigger asChild>
-            <Button variant="outline" role="combobox" aria-expanded={openSeizoen} className="justify-between">
-              {selectedSeizoen || "Seizoen"}
-              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-[200px] p-0">
-            <Command>
-              <CommandInput placeholder="Zoek seizoen..." />
-              <CommandList>
-                <CommandEmpty>Geen seizoen gevonden.</CommandEmpty>
-                <CommandGroup>
-                  {seizoenen.map((seizoen) => (
-                    <CommandItem
-                      key={seizoen}
-                      value={seizoen}
-                      onSelect={() => {
-                        updateFilters(selectedType, selectedSeizoen === seizoen ? null : seizoen)
-                        setOpenSeizoen(false)
-                      }}
-                    >
-                      <Check
-                        className={cn("mr-2 h-4 w-4", selectedSeizoen === seizoen ? "opacity-100" : "opacity-0")}
-                      />
-                      {seizoen}
-                    </CommandItem>
-                  ))}
-                </CommandGroup>
-              </CommandList>
-            </Command>
-          </PopoverContent>
-        </Popover>
+        <div className="space-y-2">
+          <Label htmlFor="seizoen-select">Seizoen</Label>
+          <Select value={selectedSeizoen} onValueChange={handleSeizoenChange}>
+            <SelectTrigger id="seizoen-select">
+              <SelectValue placeholder="Alle seizoenen" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={null}>Alle seizoenen</SelectItem>
+              {seizoenen.map((seizoen) => (
+                <SelectItem key={seizoen} value={seizoen}>
+                  {seizoen}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
 
-        <Popover open={openEigenaar} onOpenChange={setOpenEigenaar}>
-          <PopoverTrigger asChild>
-            <Button variant="outline" role="combobox" aria-expanded={openEigenaar} className="justify-between">
-              {selectedEigenaar ? eigenaren.find((e) => e.value === selectedEigenaar)?.label : "Eigenaar"}
-              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-[200px] p-0">
-            <Command>
-              <CommandInput placeholder="Zoek eigenaar..." />
-              <CommandList>
-                <CommandEmpty>Geen eigenaar gevonden.</CommandEmpty>
-                <CommandGroup>
-                  {eigenaren.map((eigenaar) => (
-                    <CommandItem
-                      key={eigenaar.value}
-                      value={eigenaar.value}
-                      onSelect={() => {
-                        updateFilters(
-                          selectedType,
-                          selectedSeizoen,
-                          selectedEigenaar === eigenaar.value ? null : eigenaar.value,
-                        )
-                        setOpenEigenaar(false)
-                      }}
-                    >
-                      <Check
-                        className={cn(
-                          "mr-2 h-4 w-4",
-                          selectedEigenaar === eigenaar.value ? "opacity-100" : "opacity-0",
-                        )}
-                      />
-                      {eigenaar.label}
-                    </CommandItem>
-                  ))}
-                </CommandGroup>
-              </CommandList>
-            </Command>
-          </PopoverContent>
-        </Popover>
+        <div className="space-y-2">
+          <Label htmlFor="eigenaar-select">Eigenaar</Label>
+          <Select value={selectedEigenaar} onValueChange={handleEigenaarChange}>
+            <SelectTrigger id="eigenaar-select">
+              <SelectValue placeholder="Alle eigenaren" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={null}>Alle eigenaren</SelectItem>
+              {eigenaren.map((eigenaar) => (
+                <SelectItem key={eigenaar.value} value={eigenaar.value}>
+                  {eigenaar.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
 
-        {hasActiveFilters && (
-          <Button variant="ghost" size="sm" onClick={resetFilters} className="h-10">
+      {hasActiveFilters && (
+        <div className="flex justify-center">
+          <Button variant="outline" size="sm" onClick={resetFilters}>
             Wis filters
           </Button>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   )
 }
