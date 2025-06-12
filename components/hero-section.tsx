@@ -110,23 +110,51 @@ export function HeroSection({ recept }: HeroSectionProps) {
             </div>
 
             {/* Right Content - Recipe Image */}
-            <div className="relative">
-              <div className="relative w-full h-96 cursor-pointer group" onClick={handleImageClick}>
-                <Image
-                  src={recept.afbeelding_url || "/placeholder.svg?height=400&width=400&query=delicious food"}
-                  alt={recept.naam}
-                  fill
-                  className="object-contain transition-transform duration-300 group-hover:scale-105"
-                />
+            <div className="relative flex justify-center items-center">
+              <div className="relative w-96 h-96 cursor-pointer group" onClick={handleImageClick}>
+                {/* Main Image */}
+                <div className="relative w-full h-full">
+                  <Image
+                    src={recept.afbeelding_url || "/placeholder.svg?height=400&width=400&query=delicious food"}
+                    alt={recept.naam}
+                    fill
+                    className="object-contain transition-transform duration-300 group-hover:scale-105"
+                  />
+                </div>
 
-                {/* Hover Overlay with Dashed Circle */}
-                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                  <div className="w-80 h-80 border-4 border-dashed border-[#e75129] rounded-full animate-pulse"></div>
+                {/* Dashed Circle Overlay */}
+                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+                  <svg
+                    className="w-full h-full animate-pulse"
+                    viewBox="0 0 400 400"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <circle
+                      cx="200"
+                      cy="200"
+                      r="190"
+                      stroke="#e75129"
+                      strokeWidth="8"
+                      strokeDasharray="20 15"
+                      strokeLinecap="round"
+                      fill="none"
+                      className="animate-spin"
+                      style={{ animationDuration: "8s" }}
+                    />
+                  </svg>
+                </div>
+
+                {/* Click Hint */}
+                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+                  <div className="bg-black/50 text-white px-4 py-2 rounded-lg text-sm font-medium">
+                    Klik voor ingrediënten
+                  </div>
                 </div>
               </div>
 
               {/* Rating */}
-              <div className="flex justify-center mt-6">
+              <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2">
                 <div className="flex gap-2">
                   {[1, 2, 3, 4, 5].map((star) => (
                     <Star key={star} className="h-8 w-8 fill-[#e75129] text-[#e75129]" />
