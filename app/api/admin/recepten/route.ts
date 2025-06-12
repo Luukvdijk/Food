@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-import { sql } from "@/lib/db"
+import { supabase } from "@/lib/db"
 import { getUser } from "@/lib/auth"
 
 export async function GET() {
@@ -9,11 +9,11 @@ export async function GET() {
       return NextResponse.json({ error: "Niet geautoriseerd" }, { status: 401 })
     }
 
-    const result = await sql`
-      SELECT id, naam FROM recepten ORDER BY naam
-    `
+    const { data, error } = await supabase.from("recepten").select("id, naam").order("naam")
 
-    return NextResponse.json(result)
+    if (error) throw error
+
+    return NextResponse.json(data)
   } catch (error) {
     console.error("Error fetching recepten:", error)
     return NextResponse.json({ error: "Server fout" }, { status: 500 })

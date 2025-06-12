@@ -1,4 +1,3 @@
-import { getReceptForEdit } from "./actions"
 import { AddReceptForm } from "./components/add-recept-form"
 import { EditReceptForm } from "./components/edit-recept-form"
 import { ReceptenTable } from "./components/recepten-table"
@@ -10,9 +9,8 @@ import { CheckCircle, XCircle, AlertTriangle } from "lucide-react"
 import Link from "next/link"
 import { getUser } from "@/lib/auth"
 import { redirect } from "next/navigation"
-import { Suspense } from "react"
+import { IngredientsManager } from "./components/ingredients-manager"
 import { supabase } from "@/lib/db"
-import { Skeleton } from "@/components/ui/skeleton"
 
 interface AdminPageProps {
   searchParams: {
@@ -29,6 +27,52 @@ async function handleSignOut() {
   redirect("/api/auth/signout-redirect")
 }
 
+async function getAllReceptenAdmin() {
+  const { data, error } = await supabase
+    .from("recepten")
+    .select(`
+      *,
+      ingredient_count: ingredienten(count),
+      bijgerecht_count: bijgerechten(count)
+    `)
+    .order("naam")
+
+  if (error) throw error
+  return data || []
+}
+
+async function getReceptForEdit(id: number) {
+  // Get the recipe
+  const { data: recept, error: receptError } = await supabase.from("recepten").select("*").eq("id", id).single()
+
+  if (receptError) throw receptError
+  if (!recept) return null
+
+  // Get ingredients
+  const { data: ingredienten, error: ingredientenError } = await supabase
+    .from("ingredienten")
+    .select("*")
+    .eq("recept_id", id)
+    .order("id")
+
+  if (ingredientenError) throw ingredientenError
+
+  // Get bijgerechten
+  const { data: bijgerechten, error: bijgerechtenError } = await supabase
+    .from("bijgerechten")
+    .select("*")
+    .eq("recept_id", id)
+    .order("id")
+
+  if (bijgerechtenError) throw bijgerechtenError
+
+  return {
+    recept,
+    ingredienten: ingredienten || [],
+    bijgerechten: bijgerechten || [],
+  }
+}
+
 export default async function AdminPage({ searchParams }: AdminPageProps) {
   // Check authentication first - don't catch redirect errors
   const user = await getUser()
@@ -36,20 +80,20 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
     redirect("/auth/signin")
   }
 
-  // Fetch all recipes
-  const { data: recepten, error: dataError } = await supabase
-    .from("recepten")
-    .select("*")
-    .order("created_at", { ascending: false })
+  // Try to load data with error handling
+  let recepten: any[] = []
+  let dataError: string | null = null
+  let editData = null
 
-  if (dataError) {
-    console.error("Error fetching recipes:", dataError)
+  try {
+    recepten = await getAllReceptenAdmin()
+  } catch (error) {
+    console.error("Error loading recepten:", error)
+    dataError = "Kon recepten niet laden. Controleer de database verbinding."
   }
 
   // Check if we're editing a recipe
   const editId = searchParams.edit ? Number.parseInt(searchParams.edit) : null
-  let editData = null
-
   if (editId && !dataError) {
     try {
       editData = await getReceptForEdit(editId)
@@ -115,7 +159,7 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
             {searchParams.error === "missing_fields" && "Niet alle verplichte velden zijn ingevuld."}
             {searchParams.error === "missing_steps" && "Geen bereidingsstappen opgegeven."}
             {searchParams.error === "missing_ingredients" && "Geen ingrediënten opgegeven."}
-            {dataError && "Kon recepten niet laden. Controleer de database verbinding."}
+            {dataError && dataError}
             {searchParams.error &&
               !dataError &&
               ![
@@ -147,8 +191,8 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
           </CardHeader>
           <CardContent>
             <ul className="list-disc list-inside space-y-2 text-sm">
-              <li>Is de DATABASE_URL environment variable correct ingesteld?</li>
-              <li>Is de database server bereikbaar?</li>
+              <li>Zijn de SUPABASE_URL en SUPABASE_SERVICE_KEY environment variables correct ingesteld?</li>
+              <li>Is de Supabase server bereikbaar?</li>
               <li>Zijn de database tabellen aangemaakt?</li>
             </ul>
             <div className="mt-4">
@@ -174,7 +218,7 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
                 <CardTitle className="text-sm font-medium">Totaal Recepten</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{recepten?.length || 0}</div>
+                <div className="text-2xl font-bold">{recepten.length}</div>
               </CardContent>
             </Card>
             <Card>
@@ -183,7 +227,7 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">
-                  {recepten?.reduce((sum, r) => sum + (Number.parseInt(r.ingredient_count) || 0), 0) || 0}
+                  {recepten.reduce((sum, r) => sum + (r.ingredient_count?.[0]?.count || 0), 0)}
                 </div>
               </CardContent>
             </Card>
@@ -193,27 +237,54 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">
-                  {recepten?.reduce((sum, r) => sum + (Number.parseInt(r.bijgerecht_count) || 0), 0) || 0}
+                  {recepten.reduce((sum, r) => sum + (r.bijgerecht_count?.[0]?.count || 0), 0)}
                 </div>
               </CardContent>
             </Card>
           </div>
 
           {/* Tabs voor verschillende secties */}
-          <Tabs defaultValue="recepten">
-            <TabsList className="mb-8">
-              <TabsTrigger value="recepten">Recepten</TabsTrigger>
-              <TabsTrigger value="toevoegen">Recept Toevoegen</TabsTrigger>
+          <Tabs defaultValue="overview" className="space-y-6">
+            <TabsList>
+              <TabsTrigger value="overview">Overzicht</TabsTrigger>
+              <TabsTrigger value="ingredients">Ingrediënten</TabsTrigger>
+              <TabsTrigger value="add">Recept Toevoegen</TabsTrigger>
             </TabsList>
 
-            <TabsContent value="recepten">
-              <Suspense fallback={<Skeleton className="h-[600px] w-full" />}>
-                <ReceptenTable initialRecepten={recepten || []} />
-              </Suspense>
+            <TabsContent value="overview">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Alle Recepten</CardTitle>
+                  <CardDescription>Beheer je bestaande recepten</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <ReceptenTable recepten={recepten} />
+                </CardContent>
+              </Card>
             </TabsContent>
 
-            <TabsContent value="toevoegen">
-              <AddReceptForm />
+            <TabsContent value="ingredients">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Ingrediënten Beheer</CardTitle>
+                  <CardDescription>Beheer ingrediënten van alle recepten</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <IngredientsManager />
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="add">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Nieuw Recept Toevoegen</CardTitle>
+                  <CardDescription>Voeg een nieuw recept toe aan je collectie</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <AddReceptForm />
+                </CardContent>
+              </Card>
             </TabsContent>
           </Tabs>
         </>

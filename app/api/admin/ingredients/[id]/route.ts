@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { sql } from "@/lib/db"
+import { supabase } from "@/lib/db"
 import { getUser } from "@/lib/auth"
 
 export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
@@ -12,11 +12,17 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     const id = Number.parseInt(params.id)
     const { naam, hoeveelheid, eenheid, notitie } = await request.json()
 
-    await sql`
-      UPDATE ingredienten 
-      SET naam = ${naam}, hoeveelheid = ${hoeveelheid}, eenheid = ${eenheid}, notitie = ${notitie || null}
-      WHERE id = ${id}
-    `
+    const { error } = await supabase
+      .from("ingredienten")
+      .update({
+        naam,
+        hoeveelheid,
+        eenheid,
+        notitie: notitie || null,
+      })
+      .eq("id", id)
+
+    if (error) throw error
 
     return NextResponse.json({ success: true })
   } catch (error) {
@@ -34,7 +40,9 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
 
     const id = Number.parseInt(params.id)
 
-    await sql`DELETE FROM ingredienten WHERE id = ${id}`
+    const { error } = await supabase.from("ingredienten").delete().eq("id", id)
+
+    if (error) throw error
 
     return NextResponse.json({ success: true })
   } catch (error) {
