@@ -14,11 +14,11 @@ body {
 
 @layer base {
   :root {
-    --background: 238 225 209; /* #eee1d1 */
-    --foreground: 0 0% 0%; /* #000000 */
+    --background: 40 88 58; /* #286058 - green as default */
+    --foreground: 255 255 255; /* white text on green */
     --card: 255 255 255; /* #ffffff */
     --card-foreground: 0 0% 0%;
-    --popover: 255 255 255;
+    --popover: 238 225 209; /* #eee1d1 - cream for popups */
     --popover-foreground: 0 0% 0%;
     --primary: 40 88 58; /* #286058 */
     --primary-foreground: 255 255 255;
@@ -40,27 +40,6 @@ body {
     --chart-5: 0 0% 0%;
     --radius: 0.5rem;
   }
-  .dark {
-    --background: 40 88 58;
-    --foreground: 255 255 255;
-    --card: 40 88 58;
-    --card-foreground: 255 255 255;
-    --popover: 40 88 58;
-    --popover-foreground: 255 255 255;
-    --primary: 238 225 209;
-    --primary-foreground: 0 0% 0%;
-    --secondary: 231 80 42;
-    --secondary-foreground: 255 255 255;
-    --muted: 40 88 58;
-    --muted-foreground: 255 255 255;
-    --accent: 231 80 42;
-    --accent-foreground: 255 255 255;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 255 255 255;
-    --border: 0 0% 14.9%;
-    --input: 40 88 58;
-    --ring: 238 225 209;
-  }
 }
 
 @layer base {
@@ -70,19 +49,4 @@ body {
   body {
     @apply bg-background text-foreground;
   }
-}
-
-/* Custom patterns and effects */
-.diagonal-lines {
-  background-image: repeating-linear-gradient(
-    45deg,
-    transparent,
-    transparent 10px,
-    rgba(255, 255, 255, 0.1) 10px,
-    rgba(255, 255, 255, 0.1) 20px
-  );
-}
-
-.curved-section {
-  clip-path: ellipse(100% 100% at 50% 0%);
 }
