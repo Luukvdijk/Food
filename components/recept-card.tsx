@@ -1,8 +1,6 @@
 import Image from "next/image"
 import Link from "next/link"
 import { Clock, ChefHat } from "lucide-react"
-import { Badge } from "@/components/ui/badge"
-import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import type { Recept } from "@/types"
 
 interface ReceptCardProps {
@@ -11,7 +9,10 @@ interface ReceptCardProps {
 
 export function ReceptCard({ recept }: ReceptCardProps) {
   return (
-    <Card className="overflow-hidden h-full flex flex-col bg-secondary border-secondary">
+    <div
+      className="overflow-hidden h-full flex flex-col rounded-lg"
+      style={{ backgroundColor: "#eee1d1", border: "1px solid #eee1d1" }}
+    >
       <div className="relative h-48">
         <Image
           src={recept.afbeelding_url || "/placeholder.svg?height=400&width=600"}
@@ -20,14 +21,14 @@ export function ReceptCard({ recept }: ReceptCardProps) {
           className="object-cover"
         />
       </div>
-      <CardHeader className="bg-secondary">
+      <div className="p-6" style={{ backgroundColor: "#eee1d1" }}>
         <Link href={`/recept/${recept.id}`} className="hover:underline">
-          <h3 className="text-lg font-semibold text-secondary-foreground">{recept.naam}</h3>
+          <h3 className="text-lg font-semibold text-gray-900">{recept.naam}</h3>
         </Link>
-        <p className="text-sm text-muted-foreground line-clamp-2">{recept.beschrijving}</p>
-      </CardHeader>
-      <CardContent className="flex-grow bg-secondary">
-        <div className="flex items-center gap-4 text-sm text-muted-foreground mb-4">
+        <p className="text-sm text-gray-600 line-clamp-2 mt-1">{recept.beschrijving}</p>
+      </div>
+      <div className="px-6 flex-grow" style={{ backgroundColor: "#eee1d1" }}>
+        <div className="flex items-center gap-4 text-sm text-gray-600 mb-4">
           <div className="flex items-center">
             <Clock className="mr-1 h-4 w-4" />
             <span>{recept.bereidingstijd} min</span>
@@ -37,24 +38,30 @@ export function ReceptCard({ recept }: ReceptCardProps) {
             <span>{recept.moeilijkheidsgraad}</span>
           </div>
         </div>
-      </CardContent>
-      <CardFooter className="bg-secondary">
+      </div>
+      <div className="px-6 pb-6" style={{ backgroundColor: "#eee1d1" }}>
         <div className="flex flex-wrap gap-2">
-          <Badge variant="outline" className="border-primary text-primary bg-white">
+          <span className="inline-flex items-center rounded-md border border-[#286058] bg-white px-2 py-1 text-xs font-medium text-[#286058]">
             {recept.type}
-          </Badge>
+          </span>
           {recept.seizoen.map((s) => (
-            <Badge key={s} variant="secondary" className="bg-accent text-accent-foreground">
+            <span
+              key={s}
+              className="inline-flex items-center rounded-md bg-[#e75129] px-2 py-1 text-xs font-medium text-white"
+            >
               {s}
-            </Badge>
+            </span>
           ))}
           {recept.tags.slice(0, 2).map((tag) => (
-            <Badge key={tag} variant="outline" className="border-primary text-primary bg-white">
+            <span
+              key={tag}
+              className="inline-flex items-center rounded-md border border-[#286058] bg-white px-2 py-1 text-xs font-medium text-[#286058]"
+            >
               {tag}
-            </Badge>
+            </span>
           ))}
         </div>
-      </CardFooter>
-    </Card>
+      </div>
+    </div>
   )
 }
