@@ -1,7 +1,6 @@
 "use client"
 
 import { useState } from "react"
-import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Star, Minus, Plus, Users } from "lucide-react"
 import Image from "next/image"
@@ -76,32 +75,80 @@ export function HeroSection({ recept }: HeroSectionProps) {
 
               {/* Controls */}
               <div className="flex items-center gap-6">
-                <Button
+                <button
                   onClick={refreshPage}
-                  className="bg-[#e75129] hover:bg-[#e75129]/90 text-white px-8 py-3 text-lg"
+                  style={{
+                    backgroundColor: "#e75129",
+                    color: "white",
+                    padding: "12px 32px",
+                    fontSize: "18px",
+                    fontWeight: "500",
+                    border: "none",
+                    borderRadius: "6px",
+                    cursor: "pointer",
+                    transition: "background-color 0.2s ease",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = "#d63e1a"
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = "#e75129"
+                  }}
                 >
                   Nieuw gerecht
-                </Button>
+                </button>
 
                 <div className="flex items-center gap-4">
                   <div className="flex items-center gap-2 bg-white/10 rounded-full px-4 py-2">
-                    <Button
-                      variant="ghost"
-                      size="icon"
+                    <button
                       onClick={decrementServings}
-                      className="h-8 w-8 rounded-full border border-white/30 text-white hover:bg-white/20"
+                      style={{
+                        height: "32px",
+                        width: "32px",
+                        borderRadius: "50%",
+                        border: "1px solid rgba(255, 255, 255, 0.3)",
+                        color: "white",
+                        backgroundColor: "transparent",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        cursor: "pointer",
+                        transition: "background-color 0.2s ease",
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = "rgba(255, 255, 255, 0.2)"
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = "transparent"
+                      }}
                     >
                       <Minus className="h-4 w-4" />
-                    </Button>
+                    </button>
                     <span className="text-xl font-medium w-8 text-center">{servings}</span>
-                    <Button
-                      variant="ghost"
-                      size="icon"
+                    <button
                       onClick={incrementServings}
-                      className="h-8 w-8 rounded-full border border-white/30 text-white hover:bg-white/20"
+                      style={{
+                        height: "32px",
+                        width: "32px",
+                        borderRadius: "50%",
+                        border: "1px solid rgba(255, 255, 255, 0.3)",
+                        color: "white",
+                        backgroundColor: "transparent",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        cursor: "pointer",
+                        transition: "background-color 0.2s ease",
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = "rgba(255, 255, 255, 0.2)"
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = "transparent"
+                      }}
                     >
                       <Plus className="h-4 w-4" />
-                    </Button>
+                    </button>
                   </div>
 
                   <Users className="h-6 w-6 text-white/70" />
