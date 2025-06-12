@@ -49,7 +49,7 @@ export default async function ZoekenPage({ searchParams }: SearchPageProps) {
   const eigenaars = [...new Set(eigenaarData?.map((r) => r.eigenaar).filter(Boolean))]
 
   return (
-    <div className="min-h-screen bg-primary text-white">
+    <div className="min-h-screen" style={{ backgroundColor: "#286058" }}>
       <div className="container mx-auto py-8">
         <h1 className="text-3xl font-bold mb-8 text-white">Recepten Zoeken</h1>
 
@@ -74,7 +74,7 @@ export default async function ZoekenPage({ searchParams }: SearchPageProps) {
             fallback={
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                 {[...Array(6)].map((_, i) => (
-                  <Skeleton key={i} className="h-[350px]" />
+                  <Skeleton key={i} className="h-[350px] bg-white/10" />
                 ))}
               </div>
             }
