@@ -1,12 +1,7 @@
-import { createClient } from "@supabase/supabase-js"
+import { getServiceClient } from "./supabase-singleton"
 
-// Use fallback values for preview environment
-const supabaseUrl =
-  process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || "https://placeholder.supabase.co"
-const supabaseKey = process.env.SUPABASE_SERVICE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "placeholder-key"
-
-// Create Supabase client with service key for server-side operations
-const supabase = createClient(supabaseUrl, supabaseKey)
+// Get the singleton service client
+const supabase = getServiceClient()
 
 // Create a wrapper function that mimics the neon sql template literal tag
 export const sql = (strings: TemplateStringsArray, ...values: any[]) => {

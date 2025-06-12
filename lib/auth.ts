@@ -1,8 +1,8 @@
-import { getServerSupabaseClient } from "./supabase-server"
+import { getServerClient } from "./supabase-singleton"
 
 export async function getUser() {
   try {
-    const supabase = getServerSupabaseClient()
+    const supabase = getServerClient()
 
     const {
       data: { session },

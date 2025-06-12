@@ -1,4 +1,4 @@
-import { getRouteHandlerClient } from "@/lib/supabase-server"
+import { getRouteHandlerClient } from "@/lib/supabase-singleton"
 import { NextResponse } from "next/server"
 
 export async function GET() {
