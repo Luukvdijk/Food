@@ -109,10 +109,19 @@ export default function SignInPage() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                onFocus={(e) => {
+                  e.target.style.borderColor = "#286058"
+                  e.target.style.outline = "2px solid #286058"
+                  e.target.style.outlineOffset = "2px"
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = "#286058"
+                  e.target.style.outline = "none"
+                }}
                 required
                 placeholder="je@email.com"
                 disabled={isLoading}
-                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2"
+                className="w-full px-3 py-2 border rounded-md transition-all duration-200"
                 style={{
                   backgroundColor: "#ffffff",
                   borderColor: "#286058",
@@ -130,10 +139,19 @@ export default function SignInPage() {
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                onFocus={(e) => {
+                  e.target.style.borderColor = "#286058"
+                  e.target.style.outline = "2px solid #286058"
+                  e.target.style.outlineOffset = "2px"
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = "#286058"
+                  e.target.style.outline = "none"
+                }}
                 required
                 placeholder="••••••••"
                 disabled={isLoading}
-                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2"
+                className="w-full px-3 py-2 border rounded-md transition-all duration-200"
                 style={{
                   backgroundColor: "#ffffff",
                   borderColor: "#286058",
