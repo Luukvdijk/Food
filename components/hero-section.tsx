@@ -111,9 +111,10 @@ export function HeroSection({ recept }: HeroSectionProps) {
 
             {/* Right Content - Recipe Image */}
             <div className="relative flex justify-center items-center">
-              <div className="relative w-80 h-80 cursor-pointer group" onClick={handleImageClick}>
-                {/* Main Image - Circular Crop */}
-                <div className="relative w-full h-full rounded-full overflow-hidden">
+              {/* Larger overlay container */}
+              <div className="relative w-96 h-96 cursor-pointer group" onClick={handleImageClick}>
+                {/* Centered smaller image */}
+                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 rounded-full overflow-hidden">
                   <Image
                     src={recept.afbeelding_url || "/placeholder.svg?height=400&width=400&query=delicious food"}
                     alt={recept.naam}
@@ -122,16 +123,16 @@ export function HeroSection({ recept }: HeroSectionProps) {
                   />
                 </div>
 
-                {/* Dashed Circle Overlay */}
+                {/* Larger Dashed Circle Overlay */}
                 <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
-                  <svg className="w-full h-full" viewBox="0 0 320 320" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <svg className="w-full h-full" viewBox="0 0 384 384" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <circle
-                      cx="160"
-                      cy="160"
-                      r="155"
+                      cx="192"
+                      cy="192"
+                      r="185"
                       stroke="#e75129"
-                      strokeWidth="6"
-                      strokeDasharray="15 10"
+                      strokeWidth="8"
+                      strokeDasharray="20 15"
                       strokeLinecap="round"
                       fill="none"
                     />
