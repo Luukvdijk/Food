@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -258,23 +257,65 @@ export function IngredientsManager() {
                             <>
                               <button
                                 onClick={() => saveEdit(ingredient.id)}
-                                style={{ backgroundColor: "#e75129", color: "white" }}
-                                className="h-8 w-8 p-0 rounded hover:bg-opacity-80 transition-all duration-200"
+                                style={{
+                                  backgroundColor: "#e75129",
+                                  color: "white",
+                                  width: "32px",
+                                  height: "32px",
+                                  padding: "0",
+                                  borderRadius: "4px",
+                                  border: "none",
+                                  cursor: "pointer",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                  transition: "background-color 0.2s ease",
+                                }}
                                 onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#d63e1a")}
                                 onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#e75129")}
                               >
                                 <Save className="h-3 w-3" />
                               </button>
-                              <Button size="sm" variant="outline" onClick={cancelEdit} className="h-8 w-8 p-0">
+                              <button
+                                onClick={cancelEdit}
+                                style={{
+                                  backgroundColor: "#eee1d1",
+                                  color: "#286058",
+                                  width: "32px",
+                                  height: "32px",
+                                  padding: "0",
+                                  borderRadius: "4px",
+                                  border: "1px solid #d1d5db",
+                                  cursor: "pointer",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                  transition: "background-color 0.2s ease",
+                                }}
+                                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#d1c7b8")}
+                                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#eee1d1")}
+                              >
                                 <X className="h-3 w-3" />
-                              </Button>
+                              </button>
                             </>
                           ) : (
                             <>
                               <button
                                 onClick={() => startEdit(ingredient)}
-                                style={{ backgroundColor: "#e75129", color: "white" }}
-                                className="h-8 w-8 p-0 rounded hover:bg-opacity-80 transition-all duration-200"
+                                style={{
+                                  backgroundColor: "#e75129",
+                                  color: "white",
+                                  width: "32px",
+                                  height: "32px",
+                                  padding: "0",
+                                  borderRadius: "4px",
+                                  border: "none",
+                                  cursor: "pointer",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                  transition: "background-color 0.2s ease",
+                                }}
                                 onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#d63e1a")}
                                 onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#e75129")}
                               >
@@ -282,8 +323,20 @@ export function IngredientsManager() {
                               </button>
                               <button
                                 onClick={() => deleteIngredient(ingredient.id)}
-                                style={{ backgroundColor: "#e75129", color: "white" }}
-                                className="h-8 w-8 p-0 rounded hover:bg-opacity-80 transition-all duration-200"
+                                style={{
+                                  backgroundColor: "#e75129",
+                                  color: "white",
+                                  width: "32px",
+                                  height: "32px",
+                                  padding: "0",
+                                  borderRadius: "4px",
+                                  border: "none",
+                                  cursor: "pointer",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                  transition: "background-color 0.2s ease",
+                                }}
                                 onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#d63e1a")}
                                 onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#e75129")}
                               >

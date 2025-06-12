@@ -41,28 +41,35 @@ export default function AdminClient({ user, recepten, editData, searchParams, da
             <p className="text-white/70">Welkom terug, {user.email}!</p>
           </div>
           <div className="flex gap-2">
-            <Link
+            <a
               href="/"
               style={{
                 backgroundColor: "#eee1d1",
                 color: "#286058",
+                padding: "8px 16px",
+                borderRadius: "6px",
+                textDecoration: "none",
                 transition: "background-color 0.2s ease",
+                border: "none",
+                cursor: "pointer",
               }}
-              className="px-4 py-2 rounded-md hover:opacity-90 transition-opacity"
               onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#d1c7b8")}
               onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#eee1d1")}
             >
               ← Terug naar website
-            </Link>
+            </a>
             <form action={handleSignOut}>
               <button
                 type="submit"
                 style={{
                   backgroundColor: "#e75129",
                   color: "white",
+                  padding: "8px 16px",
+                  borderRadius: "6px",
+                  border: "none",
+                  cursor: "pointer",
                   transition: "background-color 0.2s ease",
                 }}
-                className="px-4 py-2 rounded-md"
                 onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#d63e1a")}
                 onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#e75129")}
               >
@@ -199,23 +206,35 @@ export default function AdminClient({ user, recepten, editData, searchParams, da
             {/* Tabs voor verschillende secties */}
             <div className="space-y-6">
               {/* Tab Navigation */}
-              <div className="flex space-x-1" style={{ backgroundColor: "#eee1d1" }} className="p-1 rounded-lg">
+              <div
+                style={{ backgroundColor: "#eee1d1", padding: "4px", borderRadius: "8px" }}
+                className="flex space-x-1"
+              >
                 <button
                   onClick={() => setActiveTab("overview")}
                   style={{
                     backgroundColor: activeTab === "overview" ? "#e75129" : "transparent",
                     color: activeTab === "overview" ? "white" : "#286058",
-                    transition: "background-color 0.2s ease",
+                    padding: "8px 16px",
+                    borderRadius: "6px",
+                    fontSize: "14px",
+                    fontWeight: "500",
+                    border: "none",
+                    cursor: "pointer",
+                    transition: "all 0.2s ease",
                   }}
-                  className="px-4 py-2 rounded-md text-sm font-medium"
                   onMouseEnter={(e) => {
                     if (activeTab !== "overview") {
                       e.currentTarget.style.backgroundColor = "#d1c7b8"
+                    } else {
+                      e.currentTarget.style.backgroundColor = "#d63e1a"
                     }
                   }}
                   onMouseLeave={(e) => {
                     if (activeTab !== "overview") {
                       e.currentTarget.style.backgroundColor = "transparent"
+                    } else {
+                      e.currentTarget.style.backgroundColor = "#e75129"
                     }
                   }}
                 >
@@ -226,17 +245,26 @@ export default function AdminClient({ user, recepten, editData, searchParams, da
                   style={{
                     backgroundColor: activeTab === "ingredients" ? "#e75129" : "transparent",
                     color: activeTab === "ingredients" ? "white" : "#286058",
-                    transition: "background-color 0.2s ease",
+                    padding: "8px 16px",
+                    borderRadius: "6px",
+                    fontSize: "14px",
+                    fontWeight: "500",
+                    border: "none",
+                    cursor: "pointer",
+                    transition: "all 0.2s ease",
                   }}
-                  className="px-4 py-2 rounded-md text-sm font-medium"
                   onMouseEnter={(e) => {
                     if (activeTab !== "ingredients") {
                       e.currentTarget.style.backgroundColor = "#d1c7b8"
+                    } else {
+                      e.currentTarget.style.backgroundColor = "#d63e1a"
                     }
                   }}
                   onMouseLeave={(e) => {
                     if (activeTab !== "ingredients") {
                       e.currentTarget.style.backgroundColor = "transparent"
+                    } else {
+                      e.currentTarget.style.backgroundColor = "#e75129"
                     }
                   }}
                 >
@@ -247,17 +275,26 @@ export default function AdminClient({ user, recepten, editData, searchParams, da
                   style={{
                     backgroundColor: activeTab === "add" ? "#e75129" : "transparent",
                     color: activeTab === "add" ? "white" : "#286058",
-                    transition: "background-color 0.2s ease",
+                    padding: "8px 16px",
+                    borderRadius: "6px",
+                    fontSize: "14px",
+                    fontWeight: "500",
+                    border: "none",
+                    cursor: "pointer",
+                    transition: "all 0.2s ease",
                   }}
-                  className="px-4 py-2 rounded-md text-sm font-medium"
                   onMouseEnter={(e) => {
                     if (activeTab !== "add") {
                       e.currentTarget.style.backgroundColor = "#d1c7b8"
+                    } else {
+                      e.currentTarget.style.backgroundColor = "#d63e1a"
                     }
                   }}
                   onMouseLeave={(e) => {
                     if (activeTab !== "add") {
                       e.currentTarget.style.backgroundColor = "transparent"
+                    } else {
+                      e.currentTarget.style.backgroundColor = "#e75129"
                     }
                   }}
                 >
