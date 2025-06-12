@@ -1,14 +1,9 @@
 "use client"
 
 import type React from "react"
-
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { ArrowLeft } from "lucide-react"
-import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useState, useEffect } from "react"
 
@@ -70,66 +65,100 @@ export default function SignInPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div
+      className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8"
+      style={{ backgroundColor: "#286058" }}
+    >
       <div className="max-w-md w-full space-y-8">
         <div className="text-center">
-          <Button variant="ghost" asChild className="mb-4">
-            <Link href="/">
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Terug naar website
-            </Link>
-          </Button>
+          <button
+            className="mb-4 inline-flex items-center px-4 py-2 text-white hover:text-white/80 transition-colors"
+            onClick={() => router.push("/")}
+          >
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Terug naar website
+          </button>
         </div>
 
-        <Card>
-          <CardHeader className="text-center">
-            <CardTitle className="text-2xl">Admin Inloggen</CardTitle>
-            <CardDescription>Log in met je Supabase account om toegang te krijgen tot het admin paneel</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              {error && (
-                <Alert variant="destructive">
-                  <AlertDescription>{error}</AlertDescription>
-                </Alert>
-              )}
+        <div className="rounded-lg border shadow-lg p-8" style={{ backgroundColor: "#eee1d1" }}>
+          <div className="text-center mb-6">
+            <h1 className="text-2xl font-bold" style={{ color: "#286058" }}>
+              Admin Inloggen
+            </h1>
+            <p className="text-sm mt-2" style={{ color: "#286058", opacity: 0.7 }}>
+              Log in met je Supabase account om toegang te krijgen tot het admin paneel
+            </p>
+          </div>
 
-              <div>
-                <Label htmlFor="email">E-mailadres</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  placeholder="je@email.com"
-                  disabled={isLoading}
-                />
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {error && (
+              <div
+                className="p-3 rounded-md border"
+                style={{ backgroundColor: "#fee2e2", borderColor: "#fecaca", color: "#dc2626" }}
+              >
+                {error}
               </div>
+            )}
 
-              <div>
-                <Label htmlFor="password">Wachtwoord</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  placeholder="••••••••"
-                  disabled={isLoading}
-                />
-              </div>
-
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? "Inloggen..." : "Inloggen"}
-              </Button>
-            </form>
-
-            <div className="mt-4 text-sm text-muted-foreground text-center">
-              <p>Accounts worden beheerd via Supabase Dashboard</p>
+            <div>
+              <Label htmlFor="email" className="block text-sm font-medium mb-1" style={{ color: "#286058" }}>
+                E-mailadres
+              </Label>
+              <Input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                placeholder="je@email.com"
+                disabled={isLoading}
+                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2"
+                style={{
+                  backgroundColor: "#ffffff",
+                  borderColor: "#286058",
+                  color: "#286058",
+                }}
+              />
             </div>
-          </CardContent>
-        </Card>
+
+            <div>
+              <Label htmlFor="password" className="block text-sm font-medium mb-1" style={{ color: "#286058" }}>
+                Wachtwoord
+              </Label>
+              <Input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                placeholder="••••••••"
+                disabled={isLoading}
+                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2"
+                style={{
+                  backgroundColor: "#ffffff",
+                  borderColor: "#286058",
+                  color: "#286058",
+                }}
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="w-full py-2 px-4 rounded-md font-medium transition-colors disabled:opacity-50"
+              style={{
+                backgroundColor: "#e75129",
+                color: "#ffffff",
+              }}
+            >
+              {isLoading ? "Inloggen..." : "Inloggen"}
+            </button>
+          </form>
+
+          <div className="mt-4 text-sm text-center" style={{ color: "#286058", opacity: 0.7 }}>
+            <p>Accounts worden beheerd via Supabase Dashboard</p>
+          </div>
+        </div>
       </div>
     </div>
   )
