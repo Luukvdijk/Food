@@ -23,11 +23,15 @@ export function HeroSection({ recept }: HeroSectionProps) {
   const incrementServings = () => setServings((prev) => prev + 1)
   const decrementServings = () => setServings((prev) => Math.max(1, prev - 1))
 
+  const refreshPage = () => {
+    window.location.reload()
+  }
+
   if (!recept) {
     return (
-      <section className="bg-[#286058] text-white relative overflow-hidden min-h-[600px]">
+      <section className="bg-[#286058] text-white relative overflow-hidden min-h-[600px] w-full">
         <div className="diagonal-lines absolute inset-0"></div>
-        <div className="container mx-auto py-12 relative z-10">
+        <div className="w-full py-12 px-8 relative z-10">
           <div className="text-center">
             <h1 className="text-6xl font-bold mb-8">Geen recept gevonden</h1>
             <p className="text-xl opacity-90">Probeer een ander recept te zoeken</p>
@@ -38,10 +42,10 @@ export function HeroSection({ recept }: HeroSectionProps) {
   }
 
   return (
-    <section className="bg-[#286058] text-white relative overflow-hidden min-h-[600px]">
+    <section className="bg-[#286058] text-white relative overflow-hidden min-h-[600px] w-full">
       <div className="diagonal-lines absolute inset-0"></div>
-      <div className="container mx-auto py-12 relative z-10">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+      <div className="w-full py-12 px-8 relative z-10">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center max-w-7xl mx-auto">
           {/* Left Content */}
           <div className="space-y-8">
             <h1 className="text-6xl font-bold leading-tight">{recept.naam}</h1>
@@ -65,7 +69,9 @@ export function HeroSection({ recept }: HeroSectionProps) {
 
             {/* Controls */}
             <div className="flex items-center gap-6">
-              <Button className="bg-[#e75129] hover:bg-[#e75129]/90 text-white px-8 py-3 text-lg">Nieuw gerecht</Button>
+              <Button onClick={refreshPage} className="bg-[#e75129] hover:bg-[#e75129]/90 text-white px-8 py-3 text-lg">
+                Nieuw gerecht
+              </Button>
 
               <div className="flex items-center gap-4">
                 <div className="flex items-center gap-2 bg-white/10 rounded-full px-4 py-2">

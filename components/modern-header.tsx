@@ -1,10 +1,8 @@
 "use client"
 
 import type React from "react"
-
 import { useState, useEffect } from "react"
-import { Search, ChevronDown, Moon, Sun, Settings } from "lucide-react"
-import { useTheme } from "next-themes"
+import { Search, ChevronDown, Settings } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { useRouter } from "next/navigation"
@@ -13,13 +11,10 @@ import Link from "next/link"
 export function ModernHeader() {
   const [zoekterm, setZoekterm] = useState("")
   const [isLoggedIn, setIsLoggedIn] = useState(false)
-  const [mounted, setMounted] = useState(false)
   const [showFilters, setShowFilters] = useState(false)
   const router = useRouter()
-  const { theme, setTheme } = useTheme()
 
   useEffect(() => {
-    setMounted(true)
     const checkAuth = async () => {
       try {
         const response = await fetch("/api/auth/status")
@@ -39,19 +34,11 @@ export function ModernHeader() {
     }
   }
 
-  const toggleTheme = () => {
-    setTheme(theme === "dark" ? "light" : "dark")
-  }
-
-  if (!mounted) {
-    return null
-  }
-
   return (
-    <header className="bg-[#286058] text-white relative overflow-hidden">
+    <header className="bg-[#286058] text-white relative overflow-hidden w-full">
       <div className="diagonal-lines absolute inset-0"></div>
-      <div className="container mx-auto py-6 relative z-10">
-        <div className="flex items-center justify-between mb-8">
+      <div className="w-full py-6 px-8 relative z-10">
+        <div className="flex items-center justify-between">
           {/* Filters */}
           <button
             onClick={() => setShowFilters(!showFilters)}
@@ -75,12 +62,8 @@ export function ModernHeader() {
             </div>
           </form>
 
-          {/* Theme and Admin */}
+          {/* Admin */}
           <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon" onClick={toggleTheme} className="text-white hover:bg-white/10">
-              {theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
-            </Button>
-
             {isLoggedIn ? (
               <Button asChild variant="ghost" className="text-white hover:bg-white/10">
                 <Link href="/admin">
