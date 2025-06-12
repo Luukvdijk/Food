@@ -39,29 +39,34 @@ export function IngredientsPopup({ isOpen, onClose, receptId, servings, receptNa
   const fetchIngredients = async () => {
     setLoading(true)
     try {
-      const { data, error } = await supabase
-        .from("recept_ingredienten")
+      // First, let's try to get ingredients directly from the recepten table
+      const { data: receptData, error: receptError } = await supabase
+        .from("recepten")
         .select(`
-          hoeveelheid,
-          eenheid,
-          ingredienten (
-            id,
-            naam
-          )
+          *,
+          ingredienten (*)
         `)
-        .eq("recept_id", receptId)
+        .eq("id", receptId)
+        .single()
 
-      if (error) throw error
+      if (receptError) {
+        console.error("Error fetching recipe:", receptError)
+        // Fallback: try to get ingredients from ingredienten table
+        const { data: ingredientsData, error: ingredientsError } = await supabase
+          .from("ingredienten")
+          .select("*")
+          .eq("recept_id", receptId)
 
-      const formattedIngredients =
-        data?.map((item: any) => ({
-          id: item.ingredienten.id,
-          naam: item.ingredienten.naam,
-          hoeveelheid: item.hoeveelheid,
-          eenheid: item.eenheid,
-        })) || []
-
-      setIngredients(formattedIngredients)
+        if (ingredientsError) {
+          console.error("Error fetching ingredients:", ingredientsError)
+          setIngredients([])
+        } else {
+          setIngredients(ingredientsData || [])
+        }
+      } else {
+        // Use the ingredients from the recipe data
+        setIngredients(receptData.ingredienten || [])
+      }
     } catch (error) {
       console.error("Error fetching ingredients:", error)
       setIngredients([])
@@ -71,6 +76,7 @@ export function IngredientsPopup({ isOpen, onClose, receptId, servings, receptNa
   }
 
   const calculateAmount = (baseAmount: number) => {
+    if (!baseAmount) return "1"
     return (baseAmount * servings).toFixed(1).replace(/\.0$/, "")
   }
 
@@ -115,7 +121,10 @@ export function IngredientsPopup({ isOpen, onClose, receptId, servings, receptNa
                 <div key={ingredient.id} className="flex items-center space-x-4">
                   <div className="w-3 h-3 bg-[#e75129] rounded-full flex-shrink-0"></div>
                   <span className="text-[#286058] text-lg">
-                    {calculateAmount(ingredient.hoeveelheid)} {ingredient.eenheid} {ingredient.naam}
+                    {ingredient.hoeveelheid
+                      ? `${calculateAmount(ingredient.hoeveelheid)} ${ingredient.eenheid || ""} `
+                      : ""}
+                    {ingredient.naam}
                   </span>
                 </div>
               ))}
@@ -123,7 +132,8 @@ export function IngredientsPopup({ isOpen, onClose, receptId, servings, receptNa
           ) : (
             <div className="text-center py-8">
               <div className="text-4xl mb-4">🥘</div>
-              <p className="text-[#286058]/70">Geen ingrediënten gevonden voor dit recept.</p>
+              <p className="text-[#286058]/70 mb-4">Geen ingrediënten gevonden voor dit recept.</p>
+              <p className="text-[#286058]/50 text-sm">Voeg ingrediënten toe via het admin panel om ze hier te zien.</p>
             </div>
           )}
         </div>
