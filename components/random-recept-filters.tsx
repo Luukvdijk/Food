@@ -78,7 +78,6 @@ export function RandomReceptFilters({ onFiltersChange }: RandomReceptFiltersProp
       <h3 className="text-sm font-medium text-center">Filter op:</h3>
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="type-select">Type gerecht</Label>
           <Select value={selectedType} onValueChange={handleTypeChange}>
             <SelectTrigger id="type-select">
               <SelectValue placeholder="Alle types" />
@@ -95,7 +94,6 @@ export function RandomReceptFilters({ onFiltersChange }: RandomReceptFiltersProp
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="seizoen-select">Seizoen</Label>
           <Select value={selectedSeizoen} onValueChange={handleSeizoenChange}>
             <SelectTrigger id="seizoen-select">
               <SelectValue placeholder="Alle seizoenen" />
@@ -112,7 +110,6 @@ export function RandomReceptFilters({ onFiltersChange }: RandomReceptFiltersProp
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="eigenaar-select">Eigenaar</Label>
           <Select value={selectedEigenaar} onValueChange={handleEigenaarChange}>
             <SelectTrigger id="eigenaar-select">
               <SelectValue placeholder="Alle eigenaren" />
