@@ -256,40 +256,39 @@ export function IngredientsManager() {
                         <div className="flex items-center gap-2">
                           {editingId === ingredient.id ? (
                             <>
-                              <Button
-                                size="sm"
+                              <button
                                 onClick={() => saveEdit(ingredient.id)}
-                                className="h-8 w-8 p-0"
                                 style={{ backgroundColor: "#e75129", color: "white" }}
+                                className="h-8 w-8 p-0 rounded hover:bg-opacity-80 transition-all duration-200"
+                                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#d63e1a")}
+                                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#e75129")}
                               >
                                 <Save className="h-3 w-3" />
-                              </Button>
+                              </button>
                               <Button size="sm" variant="outline" onClick={cancelEdit} className="h-8 w-8 p-0">
                                 <X className="h-3 w-3" />
                               </Button>
                             </>
                           ) : (
                             <>
-                              <Button
-                                size="sm"
-                                variant="outline"
+                              <button
                                 onClick={() => startEdit(ingredient)}
-                                className="h-8 w-8 p-0"
                                 style={{ backgroundColor: "#e75129", color: "white" }}
-                                className="px-3 py-1 rounded hover:opacity-90 transition-opacity"
+                                className="h-8 w-8 p-0 rounded hover:bg-opacity-80 transition-all duration-200"
+                                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#d63e1a")}
+                                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#e75129")}
                               >
                                 <Pencil className="h-3 w-3" />
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="outline"
+                              </button>
+                              <button
                                 onClick={() => deleteIngredient(ingredient.id)}
-                                className="h-8 w-8 p-0"
                                 style={{ backgroundColor: "#e75129", color: "white" }}
-                                className="px-3 py-1 rounded hover:opacity-90 transition-opacity"
+                                className="h-8 w-8 p-0 rounded hover:bg-opacity-80 transition-all duration-200"
+                                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#d63e1a")}
+                                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#e75129")}
                               >
                                 <Trash2 className="h-3 w-3" />
-                              </Button>
+                              </button>
                             </>
                           )}
                         </div>

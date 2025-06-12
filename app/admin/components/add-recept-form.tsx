@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react"
 import { addRecept } from "../actions"
-import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
@@ -117,7 +116,7 @@ export function AddReceptForm() {
                   placeholder="Bijv. Hollandse Erwtensoep"
                   disabled={isSubmitting}
                   style={{ backgroundColor: "white", border: "1px solid #d1d5db", color: "#286058" }}
-                  className="w-full px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  className="w-full px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-green-600 hover:border-green-500 transition-colors"
                 />
               </div>
               <div>
@@ -132,7 +131,7 @@ export function AddReceptForm() {
                   max="20"
                   disabled={isSubmitting}
                   style={{ backgroundColor: "white", border: "1px solid #d1d5db", color: "#286058" }}
-                  className="w-full px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  className="w-full px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-green-600 hover:border-green-500 transition-colors"
                 />
               </div>
             </div>
@@ -147,7 +146,7 @@ export function AddReceptForm() {
                 rows={3}
                 disabled={isSubmitting}
                 style={{ backgroundColor: "white", border: "1px solid #d1d5db", color: "#286058" }}
-                className="w-full px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                className="w-full px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-green-600 hover:border-green-500 transition-colors"
               />
             </div>
 
@@ -163,7 +162,7 @@ export function AddReceptForm() {
                   min="1"
                   disabled={isSubmitting}
                   style={{ backgroundColor: "white", border: "1px solid #d1d5db", color: "#286058" }}
-                  className="w-full px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  className="w-full px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-green-600 hover:border-green-500 transition-colors"
                 />
               </div>
               <div>
@@ -233,7 +232,7 @@ export function AddReceptForm() {
                   defaultValue="Lente, Zomer, Herfst, Winter"
                   disabled={isSubmitting}
                   style={{ backgroundColor: "white", border: "1px solid #d1d5db", color: "#286058" }}
-                  className="w-full px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  className="w-full px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-green-600 hover:border-green-500 transition-colors"
                 />
               </div>
               <div>
@@ -244,7 +243,7 @@ export function AddReceptForm() {
                   placeholder="vegetarisch, snel, gezond"
                   disabled={isSubmitting}
                   style={{ backgroundColor: "white", border: "1px solid #d1d5db", color: "#286058" }}
-                  className="w-full px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  className="w-full px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-green-600 hover:border-green-500 transition-colors"
                 />
               </div>
             </div>
@@ -282,7 +281,7 @@ export function AddReceptForm() {
               rows={8}
               disabled={isSubmitting}
               style={{ backgroundColor: "white", border: "1px solid #d1d5db", color: "#286058" }}
-              className="w-full px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+              className="w-full px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-green-600 hover:border-green-500 transition-colors"
             />
           </div>
         </div>
@@ -308,7 +307,7 @@ export function AddReceptForm() {
               rows={8}
               disabled={isSubmitting}
               style={{ backgroundColor: "white", border: "1px solid #d1d5db", color: "#286058" }}
-              className="w-full px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+              className="w-full px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-green-600 hover:border-green-500 transition-colors"
             />
           </div>
         </div>
@@ -333,18 +332,19 @@ export function AddReceptForm() {
               rows={4}
               disabled={isSubmitting}
               style={{ backgroundColor: "white", border: "1px solid #d1d5db", color: "#286058" }}
-              className="w-full px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+              className="w-full px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-green-600 hover:border-green-500 transition-colors"
             />
           </div>
         </div>
 
         <div className="flex justify-end">
-          <Button
+          <button
             type="submit"
             disabled={isSubmitting}
-            size="lg"
             style={{ backgroundColor: "#e75129", color: "white" }}
-            className="px-6 py-3 rounded-md hover:opacity-90 transition-opacity disabled:opacity-50"
+            className="px-6 py-3 rounded-md transition-all duration-200 disabled:opacity-50"
+            onMouseEnter={(e) => !isSubmitting && (e.currentTarget.style.backgroundColor = "#d63e1a")}
+            onMouseLeave={(e) => !isSubmitting && (e.currentTarget.style.backgroundColor = "#e75129")}
           >
             {isSubmitting ? (
               <>
@@ -354,7 +354,7 @@ export function AddReceptForm() {
             ) : (
               "Recept Toevoegen"
             )}
-          </Button>
+          </button>
         </div>
       </form>
     </div>
