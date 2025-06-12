@@ -4,7 +4,7 @@ import { supabase } from "@/lib/db"
 import type { Ingredient, Bijgerecht } from "@/types"
 import { revalidatePath } from "next/cache"
 
-export async function createRecept(formData: FormData): Promise<{ success: boolean; id?: number; error?: string }> {
+export async function addRecept(formData: FormData): Promise<{ success: boolean; id?: number; error?: string }> {
   try {
     const receptData = {
       naam: formData.get("naam") as string,
@@ -65,6 +65,9 @@ export async function createRecept(formData: FormData): Promise<{ success: boole
     }
   }
 }
+
+// Keep createRecept as an alias for backward compatibility
+export const createRecept = addRecept
 
 export async function updateRecept(id: string, formData: FormData): Promise<{ success: boolean; error?: string }> {
   try {
