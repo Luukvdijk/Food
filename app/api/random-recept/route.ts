@@ -9,14 +9,11 @@ export async function GET(request: Request) {
     const seizoen = searchParams.get("seizoen") as Seizoen | null
     const eigenaar = searchParams.get("eigenaar") as Eigenaar | null
 
-    console.log("Random recipe filters:", { type, seizoen, eigenaar })
-
     // Start building the query
     let query = supabase.from("recepten").select("*")
 
     // Apply filters
     if (type) {
-      // Make sure we're using the exact column name and format
       query = query.eq("type", type)
     }
 
@@ -25,20 +22,13 @@ export async function GET(request: Request) {
     }
 
     if (seizoen) {
-      // For array fields, we need to check if the array contains the value
-      // Let's try a different approach for arrays
       query = query.contains("seizoen", [seizoen])
     }
 
     // Execute the query and get all matching recipes
     const { data: allRecipes, error: fetchError } = await query
 
-    if (fetchError) {
-      console.error("Error fetching recipes:", fetchError)
-      throw fetchError
-    }
-
-    console.log("Found recipes:", allRecipes?.length || 0)
+    if (fetchError) throw fetchError
 
     if (!allRecipes || allRecipes.length === 0) {
       return NextResponse.json(null)
@@ -48,11 +38,8 @@ export async function GET(request: Request) {
     const randomIndex = Math.floor(Math.random() * allRecipes.length)
     const randomRecipe = allRecipes[randomIndex]
 
-    console.log("Selected random recipe:", randomRecipe?.naam)
-
     return NextResponse.json(randomRecipe)
   } catch (error) {
-    console.error("Error in random recipe API:", error)
     return NextResponse.json({ error: "Failed to fetch random recipe" }, { status: 500 })
   }
 }

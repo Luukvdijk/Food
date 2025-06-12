@@ -36,8 +36,6 @@ export function RandomRecept({ initialRecept }: RandomReceptProps) {
       const queryString = queryParams.toString()
       const url = `/api/random-recept${queryString ? `?${queryString}` : ""}`
 
-      console.log("Fetching random recipe from:", url)
-
       const response = await fetch(url)
 
       if (!response.ok) {
@@ -45,8 +43,6 @@ export function RandomRecept({ initialRecept }: RandomReceptProps) {
       }
 
       const data = await response.json()
-
-      console.log("Random recipe response:", data)
 
       if (data === null) {
         setNoResults(true)
@@ -59,7 +55,6 @@ export function RandomRecept({ initialRecept }: RandomReceptProps) {
         setNoResults(false)
       }
     } catch (error) {
-      console.error("Error fetching random recipe:", error)
       setError("Er is een fout opgetreden bij het ophalen van een recept")
       setNoResults(false)
     } finally {
@@ -74,9 +69,7 @@ export function RandomRecept({ initialRecept }: RandomReceptProps) {
   }
 
   const handleFiltersChange = (newFilters: FilterOptions) => {
-    console.log("Filters changed:", newFilters)
     setFilters(newFilters)
-    // Reset the current recipe when filters change
     setRecept(null)
     setNoResults(false)
     setError(null)

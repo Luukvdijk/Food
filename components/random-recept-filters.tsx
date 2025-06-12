@@ -22,7 +22,6 @@ export function RandomReceptFilters({ onFiltersChange }: RandomReceptFiltersProp
   const [selectedEigenaar, setSelectedEigenaar] = useState<string>("all")
   const [dbInfo, setDbInfo] = useState<any>(null)
 
-  // Fetch database info on component mount to help debug
   useEffect(() => {
     const fetchDbInfo = async () => {
       try {
@@ -30,10 +29,9 @@ export function RandomReceptFilters({ onFiltersChange }: RandomReceptFiltersProp
         if (response.ok) {
           const data = await response.json()
           setDbInfo(data)
-          console.log("Database info:", data)
         }
       } catch (error) {
-        console.error("Error fetching DB info:", error)
+        // Silently fail if debug endpoint is not available
       }
     }
 
@@ -51,24 +49,20 @@ export function RandomReceptFilters({ onFiltersChange }: RandomReceptFiltersProp
     if (finalSeizoen && finalSeizoen !== "all") filters.seizoen = finalSeizoen as Seizoen
     if (finalEigenaar && finalEigenaar !== "all") filters.eigenaar = finalEigenaar as Eigenaar
 
-    console.log("Updating filters:", filters)
     onFiltersChange(filters)
   }
 
   const handleTypeChange = (value: string) => {
-    console.log("Type changed to:", value)
     setSelectedType(value)
     updateFilters(value, undefined, undefined)
   }
 
   const handleSeizoenChange = (value: string) => {
-    console.log("Seizoen changed to:", value)
     setSelectedSeizoen(value)
     updateFilters(undefined, value, undefined)
   }
 
   const handleEigenaarChange = (value: string) => {
-    console.log("Eigenaar changed to:", value)
     setSelectedEigenaar(value)
     updateFilters(undefined, undefined, value)
   }
