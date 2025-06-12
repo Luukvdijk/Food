@@ -49,6 +49,8 @@ export function IngredientsManager() {
       width: "100%",
       maxWidth: "20rem",
       cursor: "pointer",
+      outline: "none",
+      transition: "border-color 0.2s ease, box-shadow 0.2s ease",
     },
     table: {
       width: "100%",
@@ -270,6 +272,14 @@ export function IngredientsManager() {
                 value={selectedReceptId}
                 onChange={(e) => setSelectedReceptId(e.target.value)}
                 style={styles.select}
+                onFocus={(e) => {
+                  e.currentTarget.style.borderColor = "#eee1d1"
+                  e.currentTarget.style.boxShadow = "0 0 0 3px rgba(238, 225, 209, 0.3)"
+                }}
+                onBlur={(e) => {
+                  e.currentTarget.style.borderColor = "#d1d5db"
+                  e.currentTarget.style.boxShadow = "none"
+                }}
               >
                 <option value="all">Alle recepten</option>
                 {recepten.map((recept) => (
