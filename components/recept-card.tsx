@@ -11,7 +11,7 @@ interface ReceptCardProps {
 
 export function ReceptCard({ recept }: ReceptCardProps) {
   return (
-    <Card className="overflow-hidden h-full flex flex-col">
+    <Card className="overflow-hidden h-full flex flex-col bg-secondary border-secondary">
       <div className="relative h-48">
         <Image
           src={recept.afbeelding_url || "/placeholder.svg?height=400&width=600"}
@@ -20,13 +20,13 @@ export function ReceptCard({ recept }: ReceptCardProps) {
           className="object-cover"
         />
       </div>
-      <CardHeader>
+      <CardHeader className="bg-secondary">
         <Link href={`/recept/${recept.id}`} className="hover:underline">
-          <h3 className="text-lg font-semibold">{recept.naam}</h3>
+          <h3 className="text-lg font-semibold text-secondary-foreground">{recept.naam}</h3>
         </Link>
         <p className="text-sm text-muted-foreground line-clamp-2">{recept.beschrijving}</p>
       </CardHeader>
-      <CardContent className="flex-grow">
+      <CardContent className="flex-grow bg-secondary">
         <div className="flex items-center gap-4 text-sm text-muted-foreground mb-4">
           <div className="flex items-center">
             <Clock className="mr-1 h-4 w-4" />
@@ -38,16 +38,18 @@ export function ReceptCard({ recept }: ReceptCardProps) {
           </div>
         </div>
       </CardContent>
-      <CardFooter>
+      <CardFooter className="bg-secondary">
         <div className="flex flex-wrap gap-2">
-          <Badge variant="outline">{recept.type}</Badge>
+          <Badge variant="outline" className="border-primary text-primary bg-white">
+            {recept.type}
+          </Badge>
           {recept.seizoen.map((s) => (
-            <Badge key={s} variant="secondary">
+            <Badge key={s} variant="secondary" className="bg-accent text-accent-foreground">
               {s}
             </Badge>
           ))}
           {recept.tags.slice(0, 2).map((tag) => (
-            <Badge key={tag} variant="outline">
+            <Badge key={tag} variant="outline" className="border-primary text-primary bg-white">
               {tag}
             </Badge>
           ))}
