@@ -2,6 +2,7 @@
 
 import { supabase } from "@/lib/db"
 import type { Recept } from "@/types"
+import { revalidatePath } from "next/cache"
 
 export async function getAllRecepten(): Promise<Recept[]> {
   try {
@@ -143,6 +144,16 @@ export async function getRandomRecept(): Promise<Recept | null> {
     console.error("Error fetching random recept:", error)
     return null
   }
+}
+
+export async function refreshHomepage() {
+  "use server"
+
+  // Revalidate the homepage to force a fresh random recipe
+  revalidatePath("/")
+
+  // Return success
+  return { success: true }
 }
 
 export async function checkDatabaseStatus() {

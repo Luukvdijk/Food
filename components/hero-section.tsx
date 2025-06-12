@@ -1,9 +1,11 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useTransition } from "react"
 import { Star, Minus, Plus, Users } from "lucide-react"
 import Image from "next/image"
 import { IngredientsPopup } from "./ingredients-popup"
+import { refreshHomepage } from "@/app/actions"
+import { useRouter } from "next/navigation"
 
 interface HeroSectionProps {
   recept?: {
@@ -20,12 +22,23 @@ export function HeroSection({ recept }: HeroSectionProps) {
   const [servings, setServings] = useState(1)
   const [showIngredientsPopup, setShowIngredientsPopup] = useState(false)
   const [hoverStates, setHoverStates] = useState<Record<string, boolean>>({})
+  const [isPending, startTransition] = useTransition()
+  const router = useRouter()
 
   const incrementServings = () => setServings((prev) => prev + 1)
   const decrementServings = () => setServings((prev) => Math.max(1, prev - 1))
 
-  const refreshPage = () => {
-    window.location.reload()
+  const handleNewRecipe = () => {
+    startTransition(async () => {
+      try {
+        await refreshHomepage()
+        router.refresh()
+      } catch (error) {
+        console.error("Error refreshing recipe:", error)
+        // Fallback to window reload if server action fails
+        window.location.reload()
+      }
+    })
   }
 
   const handleImageClick = () => {
@@ -124,7 +137,8 @@ export function HeroSection({ recept }: HeroSectionProps) {
               {/* Controls */}
               <div className="flex items-center gap-6">
                 <button
-                  onClick={refreshPage}
+                  onClick={handleNewRecipe}
+                  disabled={isPending}
                   style={{
                     backgroundColor: "#e75129",
                     color: "white",
@@ -133,17 +147,22 @@ export function HeroSection({ recept }: HeroSectionProps) {
                     fontWeight: "500",
                     border: "none",
                     borderRadius: "6px",
-                    cursor: "pointer",
+                    cursor: isPending ? "not-allowed" : "pointer",
                     transition: "background-color 0.2s ease",
+                    opacity: isPending ? 0.7 : 1,
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = "#d63e1a"
+                    if (!isPending) {
+                      e.currentTarget.style.backgroundColor = "#d63e1a"
+                    }
                   }}
                   onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = "#e75129"
+                    if (!isPending) {
+                      e.currentTarget.style.backgroundColor = "#e75129"
+                    }
                   }}
                 >
-                  Nieuw gerecht
+                  {isPending ? "Laden..." : "Nieuw gerecht"}
                 </button>
 
                 <div className="flex items-center gap-4">
