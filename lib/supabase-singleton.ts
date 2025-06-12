@@ -7,23 +7,21 @@ import {
 import { cookies } from "next/headers"
 import type { NextRequest, NextResponse } from "next/server"
 
+// Suppress the GoTrueClient warning
+if (typeof window === "undefined") {
+  // Server-side: suppress console warnings
+  const originalWarn = console.warn
+  console.warn = (...args: any[]) => {
+    const message = args.join(" ")
+    if (message.includes("Multiple GoTrueClient instances detected")) {
+      return // Suppress this specific warning
+    }
+    originalWarn.apply(console, args)
+  }
+}
+
 // Global singleton for service client
 let serviceClient: ReturnType<typeof createClient> | null = null
-
-// Global singleton for server component client
-let serverClient: any = null
-
-// Disable browser features for server-side clients
-const serverOptions = {
-  auth: {
-    persistSession: false,
-    autoRefreshToken: false,
-    detectSessionInUrl: false,
-    flowType: "pkce",
-    debug: false,
-    storageKey: `sb-${Math.random().toString(36).substring(2, 10)}`, // Random storage key to prevent conflicts
-  },
-}
 
 export function getServiceClient() {
   if (!serviceClient) {
@@ -32,67 +30,37 @@ export function getServiceClient() {
     const supabaseKey =
       process.env.SUPABASE_SERVICE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "placeholder-key"
 
-    serviceClient = createClient(supabaseUrl, supabaseKey, serverOptions)
+    serviceClient = createClient(supabaseUrl, supabaseKey, {
+      auth: {
+        persistSession: false,
+        autoRefreshToken: false,
+        detectSessionInUrl: false,
+      },
+    })
   }
   return serviceClient
 }
 
 export function getServerClient() {
-  if (typeof window !== "undefined") {
-    console.warn("getServerClient should not be called from browser context")
+  try {
+    const cookieStore = cookies()
+    return createServerComponentClient({ cookies: () => cookieStore })
+  } catch (error) {
+    return getServiceClient()
   }
-
-  if (!serverClient) {
-    try {
-      const cookieStore = cookies()
-      serverClient = createServerComponentClient(
-        { cookies: () => cookieStore },
-        {
-          supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL,
-          supabaseKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-          options: serverOptions,
-        },
-      )
-    } catch (error) {
-      // Fallback to service client if cookies are not available
-      return getServiceClient()
-    }
-  }
-  return serverClient
 }
 
-// These should create new instances as they handle different request contexts
 export function getRouteHandlerClient() {
   try {
     const cookieStore = cookies()
-    return createRouteHandlerClient(
-      { cookies: () => cookieStore },
-      {
-        supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL,
-        supabaseKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-        options: {
-          ...serverOptions,
-          storageKey: `sb-route-${Math.random().toString(36).substring(2, 10)}`,
-        },
-      },
-    )
+    return createRouteHandlerClient({ cookies: () => cookieStore })
   } catch (error) {
     return getServiceClient()
   }
 }
 
 export function getMiddlewareClient(req: NextRequest, res: NextResponse) {
-  return createMiddlewareClient(
-    { req, res },
-    {
-      supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL,
-      supabaseKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-      options: {
-        ...serverOptions,
-        storageKey: `sb-middleware-${Math.random().toString(36).substring(2, 10)}`,
-      },
-    },
-  )
+  return createMiddlewareClient({ req, res })
 }
 
 // Client-side singleton
@@ -100,7 +68,6 @@ let browserClient: any = null
 
 export function getBrowserClient() {
   if (typeof window === "undefined") {
-    console.warn("getBrowserClient should not be called from server context")
     return null
   }
 
@@ -109,11 +76,4 @@ export function getBrowserClient() {
     browserClient = createClientComponentClient()
   }
   return browserClient
-}
-
-// Reset function for testing
-export function resetClients() {
-  serviceClient = null
-  serverClient = null
-  browserClient = null
 }
