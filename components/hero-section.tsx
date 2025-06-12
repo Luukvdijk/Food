@@ -1,32 +1,32 @@
 "use client"
 
 import { useState, useTransition } from "react"
-import { Star, Minus, Plus, Users } from "lucide-react"
-import Image from "next/image"
+import { useRouter } from "next/navigation"
+import { Plus, Minus } from "lucide-react"
 import { IngredientsPopup } from "./ingredients-popup"
 import { refreshHomepage } from "@/app/actions"
-import { useRouter } from "next/navigation"
+
+interface Recept {
+  id: number
+  naam: string
+  afbeelding_url?: string
+  seizoen?: string
+  type?: string
+  tags?: string
+  bereidingstijd?: number
+  moeilijkheidsgraad?: string
+}
 
 interface HeroSectionProps {
-  recept?: {
-    id: number
-    naam: string
-    afbeelding_url?: string
-    seizoen: string[]
-    tags: string[]
-    type: string
-  } | null
+  recept: Recept | null
 }
 
 export function HeroSection({ recept }: HeroSectionProps) {
-  const [servings, setServings] = useState(1)
-  const [showIngredientsPopup, setShowIngredientsPopup] = useState(false)
-  const [hoverStates, setHoverStates] = useState<Record<string, boolean>>({})
+  const [servings, setServings] = useState(4)
+  const [showIngredients, setShowIngredients] = useState(false)
+  const [hoveredBadge, setHoveredBadge] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
   const router = useRouter()
-
-  const incrementServings = () => setServings((prev) => prev + 1)
-  const decrementServings = () => setServings((prev) => Math.max(1, prev - 1))
 
   const handleNewRecipe = () => {
     startTransition(async () => {
@@ -34,253 +34,274 @@ export function HeroSection({ recept }: HeroSectionProps) {
         await refreshHomepage()
         router.refresh()
       } catch (error) {
-        console.error("Error refreshing recipe:", error)
-        // Fallback to window reload if server action fails
+        console.error("Error refreshing:", error)
+        // Fallback to page reload
         window.location.reload()
       }
     })
   }
 
-  const handleImageClick = () => {
-    if (recept) {
-      setShowIngredientsPopup(true)
-    }
-  }
-
-  const handleBadgeHover = (id: string, isHovering: boolean) => {
-    setHoverStates((prev) => ({
-      ...prev,
-      [id]: isHovering,
-    }))
+  const adjustServings = (increment: boolean) => {
+    setServings((prev) => {
+      if (increment) return Math.min(prev + 1, 12)
+      return Math.max(prev - 1, 1)
+    })
   }
 
   if (!recept) {
     return (
-      <section className="bg-[#286058] text-white relative overflow-hidden min-h-[600px] w-full">
-        <div className="w-full py-12 px-8 relative z-10">
-          <div className="text-center">
-            <h1 className="text-6xl font-bold mb-8">Geen recept gevonden</h1>
-            <p className="text-xl opacity-90">Probeer een ander recept te zoeken</p>
-          </div>
+      <div className="relative min-h-screen w-full bg-[#286058] flex items-center justify-center">
+        <div className="text-center text-white">
+          <div className="text-6xl mb-6">🍽️</div>
+          <h2 className="text-3xl font-bold mb-4">Geen recept gevonden</h2>
+          <p className="text-xl opacity-80">Probeer later opnieuw</p>
         </div>
-      </section>
+      </div>
     )
   }
 
   return (
     <>
-      <section className="bg-[#286058] text-white relative overflow-hidden min-h-[600px] w-full">
-        <div className="w-full py-12 px-8 relative z-10">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center max-w-7xl mx-auto">
-            {/* Left Content */}
-            <div className="space-y-8">
-              <h1 className="text-6xl font-bold leading-tight">{recept.naam}</h1>
+      <div className="relative min-h-screen w-full bg-[#286058] flex items-center justify-center">
+        {/* Background Image with Overlay */}
+        <div className="absolute inset-0">
+          <img
+            src={recept.afbeelding_url || "/placeholder.svg?height=800&width=1200&query=delicious food recipe"}
+            alt={recept.naam}
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-[#286058]/60"></div>
+        </div>
 
-              {/* Tags */}
-              <div style={{ display: "flex", flexWrap: "wrap", gap: "12px" }}>
-                {recept.seizoen.map((seizoen) => (
-                  <span
-                    key={seizoen}
-                    style={{
-                      backgroundColor: hoverStates[`seizoen-${seizoen}`] ? "#d1c7b8" : "#eee1d1",
-                      color: "#286058",
-                      padding: "8px 16px",
-                      borderRadius: "4px",
-                      fontSize: "14px",
-                      fontWeight: "500",
-                      transition: "background-color 0.2s ease",
-                      cursor: "default",
-                    }}
-                    onMouseEnter={() => handleBadgeHover(`seizoen-${seizoen}`, true)}
-                    onMouseLeave={() => handleBadgeHover(`seizoen-${seizoen}`, false)}
-                  >
-                    {seizoen}
-                  </span>
-                ))}
-                <span
-                  style={{
-                    backgroundColor: hoverStates["type"] ? "#d1c7b8" : "#eee1d1",
-                    color: "#286058",
-                    padding: "8px 16px",
-                    borderRadius: "4px",
-                    fontSize: "14px",
-                    fontWeight: "500",
-                    transition: "background-color 0.2s ease",
-                    cursor: "default",
-                  }}
-                  onMouseEnter={() => handleBadgeHover("type", true)}
-                  onMouseLeave={() => handleBadgeHover("type", false)}
-                >
-                  {recept.type}
-                </span>
-                {recept.tags.slice(0, 1).map((tag) => (
-                  <span
-                    key={tag}
-                    style={{
-                      backgroundColor: hoverStates[`tag-${tag}`] ? "#d1c7b8" : "#eee1d1",
-                      color: "#286058",
-                      padding: "8px 16px",
-                      borderRadius: "4px",
-                      fontSize: "14px",
-                      fontWeight: "500",
-                      transition: "background-color 0.2s ease",
-                      cursor: "default",
-                    }}
-                    onMouseEnter={() => handleBadgeHover(`tag-${tag}`, true)}
-                    onMouseLeave={() => handleBadgeHover(`tag-${tag}`, false)}
-                  >
-                    {tag}
-                  </span>
-                ))}
-              </div>
+        {/* Content */}
+        <div className="relative z-10 text-center text-white px-8 max-w-4xl mx-auto">
+          {/* Recipe Title */}
+          <h1 className="text-5xl md:text-7xl font-bold mb-8 leading-tight">{recept.naam}</h1>
 
-              {/* Controls */}
-              <div className="flex items-center gap-6">
-                <button
-                  onClick={handleNewRecipe}
-                  disabled={isPending}
-                  style={{
-                    backgroundColor: "#e75129",
-                    color: "white",
-                    padding: "12px 32px",
-                    fontSize: "18px",
-                    fontWeight: "500",
-                    border: "none",
-                    borderRadius: "6px",
-                    cursor: isPending ? "not-allowed" : "pointer",
-                    transition: "background-color 0.2s ease",
-                    opacity: isPending ? 0.7 : 1,
-                  }}
-                  onMouseEnter={(e) => {
-                    if (!isPending) {
-                      e.currentTarget.style.backgroundColor = "#d63e1a"
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (!isPending) {
-                      e.currentTarget.style.backgroundColor = "#e75129"
-                    }
-                  }}
-                >
-                  {isPending ? "Laden..." : "Nieuw gerecht"}
-                </button>
+          {/* Recipe Info Badges */}
+          <div className="flex flex-wrap justify-center gap-4 mb-12">
+            {recept.seizoen && (
+              <span
+                style={{
+                  backgroundColor: hoveredBadge === `seizoen-${recept.id}` ? "#d1c7b8" : "#eee1d1",
+                  color: "#286058",
+                  padding: "8px 16px",
+                  borderRadius: "20px",
+                  fontSize: "14px",
+                  fontWeight: "500",
+                  cursor: "default",
+                  transition: "background-color 0.2s ease",
+                }}
+                onMouseEnter={() => setHoveredBadge(`seizoen-${recept.id}`)}
+                onMouseLeave={() => setHoveredBadge(null)}
+              >
+                🌱 {recept.seizoen}
+              </span>
+            )}
+            {recept.type && (
+              <span
+                style={{
+                  backgroundColor: hoveredBadge === `type-${recept.id}` ? "#d1c7b8" : "#eee1d1",
+                  color: "#286058",
+                  padding: "8px 16px",
+                  borderRadius: "20px",
+                  fontSize: "14px",
+                  fontWeight: "500",
+                  cursor: "default",
+                  transition: "background-color 0.2s ease",
+                }}
+                onMouseEnter={() => setHoveredBadge(`type-${recept.id}`)}
+                onMouseLeave={() => setHoveredBadge(null)}
+              >
+                🍽️ {recept.type}
+              </span>
+            )}
+            {recept.bereidingstijd && (
+              <span
+                style={{
+                  backgroundColor: hoveredBadge === `tijd-${recept.id}` ? "#d1c7b8" : "#eee1d1",
+                  color: "#286058",
+                  padding: "8px 16px",
+                  borderRadius: "20px",
+                  fontSize: "14px",
+                  fontWeight: "500",
+                  cursor: "default",
+                  transition: "background-color 0.2s ease",
+                }}
+                onMouseEnter={() => setHoveredBadge(`tijd-${recept.id}`)}
+                onMouseLeave={() => setHoveredBadge(null)}
+              >
+                ⏱️ {recept.bereidingstijd} min
+              </span>
+            )}
+            {recept.moeilijkheidsgraad && (
+              <span
+                style={{
+                  backgroundColor: hoveredBadge === `moeilijk-${recept.id}` ? "#d1c7b8" : "#eee1d1",
+                  color: "#286058",
+                  padding: "8px 16px",
+                  borderRadius: "20px",
+                  fontSize: "14px",
+                  fontWeight: "500",
+                  cursor: "default",
+                  transition: "background-color 0.2s ease",
+                }}
+                onMouseEnter={() => setHoveredBadge(`moeilijk-${recept.id}`)}
+                onMouseLeave={() => setHoveredBadge(null)}
+              >
+                📊 {recept.moeilijkheidsgraad}
+              </span>
+            )}
+            {recept.tags && (
+              <span
+                style={{
+                  backgroundColor: hoveredBadge === `tags-${recept.id}` ? "#d1c7b8" : "#eee1d1",
+                  color: "#286058",
+                  padding: "8px 16px",
+                  borderRadius: "20px",
+                  fontSize: "14px",
+                  fontWeight: "500",
+                  cursor: "default",
+                  transition: "background-color 0.2s ease",
+                }}
+                onMouseEnter={() => setHoveredBadge(`tags-${recept.id}`)}
+                onMouseLeave={() => setHoveredBadge(null)}
+              >
+                🏷️ {recept.tags}
+              </span>
+            )}
+          </div>
 
-                <div className="flex items-center gap-4">
-                  <div className="flex items-center gap-2 bg-white/10 rounded-full px-4 py-2">
-                    <button
-                      onClick={decrementServings}
-                      style={{
-                        height: "32px",
-                        width: "32px",
-                        borderRadius: "50%",
-                        border: "1px solid rgba(255, 255, 255, 0.3)",
-                        color: "white",
-                        backgroundColor: "transparent",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        cursor: "pointer",
-                        transition: "background-color 0.2s ease",
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.backgroundColor = "rgba(255, 255, 255, 0.2)"
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.backgroundColor = "transparent"
-                      }}
-                    >
-                      <Minus className="h-4 w-4" />
-                    </button>
-                    <span className="text-xl font-medium w-8 text-center">{servings}</span>
-                    <button
-                      onClick={incrementServings}
-                      style={{
-                        height: "32px",
-                        width: "32px",
-                        borderRadius: "50%",
-                        border: "1px solid rgba(255, 255, 255, 0.3)",
-                        color: "white",
-                        backgroundColor: "transparent",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        cursor: "pointer",
-                        transition: "background-color 0.2s ease",
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.backgroundColor = "rgba(255, 255, 255, 0.2)"
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.backgroundColor = "transparent"
-                      }}
-                    >
-                      <Plus className="h-4 w-4" />
-                    </button>
-                  </div>
+          {/* Servings Control */}
+          <div className="flex items-center justify-center gap-6 mb-12">
+            <span className="text-xl font-medium">Voor</span>
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => adjustServings(false)}
+                disabled={servings <= 1}
+                style={{
+                  width: "48px",
+                  height: "48px",
+                  borderRadius: "50%",
+                  border: "2px solid white",
+                  backgroundColor: "transparent",
+                  color: "white",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  cursor: servings <= 1 ? "not-allowed" : "pointer",
+                  opacity: servings <= 1 ? 0.5 : 1,
+                  transition: "background-color 0.2s ease",
+                }}
+                onMouseEnter={(e) => {
+                  if (servings > 1) {
+                    e.currentTarget.style.backgroundColor = "rgba(255, 255, 255, 0.2)"
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = "transparent"
+                }}
+              >
+                <Minus size={20} />
+              </button>
 
-                  <Users className="h-6 w-6 text-white/70" />
-                </div>
-              </div>
+              <span className="text-3xl font-bold min-w-[60px] text-center">{servings}</span>
+
+              <button
+                onClick={() => adjustServings(true)}
+                disabled={servings >= 12}
+                style={{
+                  width: "48px",
+                  height: "48px",
+                  borderRadius: "50%",
+                  border: "2px solid white",
+                  backgroundColor: "transparent",
+                  color: "white",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  cursor: servings >= 12 ? "not-allowed" : "pointer",
+                  opacity: servings >= 12 ? 0.5 : 1,
+                  transition: "background-color 0.2s ease",
+                }}
+                onMouseEnter={(e) => {
+                  if (servings < 12) {
+                    e.currentTarget.style.backgroundColor = "rgba(255, 255, 255, 0.2)"
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = "transparent"
+                }}
+              >
+                <Plus size={20} />
+              </button>
             </div>
+            <span className="text-xl font-medium">{servings === 1 ? "persoon" : "personen"}</span>
+          </div>
 
-            {/* Right Content - Recipe Image */}
-            <div className="relative flex justify-center items-center">
-              {/* Slightly larger overlay container */}
-              <div className="relative w-72 h-72 cursor-pointer group" onClick={handleImageClick}>
-                {/* Main image */}
-                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 rounded-full overflow-hidden">
-                  <Image
-                    src={recept.afbeelding_url || "/placeholder.svg?height=400&width=400&query=delicious food"}
-                    alt={recept.naam}
-                    fill
-                    className="object-cover transition-transform duration-300 group-hover:scale-110"
-                  />
+          {/* Action Buttons */}
+          <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
+            <button
+              onClick={() => setShowIngredients(true)}
+              style={{
+                backgroundColor: "#eee1d1",
+                color: "#286058",
+                padding: "16px 32px",
+                borderRadius: "12px",
+                fontSize: "18px",
+                fontWeight: "600",
+                border: "none",
+                cursor: "pointer",
+                transition: "background-color 0.2s ease",
+                minWidth: "200px",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = "#d1c7b8"
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = "#eee1d1"
+              }}
+            >
+              Bekijk Recept
+            </button>
 
-                  {/* Color overlay on hover */}
-                  <div className="absolute inset-0 bg-[#e75129]/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                </div>
-
-                {/* Dashed Circle Overlay - just slightly bigger than image */}
-                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
-                  <svg className="w-full h-full" viewBox="0 0 288 288" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <circle
-                      cx="144"
-                      cy="144"
-                      r="140"
-                      stroke="#e75129"
-                      strokeWidth="6"
-                      strokeDasharray="15 10"
-                      strokeLinecap="round"
-                      fill="none"
-                    />
-                  </svg>
-                </div>
-
-                {/* Click Hint */}
-                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-10">
-                  <div className="bg-black/60 text-white px-4 py-2 rounded-lg text-sm font-medium">
-                    Klik voor ingrediënten
-                  </div>
-                </div>
-              </div>
-
-              {/* Rating */}
-              <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2">
-                <div className="flex gap-2">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <Star key={star} className="h-8 w-8 fill-[#e75129] text-[#e75129]" />
-                  ))}
-                </div>
-              </div>
-            </div>
+            <button
+              onClick={handleNewRecipe}
+              disabled={isPending}
+              style={{
+                backgroundColor: "#e75129",
+                color: "white",
+                padding: "16px 32px",
+                borderRadius: "12px",
+                fontSize: "18px",
+                fontWeight: "600",
+                border: "none",
+                cursor: isPending ? "not-allowed" : "pointer",
+                transition: "background-color 0.2s ease",
+                minWidth: "200px",
+                opacity: isPending ? 0.7 : 1,
+              }}
+              onMouseEnter={(e) => {
+                if (!isPending) {
+                  e.currentTarget.style.backgroundColor = "#d63e1a"
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!isPending) {
+                  e.currentTarget.style.backgroundColor = "#e75129"
+                }
+              }}
+            >
+              {isPending ? "Laden..." : "Nieuw Gerecht"}
+            </button>
           </div>
         </div>
-      </section>
+      </div>
 
       {/* Ingredients Popup */}
       <IngredientsPopup
-        isOpen={showIngredientsPopup}
-        onClose={() => setShowIngredientsPopup(false)}
+        isOpen={showIngredients}
+        onClose={() => setShowIngredients(false)}
         receptId={recept.id}
         servings={servings}
         receptNaam={recept.naam}
