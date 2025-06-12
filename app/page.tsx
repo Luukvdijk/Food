@@ -23,14 +23,74 @@ async function getRandomReceptForInitialLoad() {
 
 async function getBijgerechtenForRecept(receptId: number) {
   try {
-    // Get bijgerechten linked to this recipe
+    // First try to get bijgerechten from junction table
     const { data: receptBijgerechten, error: linkError } = await supabase
       .from("recept_bijgerechten")
       .select("bijgerecht_id")
       .eq("recept_id", receptId)
 
-    if (linkError) throw linkError
-    if (!receptBijgerechten || receptBijgerechten.length === 0) return []
+    if (linkError) {
+      // If junction table doesn't exist, get all bijgerechten as fallback
+      console.log("Junction table not found, showing all bijgerechten")
+      const { data: allBijgerechten, error: allError } = await supabase.from("bijgerechten").select("*").limit(3)
+
+      if (allError) throw allError
+
+      // Add ingredient counts
+      const bijgerechtenWithCounts = await Promise.all(
+        (allBijgerechten || []).map(async (bijgerecht) => {
+          // Try to get ingredient count, fallback to 0 if table doesn't exist
+          try {
+            const { count } = await supabase
+              .from("bijgerecht_ingredienten")
+              .select("*", { count: "exact", head: true })
+              .eq("bijgerecht_id", bijgerecht.id)
+
+            return {
+              ...bijgerecht,
+              ingredienten_count: count || 0,
+            }
+          } catch {
+            return {
+              ...bijgerecht,
+              ingredienten_count: 0,
+            }
+          }
+        }),
+      )
+
+      return bijgerechtenWithCounts
+    }
+
+    if (!receptBijgerechten || receptBijgerechten.length === 0) {
+      // No linked bijgerechten, show some random ones
+      const { data: randomBijgerechten, error: randomError } = await supabase.from("bijgerechten").select("*").limit(3)
+
+      if (randomError) throw randomError
+
+      const bijgerechtenWithCounts = await Promise.all(
+        (randomBijgerechten || []).map(async (bijgerecht) => {
+          try {
+            const { count } = await supabase
+              .from("bijgerecht_ingredienten")
+              .select("*", { count: "exact", head: true })
+              .eq("bijgerecht_id", bijgerecht.id)
+
+            return {
+              ...bijgerecht,
+              ingredienten_count: count || 0,
+            }
+          } catch {
+            return {
+              ...bijgerecht,
+              ingredienten_count: 0,
+            }
+          }
+        }),
+      )
+
+      return bijgerechtenWithCounts
+    }
 
     const bijgerechtIds = receptBijgerechten.map((rb) => rb.bijgerecht_id)
 
@@ -45,14 +105,21 @@ async function getBijgerechtenForRecept(receptId: number) {
     // Get ingredient counts for each bijgerecht
     const bijgerechtenWithCounts = await Promise.all(
       (bijgerechten || []).map(async (bijgerecht) => {
-        const { count } = await supabase
-          .from("bijgerecht_ingredienten")
-          .select("*", { count: "exact", head: true })
-          .eq("bijgerecht_id", bijgerecht.id)
+        try {
+          const { count } = await supabase
+            .from("bijgerecht_ingredienten")
+            .select("*", { count: "exact", head: true })
+            .eq("bijgerecht_id", bijgerecht.id)
 
-        return {
-          ...bijgerecht,
-          ingredienten_count: count || 0,
+          return {
+            ...bijgerecht,
+            ingredienten_count: count || 0,
+          }
+        } catch {
+          return {
+            ...bijgerecht,
+            ingredienten_count: 0,
+          }
         }
       }),
     )
@@ -60,6 +127,7 @@ async function getBijgerechtenForRecept(receptId: number) {
     return bijgerechtenWithCounts
   } catch (error) {
     console.error("Error fetching bijgerechten:", error)
+    // Return empty array on error
     return []
   }
 }
@@ -93,7 +161,7 @@ export default async function Home() {
             <div className="text-center py-12">
               <h3 className="text-xl font-semibold mb-2 text-[#286058]">Geen bijgerechten gevonden</h3>
               <p className="text-gray-600 mb-4">
-                Dit recept heeft geen gekoppelde bijgerechten. Gebruik de zoekfunctie om alle recepten te bekijken.
+                Er zijn nog geen bijgerechten in de database. Ga naar de admin pagina om bijgerechten toe te voegen.
               </p>
             </div>
           )}
