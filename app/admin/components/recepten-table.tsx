@@ -2,9 +2,6 @@
 
 import { useState } from "react"
 import { deleteRecept } from "../actions"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -17,7 +14,6 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { Trash2, Eye, Clock, Users, Pencil, Loader2 } from "lucide-react"
-import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useToast } from "@/hooks/use-toast"
 
@@ -86,87 +82,267 @@ export function ReceptenTable({ recepten }: ReceptenTableProps) {
     }
   }
 
+  // Custom table styles
+  const tableStyles = {
+    container: {
+      width: "100%",
+      overflowX: "auto" as const,
+      borderRadius: "8px",
+      border: "1px solid #e2e8f0",
+    },
+    table: {
+      width: "100%",
+      borderCollapse: "collapse" as const,
+      fontSize: "14px",
+    },
+    thead: {
+      backgroundColor: "#f8f9fa",
+    },
+    th: {
+      padding: "12px 16px",
+      textAlign: "left" as const,
+      fontWeight: 500,
+      color: "#286058",
+      borderBottom: "1px solid #e2e8f0",
+    },
+    tr: {
+      borderBottom: "1px solid #e2e8f0",
+      transition: "background-color 0.2s ease",
+    },
+    trHover: {
+      backgroundColor: "#f1ece2", // Lighter cream color for hover
+    },
+    td: {
+      padding: "12px 16px",
+      color: "#286058",
+    },
+    actionButton: {
+      padding: "6px",
+      borderRadius: "4px",
+      backgroundColor: "transparent",
+      border: "1px solid #e2e8f0",
+      cursor: "pointer",
+      display: "inline-flex",
+      alignItems: "center",
+      justifyContent: "center",
+      transition: "all 0.2s ease",
+    },
+    actionButtonHover: {
+      backgroundColor: "#f1ece2", // Lighter cream for hover
+      borderColor: "#d1c7b8",
+    },
+    deleteButton: {
+      backgroundColor: "#e75129",
+      color: "white",
+      border: "none",
+      padding: "8px 16px",
+      borderRadius: "6px",
+      cursor: "pointer",
+      transition: "background-color 0.2s ease",
+    },
+    deleteButtonHover: {
+      backgroundColor: "#d63e1a", // Darker orange
+    },
+    cancelButton: {
+      backgroundColor: "#eee1d1",
+      color: "#286058",
+      border: "none",
+      padding: "8px 16px",
+      borderRadius: "6px",
+      cursor: "pointer",
+      transition: "background-color 0.2s ease",
+    },
+    cancelButtonHover: {
+      backgroundColor: "#d1c7b8", // Darker cream
+    },
+  }
+
   return (
-    <div className="rounded-md border">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Naam</TableHead>
-            {hasEigenaarColumn && <TableHead>Eigenaar</TableHead>}
-            <TableHead>Type</TableHead>
-            <TableHead>Tijd</TableHead>
-            <TableHead>Personen</TableHead>
-            <TableHead>Ingrediënten</TableHead>
-            <TableHead>Bijgerechten</TableHead>
-            <TableHead>Acties</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
+    <div style={tableStyles.container}>
+      <table style={tableStyles.table}>
+        <thead style={tableStyles.thead}>
+          <tr>
+            <th style={tableStyles.th}>Naam</th>
+            {hasEigenaarColumn && <th style={tableStyles.th}>Eigenaar</th>}
+            <th style={tableStyles.th}>Type</th>
+            <th style={tableStyles.th}>Tijd</th>
+            <th style={tableStyles.th}>Personen</th>
+            <th style={tableStyles.th}>Ingrediënten</th>
+            <th style={tableStyles.th}>Bijgerechten</th>
+            <th style={tableStyles.th}>Acties</th>
+          </tr>
+        </thead>
+        <tbody>
           {recepten.map((recept) => (
-            <TableRow key={recept.id}>
-              <TableCell className="font-medium">
+            <tr
+              key={recept.id}
+              style={tableStyles.tr}
+              onMouseEnter={(e) => {
+                Object.assign(e.currentTarget.style, tableStyles.trHover)
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = ""
+              }}
+            >
+              <td style={tableStyles.td}>
                 <div>
-                  <div className="font-semibold">{recept.naam}</div>
-                  <div className="text-sm text-muted-foreground line-clamp-1">{recept.beschrijving}</div>
+                  <div style={{ fontWeight: 600 }}>{recept.naam}</div>
+                  <div
+                    style={{
+                      fontSize: "12px",
+                      color: "#64748b",
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      maxWidth: "300px",
+                    }}
+                  >
+                    {recept.beschrijving}
+                  </div>
                 </div>
-              </TableCell>
+              </td>
               {hasEigenaarColumn && (
-                <TableCell>
-                  <Badge className={getEigenaarColor(recept.eigenaar)}>
+                <td style={tableStyles.td}>
+                  <span
+                    style={{
+                      display: "inline-block",
+                      padding: "2px 8px",
+                      borderRadius: "9999px",
+                      fontSize: "12px",
+                      fontWeight: 500,
+                      backgroundColor: recept.eigenaar === "henk" ? "#dbeafe" : "#fce7f3",
+                      color: recept.eigenaar === "henk" ? "#1e40af" : "#9d174d",
+                    }}
+                  >
                     {recept.eigenaar === "henk" ? "Henk" : "Pepie & Luulie"}
-                  </Badge>
-                </TableCell>
+                  </span>
+                </td>
               )}
-              <TableCell>
-                <Badge variant="outline">{recept.type}</Badge>
-              </TableCell>
-              <TableCell>
-                <div className="flex items-center">
-                  <Clock className="mr-1 h-3 w-3" />
+              <td style={tableStyles.td}>
+                <span
+                  style={{
+                    display: "inline-block",
+                    padding: "2px 8px",
+                    borderRadius: "9999px",
+                    fontSize: "12px",
+                    fontWeight: 500,
+                    backgroundColor: "#f1f5f9",
+                    color: "#475569",
+                    border: "1px solid #e2e8f0",
+                  }}
+                >
+                  {recept.type}
+                </span>
+              </td>
+              <td style={tableStyles.td}>
+                <div style={{ display: "flex", alignItems: "center" }}>
+                  <Clock style={{ marginRight: "4px", height: "12px", width: "12px" }} />
                   {recept.bereidingstijd}m
                 </div>
-              </TableCell>
-              <TableCell>
-                <div className="flex items-center">
-                  <Users className="mr-1 h-3 w-3" />
+              </td>
+              <td style={tableStyles.td}>
+                <div style={{ display: "flex", alignItems: "center" }}>
+                  <Users style={{ marginRight: "4px", height: "12px", width: "12px" }} />
                   {recept.personen}
                 </div>
-              </TableCell>
-              <TableCell>{recept.ingredient_count || 0}</TableCell>
-              <TableCell>{recept.bijgerecht_count || 0}</TableCell>
-              <TableCell>
-                <div className="flex items-center gap-2">
-                  <Button asChild variant="outline" size="sm">
-                    <Link href={`/recept/${recept.id}`}>
-                      <Eye className="h-3 w-3" />
-                    </Link>
-                  </Button>
-                  <Button variant="outline" size="sm" onClick={() => handleEdit(recept.id)}>
-                    <Pencil className="h-3 w-3" />
-                  </Button>
+              </td>
+              <td style={tableStyles.td}>{recept.ingredient_count || 0}</td>
+              <td style={tableStyles.td}>{recept.bijgerecht_count || 0}</td>
+              <td style={tableStyles.td}>
+                <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                  <a
+                    href={`/recept/${recept.id}`}
+                    style={tableStyles.actionButton}
+                    onMouseEnter={(e) => {
+                      Object.assign(e.currentTarget.style, tableStyles.actionButtonHover)
+                    }}
+                    onMouseLeave={(e) => {
+                      Object.assign(e.currentTarget.style, tableStyles.actionButton)
+                    }}
+                  >
+                    <Eye style={{ height: "16px", width: "16px", color: "#286058" }} />
+                  </a>
+                  <button
+                    onClick={() => handleEdit(recept.id)}
+                    style={tableStyles.actionButton}
+                    onMouseEnter={(e) => {
+                      Object.assign(e.currentTarget.style, tableStyles.actionButtonHover)
+                    }}
+                    onMouseLeave={(e) => {
+                      Object.assign(e.currentTarget.style, tableStyles.actionButton)
+                    }}
+                  >
+                    <Pencil style={{ height: "16px", width: "16px", color: "#286058" }} />
+                  </button>
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
-                      <Button variant="outline" size="sm" disabled={deletingId === recept.id}>
+                      <button
+                        style={tableStyles.actionButton}
+                        disabled={deletingId === recept.id}
+                        onMouseEnter={(e) => {
+                          if (deletingId !== recept.id) {
+                            Object.assign(e.currentTarget.style, tableStyles.actionButtonHover)
+                          }
+                        }}
+                        onMouseLeave={(e) => {
+                          if (deletingId !== recept.id) {
+                            Object.assign(e.currentTarget.style, tableStyles.actionButton)
+                          }
+                        }}
+                      >
                         {deletingId === recept.id ? (
-                          <Loader2 className="h-3 w-3 animate-spin" />
+                          <Loader2
+                            style={{
+                              height: "16px",
+                              width: "16px",
+                              color: "#286058",
+                              animation: "spin 1s linear infinite",
+                            }}
+                          />
                         ) : (
-                          <Trash2 className="h-3 w-3" />
+                          <Trash2 style={{ height: "16px", width: "16px", color: "#e75129" }} />
                         )}
-                      </Button>
+                      </button>
                     </AlertDialogTrigger>
-                    <AlertDialogContent>
+                    <AlertDialogContent
+                      style={{
+                        backgroundColor: "#eee1d1",
+                        color: "#286058",
+                        border: "none",
+                        borderRadius: "8px",
+                        padding: "24px",
+                      }}
+                    >
                       <AlertDialogHeader>
-                        <AlertDialogTitle>Recept verwijderen</AlertDialogTitle>
-                        <AlertDialogDescription>
+                        <AlertDialogTitle style={{ fontSize: "18px", fontWeight: 600, color: "#286058" }}>
+                          Recept verwijderen
+                        </AlertDialogTitle>
+                        <AlertDialogDescription style={{ color: "#286058", opacity: 0.8 }}>
                           Weet je zeker dat je "{recept.naam}" wilt verwijderen? Deze actie kan niet ongedaan worden
                           gemaakt.
                         </AlertDialogDescription>
                       </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Annuleren</AlertDialogCancel>
+                      <AlertDialogFooter style={{ marginTop: "16px" }}>
+                        <AlertDialogCancel
+                          style={tableStyles.cancelButton}
+                          onMouseEnter={(e) => {
+                            Object.assign(e.currentTarget.style, tableStyles.cancelButtonHover)
+                          }}
+                          onMouseLeave={(e) => {
+                            Object.assign(e.currentTarget.style, tableStyles.cancelButton)
+                          }}
+                        >
+                          Annuleren
+                        </AlertDialogCancel>
                         <AlertDialogAction
                           onClick={() => handleDelete(recept.id)}
-                          className="bg-red-600 hover:bg-red-700"
+                          style={tableStyles.deleteButton}
+                          onMouseEnter={(e) => {
+                            Object.assign(e.currentTarget.style, tableStyles.deleteButtonHover)
+                          }}
+                          onMouseLeave={(e) => {
+                            Object.assign(e.currentTarget.style, tableStyles.deleteButton)
+                          }}
                         >
                           Verwijderen
                         </AlertDialogAction>
@@ -174,11 +350,11 @@ export function ReceptenTable({ recepten }: ReceptenTableProps) {
                     </AlertDialogContent>
                   </AlertDialog>
                 </div>
-              </TableCell>
-            </TableRow>
+              </td>
+            </tr>
           ))}
-        </TableBody>
-      </Table>
+        </tbody>
+      </table>
     </div>
   )
 }
