@@ -28,17 +28,33 @@ async function handleSignOut() {
 }
 
 async function getAllReceptenAdmin() {
-  const { data, error } = await supabase
-    .from("recepten")
-    .select(`
-      *,
-      ingredient_count: ingredienten(count),
-      bijgerecht_count: bijgerechten(count)
-    `)
-    .order("naam")
+  // Get recipes with counts
+  const { data: recepten, error } = await supabase.from("recepten").select("*").order("naam")
 
   if (error) throw error
-  return data || []
+
+  // Get ingredient counts for each recipe
+  const receptenWithCounts = await Promise.all(
+    (recepten || []).map(async (recept) => {
+      const { count: ingredientCount } = await supabase
+        .from("ingredienten")
+        .select("*", { count: "exact", head: true })
+        .eq("recept_id", recept.id)
+
+      const { count: bijgerechtCount } = await supabase
+        .from("bijgerechten")
+        .select("*", { count: "exact", head: true })
+        .eq("recept_id", recept.id)
+
+      return {
+        ...recept,
+        ingredient_count: ingredientCount || 0,
+        bijgerecht_count: bijgerechtCount || 0,
+      }
+    }),
+  )
+
+  return receptenWithCounts
 }
 
 async function getReceptForEdit(id: number) {
@@ -106,12 +122,17 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
     }
   }
 
+  // Calculate totals
+  const totalRecepten = recepten.length
+  const totalIngredienten = recepten.reduce((sum, r) => sum + (r.ingredient_count || 0), 0)
+  const totalBijgerechten = recepten.reduce((sum, r) => sum + (r.bijgerecht_count || 0), 0)
+
   return (
     <div className="container mx-auto py-8 px-4">
       <div className="flex justify-between items-center mb-8">
         <div>
           <h1 className="text-3xl font-bold">Admin Dashboard</h1>
-          <p className="text-muted-foreground">Welkom terug, {user.name}!</p>
+          <p className="text-muted-foreground">Welkom terug, {user.email}!</p>
         </div>
         <div className="flex gap-2">
           <Button asChild variant="outline">
@@ -218,7 +239,7 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
                 <CardTitle className="text-sm font-medium">Totaal Recepten</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{recepten.length}</div>
+                <div className="text-2xl font-bold">{totalRecepten}</div>
               </CardContent>
             </Card>
             <Card>
@@ -226,9 +247,7 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
                 <CardTitle className="text-sm font-medium">Totaal Ingrediënten</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">
-                  {recepten.reduce((sum, r) => sum + (r.ingredient_count?.[0]?.count || 0), 0)}
-                </div>
+                <div className="text-2xl font-bold">{totalIngredienten}</div>
               </CardContent>
             </Card>
             <Card>
@@ -236,9 +255,7 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
                 <CardTitle className="text-sm font-medium">Totaal Bijgerechten</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">
-                  {recepten.reduce((sum, r) => sum + (r.bijgerecht_count?.[0]?.count || 0), 0)}
-                </div>
+                <div className="text-2xl font-bold">{totalBijgerechten}</div>
               </CardContent>
             </Card>
           </div>
