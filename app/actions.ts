@@ -14,7 +14,10 @@ export async function getAllRecepten(): Promise<Recept[]> {
       `)
       .order("created_at", { ascending: false })
 
-    if (error) throw error
+    if (error) {
+      console.error("Supabase error:", error)
+      throw error
+    }
     return data || []
   } catch (error) {
     console.error("Error fetching recepten:", error)
@@ -34,7 +37,10 @@ export async function getReceptById(id: string): Promise<Recept | null> {
       .eq("id", id)
       .single()
 
-    if (error) throw error
+    if (error) {
+      console.error("Supabase error:", error)
+      throw error
+    }
     return data
   } catch (error) {
     console.error("Error fetching recept:", error)
@@ -54,7 +60,10 @@ export async function searchRecepten(query: string): Promise<Recept[]> {
       .or(`naam.ilike.%${query}%, beschrijving.ilike.%${query}%, tags.ilike.%${query}%`)
       .order("created_at", { ascending: false })
 
-    if (error) throw error
+    if (error) {
+      console.error("Supabase error:", error)
+      throw error
+    }
     return data || []
   } catch (error) {
     console.error("Error searching recepten:", error)
@@ -79,7 +88,7 @@ export async function getReceptenByFilters(filters: {
       query = query.eq("type", filters.type)
     }
     if (filters.seizoen) {
-      query = query.eq("seizoen", filters.seizoen)
+      query = query.contains("seizoen", [filters.seizoen])
     }
     if (filters.moeilijkheidsgraad) {
       query = query.eq("moeilijkheidsgraad", filters.moeilijkheidsgraad)
@@ -90,7 +99,10 @@ export async function getReceptenByFilters(filters: {
 
     const { data, error } = await query.order("created_at", { ascending: false })
 
-    if (error) throw error
+    if (error) {
+      console.error("Supabase error:", error)
+      throw error
+    }
     return data || []
   } catch (error) {
     console.error("Error filtering recepten:", error)
@@ -103,7 +115,10 @@ export async function getRandomRecept(): Promise<Recept | null> {
     // Get total count first
     const { count, error: countError } = await supabase.from("recepten").select("*", { count: "exact", head: true })
 
-    if (countError) throw countError
+    if (countError) {
+      console.error("Supabase count error:", countError)
+      throw countError
+    }
     if (!count || count === 0) return null
 
     // Get random offset
@@ -119,7 +134,10 @@ export async function getRandomRecept(): Promise<Recept | null> {
       .range(randomOffset, randomOffset)
       .single()
 
-    if (error) throw error
+    if (error) {
+      console.error("Supabase error:", error)
+      throw error
+    }
     return data
   } catch (error) {
     console.error("Error fetching random recept:", error)
@@ -156,7 +174,10 @@ export async function getEigenaars(): Promise<string[]> {
   try {
     const { data, error } = await supabase.from("recepten").select("eigenaar").not("eigenaar", "is", null)
 
-    if (error) throw error
+    if (error) {
+      console.error("Supabase error:", error)
+      throw error
+    }
 
     const eigenaars = [...new Set(data?.map((r) => r.eigenaar).filter(Boolean))] as string[]
     return eigenaars.sort()
