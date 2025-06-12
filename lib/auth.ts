@@ -1,33 +1,40 @@
+import { createServerComponentClient } from "@supabase/auth-helpers-nextjs"
+import { cookies } from "next/headers"
+
 export async function getUser() {
   try {
+    const cookieStore = cookies()
+    const supabase = createServerComponentClient({ cookies: () => cookieStore })
+
     const {
-      data: { user },
+      data: { session },
       error,
-    } = await supabase.auth.getUser()
+    } = await supabase.auth.getSession()
 
     if (error) {
-      console.warn("Auth error:", error.message)
-      // Return mock user for preview
+      console.error("Error getting session:", error)
+      return null
+    }
+
+    if (session?.user) {
       return {
-        id: "preview-user",
-        email: "preview@example.com",
-        user_metadata: {},
-        app_metadata: {},
-        aud: "authenticated",
-        created_at: new Date().toISOString(),
+        id: session.user.id,
+        email: session.user.email || "",
+        name: session.user.user_metadata?.full_name || session.user.email || "Admin",
       }
     }
 
-    return user
+    return null
   } catch (error) {
-    console.warn("Auth connection failed, using mock user")
-    return {
-      id: "preview-user",
-      email: "preview@example.com",
-      user_metadata: {},
-      app_metadata: {},
-      aud: "authenticated",
-      created_at: new Date().toISOString(),
-    }
+    console.error("Error getting user:", error)
+    return null
   }
+}
+
+export async function requireAuth() {
+  const user = await getUser()
+  if (!user) {
+    throw new Error("Niet geautoriseerd")
+  }
+  return user
 }
