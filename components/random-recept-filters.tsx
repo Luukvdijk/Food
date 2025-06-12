@@ -2,7 +2,6 @@
 
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import type { GerechtsType, Seizoen, Eigenaar, FilterOptions } from "@/types"
 
@@ -18,60 +17,51 @@ interface RandomReceptFiltersProps {
 }
 
 export function RandomReceptFilters({ onFiltersChange }: RandomReceptFiltersProps) {
-  const [selectedType, setSelectedType] = useState<GerechtsType | "">(null)
-  const [selectedSeizoen, setSelectedSeizoen] = useState<Seizoen | "">(null)
-  const [selectedEigenaar, setSelectedEigenaar] = useState<Eigenaar | "">(null)
+  const [selectedType, setSelectedType] = useState<string>("")
+  const [selectedSeizoen, setSelectedSeizoen] = useState<string>("")
+  const [selectedEigenaar, setSelectedEigenaar] = useState<string>("")
 
-  const updateFilters = () => {
+  const updateFilters = (type?: string, seizoen?: string, eigenaar?: string) => {
     const filters: FilterOptions = {}
-    if (selectedType) filters.type = selectedType
-    if (selectedSeizoen) filters.seizoen = selectedSeizoen
-    if (selectedEigenaar) filters.eigenaar = selectedEigenaar
 
+    const finalType = type !== undefined ? type : selectedType
+    const finalSeizoen = seizoen !== undefined ? seizoen : selectedSeizoen
+    const finalEigenaar = eigenaar !== undefined ? eigenaar : selectedEigenaar
+
+    if (finalType && finalType !== "all") filters.type = finalType as GerechtsType
+    if (finalSeizoen && finalSeizoen !== "all") filters.seizoen = finalSeizoen as Seizoen
+    if (finalEigenaar && finalEigenaar !== "all") filters.eigenaar = finalEigenaar as Eigenaar
+
+    console.log("Updating filters:", filters)
     onFiltersChange(filters)
   }
 
   const handleTypeChange = (value: string) => {
-    setSelectedType(value as GerechtsType | null)
-    setTimeout(() => {
-      const filters: FilterOptions = {}
-      if (value) filters.type = value as GerechtsType
-      if (selectedSeizoen) filters.seizoen = selectedSeizoen
-      if (selectedEigenaar) filters.eigenaar = selectedEigenaar
-      onFiltersChange(filters)
-    }, 0)
+    setSelectedType(value)
+    updateFilters(value, undefined, undefined)
   }
 
   const handleSeizoenChange = (value: string) => {
-    setSelectedSeizoen(value as Seizoen | null)
-    setTimeout(() => {
-      const filters: FilterOptions = {}
-      if (selectedType) filters.type = selectedType
-      if (value) filters.seizoen = value as Seizoen
-      if (selectedEigenaar) filters.eigenaar = selectedEigenaar
-      onFiltersChange(filters)
-    }, 0)
+    setSelectedSeizoen(value)
+    updateFilters(undefined, value, undefined)
   }
 
   const handleEigenaarChange = (value: string) => {
-    setSelectedEigenaar(value as Eigenaar | null)
-    setTimeout(() => {
-      const filters: FilterOptions = {}
-      if (selectedType) filters.type = selectedType
-      if (selectedSeizoen) filters.seizoen = selectedSeizoen
-      if (value) filters.eigenaar = value as Eigenaar
-      onFiltersChange(filters)
-    }, 0)
+    setSelectedEigenaar(value)
+    updateFilters(undefined, undefined, value)
   }
 
   const resetFilters = () => {
-    setSelectedType(null)
-    setSelectedSeizoen(null)
-    setSelectedEigenaar(null)
+    setSelectedType("")
+    setSelectedSeizoen("")
+    setSelectedEigenaar("")
     onFiltersChange({})
   }
 
-  const hasActiveFilters = selectedType || selectedSeizoen || selectedEigenaar
+  const hasActiveFilters =
+    (selectedType && selectedType !== "all") ||
+    (selectedSeizoen && selectedSeizoen !== "all") ||
+    (selectedEigenaar && selectedEigenaar !== "all")
 
   return (
     <div className="space-y-4 w-full max-w-md">
@@ -79,11 +69,11 @@ export function RandomReceptFilters({ onFiltersChange }: RandomReceptFiltersProp
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="space-y-2">
           <Select value={selectedType} onValueChange={handleTypeChange}>
-            <SelectTrigger id="type-select">
+            <SelectTrigger>
               <SelectValue placeholder="Alle types" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value={null}>Alle types</SelectItem>
+              <SelectItem value="all">Alle types</SelectItem>
               {gerechtsTypes.map((type) => (
                 <SelectItem key={type} value={type}>
                   {type}
@@ -95,11 +85,11 @@ export function RandomReceptFilters({ onFiltersChange }: RandomReceptFiltersProp
 
         <div className="space-y-2">
           <Select value={selectedSeizoen} onValueChange={handleSeizoenChange}>
-            <SelectTrigger id="seizoen-select">
+            <SelectTrigger>
               <SelectValue placeholder="Alle seizoenen" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value={null}>Alle seizoenen</SelectItem>
+              <SelectItem value="all">Alle seizoenen</SelectItem>
               {seizoenen.map((seizoen) => (
                 <SelectItem key={seizoen} value={seizoen}>
                   {seizoen}
@@ -111,11 +101,11 @@ export function RandomReceptFilters({ onFiltersChange }: RandomReceptFiltersProp
 
         <div className="space-y-2">
           <Select value={selectedEigenaar} onValueChange={handleEigenaarChange}>
-            <SelectTrigger id="eigenaar-select">
+            <SelectTrigger>
               <SelectValue placeholder="Alle eigenaren" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value={null}>Alle eigenaren</SelectItem>
+              <SelectItem value="all">Alle eigenaren</SelectItem>
               {eigenaren.map((eigenaar) => (
                 <SelectItem key={eigenaar.value} value={eigenaar.value}>
                   {eigenaar.label}

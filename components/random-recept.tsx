@@ -18,11 +18,13 @@ export function RandomRecept({ initialRecept }: RandomReceptProps) {
   const [loading, setLoading] = useState(false)
   const [filters, setFilters] = useState<FilterOptions>({})
   const [noResults, setNoResults] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const router = useRouter()
 
   const getRandomRecept = async () => {
     setLoading(true)
     setNoResults(false)
+    setError(null)
 
     try {
       // Build query string from filters
@@ -34,20 +36,32 @@ export function RandomRecept({ initialRecept }: RandomReceptProps) {
       const queryString = queryParams.toString()
       const url = `/api/random-recept${queryString ? `?${queryString}` : ""}`
 
+      console.log("Fetching random recipe from:", url)
+
       const response = await fetch(url)
-      if (!response.ok) throw new Error("Failed to fetch random recipe")
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
 
       const data = await response.json()
+
+      console.log("Random recipe response:", data)
 
       if (data === null) {
         setNoResults(true)
         setRecept(null)
+      } else if (data.error) {
+        setError(data.error)
+        setRecept(null)
       } else {
         setRecept(data)
+        setNoResults(false)
       }
     } catch (error) {
       console.error("Error fetching random recipe:", error)
-      setNoResults(true)
+      setError("Er is een fout opgetreden bij het ophalen van een recept")
+      setNoResults(false)
     } finally {
       setLoading(false)
     }
@@ -60,10 +74,12 @@ export function RandomRecept({ initialRecept }: RandomReceptProps) {
   }
 
   const handleFiltersChange = (newFilters: FilterOptions) => {
+    console.log("Filters changed:", newFilters)
     setFilters(newFilters)
     // Reset the current recipe when filters change
     setRecept(null)
     setNoResults(false)
+    setError(null)
   }
 
   return (
@@ -83,6 +99,15 @@ export function RandomRecept({ initialRecept }: RandomReceptProps) {
             <Skeleton className="h-4 w-2/3 mt-2" />
           </CardContent>
         </Card>
+      ) : error ? (
+        <Card className="w-full">
+          <CardContent className="pt-6 text-center">
+            <p className="text-red-500 mb-4">{error}</p>
+            <Button onClick={getRandomRecept} size="lg">
+              Probeer opnieuw
+            </Button>
+          </CardContent>
+        </Card>
       ) : recept ? (
         <>
           <ReceptCard recept={recept} />
@@ -99,7 +124,18 @@ export function RandomRecept({ initialRecept }: RandomReceptProps) {
         <Card className="w-full">
           <CardContent className="pt-6 text-center">
             {noResults ? (
-              <p className="text-muted-foreground">Geen recepten gevonden met deze filters. Probeer andere filters.</p>
+              <div className="space-y-4">
+                <p className="text-muted-foreground">Geen recepten gevonden met deze filters.</p>
+                <p className="text-sm text-muted-foreground">
+                  Probeer andere filters of klik hieronder voor alle recepten.
+                </p>
+                <div className="flex gap-2 justify-center">
+                  <Button variant="outline" onClick={() => handleFiltersChange({})}>
+                    Wis filters
+                  </Button>
+                  <Button onClick={getRandomRecept}>Probeer opnieuw</Button>
+                </div>
+              </div>
             ) : (
               <div className="space-y-4">
                 <p className="text-muted-foreground">
