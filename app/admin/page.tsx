@@ -1,3 +1,7 @@
+"use client"
+
+import { AddReceptForm } from "./components/add-recept-form"
+import { IngredientsManager } from "./components/ingredients-manager"
 import { EditReceptForm } from "./components/edit-recept-form"
 import { ReceptenTable } from "./components/recepten-table"
 import { CheckCircle, XCircle, AlertTriangle } from "lucide-react"
@@ -5,6 +9,7 @@ import Link from "next/link"
 import { getUser } from "@/lib/auth"
 import { redirect } from "next/navigation"
 import { supabase } from "@/lib/db"
+import { useState } from "react"
 
 interface AdminPageProps {
   searchParams: {
@@ -120,6 +125,9 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
   const totalRecepten = recepten.length
   const totalIngredienten = recepten.reduce((sum, r) => sum + (r.ingredient_count || 0), 0)
   const totalBijgerechten = recepten.reduce((sum, r) => sum + (r.bijgerecht_count || 0), 0)
+
+  // State for active tab
+  const [activeTab, setActiveTab] = useState("overview")
 
   return (
     <div style={{ backgroundColor: "#286058", minHeight: "100vh" }} className="text-white">
@@ -269,34 +277,76 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
 
             {/* Tabs voor verschillende secties */}
             <div className="space-y-6">
+              {/* Tab Navigation */}
               <div className="flex space-x-1" style={{ backgroundColor: "#eee1d1" }} className="p-1 rounded-lg">
                 <button
-                  style={{ backgroundColor: "#e75129", color: "white" }}
-                  className="px-4 py-2 rounded-md text-sm font-medium"
+                  onClick={() => setActiveTab("overview")}
+                  style={{
+                    backgroundColor: activeTab === "overview" ? "#e75129" : "transparent",
+                    color: activeTab === "overview" ? "white" : "#286058",
+                  }}
+                  className="px-4 py-2 rounded-md text-sm font-medium hover:bg-white/50 transition-colors"
                 >
                   Overzicht
                 </button>
                 <button
-                  style={{ color: "#286058" }}
-                  className="px-4 py-2 rounded-md text-sm font-medium hover:bg-white/50"
+                  onClick={() => setActiveTab("ingredients")}
+                  style={{
+                    backgroundColor: activeTab === "ingredients" ? "#e75129" : "transparent",
+                    color: activeTab === "ingredients" ? "white" : "#286058",
+                  }}
+                  className="px-4 py-2 rounded-md text-sm font-medium hover:bg-white/50 transition-colors"
                 >
                   Ingrediënten
                 </button>
                 <button
-                  style={{ color: "#286058" }}
-                  className="px-4 py-2 rounded-md text-sm font-medium hover:bg-white/50"
+                  onClick={() => setActiveTab("add")}
+                  style={{
+                    backgroundColor: activeTab === "add" ? "#e75129" : "transparent",
+                    color: activeTab === "add" ? "white" : "#286058",
+                  }}
+                  className="px-4 py-2 rounded-md text-sm font-medium hover:bg-white/50 transition-colors"
                 >
                   Recept Toevoegen
                 </button>
               </div>
 
-              <div style={{ backgroundColor: "#eee1d1", color: "#286058" }} className="p-6 rounded-lg">
-                <div className="mb-6">
-                  <h2 className="text-xl font-semibold mb-2">Alle Recepten</h2>
-                  <p className="text-sm opacity-70">Beheer je bestaande recepten</p>
+              {/* Tab Content */}
+              {activeTab === "overview" && (
+                <div style={{ backgroundColor: "#eee1d1", color: "#286058" }} className="rounded-lg overflow-hidden">
+                  <div className="p-6 border-b border-gray-200">
+                    <h2 className="text-xl font-semibold mb-2">Alle Recepten</h2>
+                    <p className="text-sm opacity-70">Beheer je bestaande recepten</p>
+                  </div>
+                  <div className="p-6">
+                    <ReceptenTable recepten={recepten} />
+                  </div>
                 </div>
-                <ReceptenTable recepten={recepten} />
-              </div>
+              )}
+
+              {activeTab === "ingredients" && (
+                <div style={{ backgroundColor: "#eee1d1", color: "#286058" }} className="rounded-lg overflow-hidden">
+                  <div className="p-6 border-b border-gray-200">
+                    <h2 className="text-xl font-semibold mb-2">Ingrediënten Beheer</h2>
+                    <p className="text-sm opacity-70">Beheer ingrediënten van alle recepten</p>
+                  </div>
+                  <div className="p-6">
+                    <IngredientsManager />
+                  </div>
+                </div>
+              )}
+
+              {activeTab === "add" && (
+                <div style={{ backgroundColor: "#eee1d1", color: "#286058" }} className="rounded-lg overflow-hidden">
+                  <div className="p-6 border-b border-gray-200">
+                    <h2 className="text-xl font-semibold mb-2">Nieuw Recept Toevoegen</h2>
+                    <p className="text-sm opacity-70">Voeg een nieuw recept toe aan je collectie</p>
+                  </div>
+                  <div className="p-6">
+                    <AddReceptForm />
+                  </div>
+                </div>
+              )}
             </div>
           </>
         )}
