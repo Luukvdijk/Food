@@ -56,7 +56,10 @@ export function HeroSection({ recept }: HeroSectionProps) {
 
   if (!recept) {
     return (
-      <section className="bg-[#286058] text-white relative overflow-hidden min-h-screen w-full">
+      <section
+        className="bg-[#286058] text-white relative overflow-hidden w-full flex items-center"
+        style={{ height: "calc(100vh - 80px)" }}
+      >
         <div className="w-full py-12 px-8 relative z-10">
           <div className="text-center">
             <h1 className="text-6xl font-bold mb-8">Geen recept gevonden</h1>
@@ -69,7 +72,10 @@ export function HeroSection({ recept }: HeroSectionProps) {
 
   return (
     <>
-      <section className="bg-[#286058] text-white relative overflow-hidden min-h-screen w-full flex items-center">
+      <section
+        className="bg-[#286058] text-white relative overflow-hidden w-full flex items-center"
+        style={{ height: "calc(100vh - 80px)" }}
+      >
         <div className="w-full py-12 px-8 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center max-w-7xl mx-auto">
             {/* Left Content */}
