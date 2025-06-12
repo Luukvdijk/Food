@@ -1,34 +1,47 @@
-"use client";
+"use client"
 
-import type React from "react";
+import type React from "react"
 
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { ArrowLeft } from "lucide-react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { ArrowLeft } from "lucide-react"
+import Link from "next/link"
+import { useRouter } from "next/navigation"
+import { useState, useEffect } from "react"
 
 export default function SignInPage() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
-  const router = useRouter();
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState("")
+  const router = useRouter()
+
+  // Check if user is already authenticated
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const response = await fetch("/api/auth/status")
+        if (response.ok) {
+          const data = await response.json()
+          if (data.authenticated) {
+            router.push("/admin")
+          }
+        }
+      } catch (error) {
+        // Ignore errors, user is not authenticated
+      }
+    }
+
+    checkAuth()
+  }, [router])
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setError("");
+    e.preventDefault()
+    setIsLoading(true)
+    setError("")
 
     try {
       const response = await fetch("/api/auth/signin", {
@@ -37,23 +50,26 @@ export default function SignInPage() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ email, password }),
-      });
+      })
 
-      const data = await response.json();
+      const data = await response.json()
 
       if (response.ok && data.success) {
-        // Successful login, redirect to admin
-        window.location.href = "/admin";
+        // Wait a moment for the cookie to be set
+        setTimeout(() => {
+          router.push("/admin")
+          router.refresh()
+        }, 100)
       } else {
-        setError(data.error || "Inloggen mislukt");
+        setError(data.error || "Inloggen mislukt")
       }
     } catch (error) {
-      console.error("Login error:", error);
-      setError("Er is een fout opgetreden bij het inloggen");
+      console.error("Login error:", error)
+      setError("Er is een fout opgetreden bij het inloggen")
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  };
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
@@ -70,9 +86,7 @@ export default function SignInPage() {
         <Card>
           <CardHeader className="text-center">
             <CardTitle className="text-2xl">Admin Inloggen</CardTitle>
-            <CardDescription>
-              Log in om toegang te krijgen tot het admin paneel
-            </CardDescription>
+            <CardDescription>Log in om toegang te krijgen tot het admin paneel</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -112,9 +126,15 @@ export default function SignInPage() {
                 {isLoading ? "Inloggen..." : "Inloggen"}
               </Button>
             </form>
+
+            <div className="mt-4 text-sm text-gray-600 text-center">
+              <p>Demo inloggegevens:</p>
+              <p>Email: admin@recepten.nl</p>
+              <p>Wachtwoord: Bonappetit</p>
+            </div>
           </CardContent>
         </Card>
       </div>
     </div>
-  );
+  )
 }

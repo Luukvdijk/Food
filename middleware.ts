@@ -9,7 +9,12 @@ export async function middleware(request: NextRequest) {
     if (!authToken || authToken.value !== "authenticated") {
       // Redirect to login page
       const loginUrl = new URL("/auth/signin", request.url)
-      return NextResponse.redirect(loginUrl)
+      const response = NextResponse.redirect(loginUrl)
+
+      // Clear any existing auth cookies
+      response.cookies.delete("auth-token")
+
+      return response
     }
   }
 
