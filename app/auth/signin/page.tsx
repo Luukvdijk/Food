@@ -1,8 +1,6 @@
 "use client"
 
 import type React from "react"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { ArrowLeft } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useState, useEffect } from "react"
@@ -101,61 +99,69 @@ export default function SignInPage() {
             )}
 
             <div>
-              <Label htmlFor="email" className="block text-sm font-medium mb-1" style={{ color: "#286058" }}>
+              <label htmlFor="email" className="block text-sm font-medium mb-1" style={{ color: "#286058" }}>
                 E-mailadres
-              </Label>
-              <Input
+              </label>
+              <input
                 id="email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 onFocus={(e) => {
-                  e.target.style.borderColor = "#286058"
-                  e.target.style.outline = "2px solid #286058"
-                  e.target.style.outlineOffset = "2px"
+                  e.target.style.borderColor = "#eee1d1"
+                  e.target.style.boxShadow = "0 0 0 3px rgba(238, 225, 209, 0.3)"
                 }}
                 onBlur={(e) => {
                   e.target.style.borderColor = "#286058"
-                  e.target.style.outline = "none"
+                  e.target.style.boxShadow = "none"
                 }}
                 required
                 placeholder="je@email.com"
                 disabled={isLoading}
-                className="w-full px-3 py-2 border rounded-md transition-all duration-200"
                 style={{
+                  width: "100%",
+                  padding: "8px 12px",
+                  border: "1px solid #286058",
+                  borderRadius: "6px",
                   backgroundColor: "#ffffff",
-                  borderColor: "#286058",
                   color: "#286058",
+                  fontSize: "14px",
+                  transition: "border-color 0.2s ease, box-shadow 0.2s ease",
+                  outline: "none",
                 }}
               />
             </div>
 
             <div>
-              <Label htmlFor="password" className="block text-sm font-medium mb-1" style={{ color: "#286058" }}>
+              <label htmlFor="password" className="block text-sm font-medium mb-1" style={{ color: "#286058" }}>
                 Wachtwoord
-              </Label>
-              <Input
+              </label>
+              <input
                 id="password"
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 onFocus={(e) => {
-                  e.target.style.borderColor = "#286058"
-                  e.target.style.outline = "2px solid #286058"
-                  e.target.style.outlineOffset = "2px"
+                  e.target.style.borderColor = "#eee1d1"
+                  e.target.style.boxShadow = "0 0 0 3px rgba(238, 225, 209, 0.3)"
                 }}
                 onBlur={(e) => {
                   e.target.style.borderColor = "#286058"
-                  e.target.style.outline = "none"
+                  e.target.style.boxShadow = "none"
                 }}
                 required
                 placeholder="••••••••"
                 disabled={isLoading}
-                className="w-full px-3 py-2 border rounded-md transition-all duration-200"
                 style={{
+                  width: "100%",
+                  padding: "8px 12px",
+                  border: "1px solid #286058",
+                  borderRadius: "6px",
                   backgroundColor: "#ffffff",
-                  borderColor: "#286058",
                   color: "#286058",
+                  fontSize: "14px",
+                  transition: "border-color 0.2s ease, box-shadow 0.2s ease",
+                  outline: "none",
                 }}
               />
             </div>
