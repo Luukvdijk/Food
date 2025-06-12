@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import { X } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { supabase } from "@/lib/supabase"
+import { createClient } from "@supabase/supabase-js"
 
 interface Ingredient {
   id: number
@@ -23,6 +23,12 @@ interface IngredientsPopupProps {
 export function IngredientsPopup({ isOpen, onClose, receptId, servings, receptNaam }: IngredientsPopupProps) {
   const [ingredients, setIngredients] = useState<Ingredient[]>([])
   const [loading, setLoading] = useState(false)
+
+  // Create Supabase client directly
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL || "",
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "",
+  )
 
   useEffect(() => {
     if (isOpen && receptId) {
