@@ -113,158 +113,163 @@ export function FilterPopup({ isOpen, onClose, onFiltersChange, currentFilters }
         }`}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="bg-[#eee1d1] rounded-b-xl shadow-2xl p-6 max-h-[80vh] overflow-hidden">
+        <div
+          className="bg-[#eee1d1] rounded-b-xl shadow-2xl flex flex-col"
+          style={{ height: "70vh", maxHeight: "500px" }}
+        >
           {/* Header */}
-          <div className="flex justify-between items-center mb-6">
+          <div className="flex justify-between items-center p-6 pb-4 flex-shrink-0">
             <h2 className="text-[#e75129] text-3xl font-medium">Filters</h2>
             <X className="h-6 w-6 text-[#e75129] cursor-pointer" onClick={onClose} />
           </div>
 
-          {/* Filter Categories */}
-          <div className="space-y-4">
-            {/* Vlees Dropdown */}
-            <div className="relative">
-              <button
-                onClick={() => toggleDropdown("vlees")}
-                className="w-full flex justify-between items-center p-3 bg-white rounded-lg border border-[#286058]/20 hover:bg-gray-50 transition-colors"
-              >
-                <span className="text-[#286058] text-lg font-medium">
-                  Vlees {getSelectedCount("vlees") > 0 && `(${getSelectedCount("vlees")})`}
-                </span>
-                <ChevronDown
-                  className={`h-5 w-5 text-[#286058] transform transition-transform ${
-                    openDropdown === "vlees" ? "rotate-180" : "rotate-0"
-                  }`}
-                />
-              </button>
+          {/* Filter Categories - Scrollable */}
+          <div className="flex-1 px-6 overflow-y-auto">
+            <div className="space-y-3">
+              {/* Vlees Dropdown */}
+              <div className="relative">
+                <button
+                  onClick={() => toggleDropdown("vlees")}
+                  className="w-full flex justify-between items-center p-3 bg-white rounded-lg border border-[#286058]/20 hover:bg-gray-50 transition-colors"
+                >
+                  <span className="text-[#286058] text-lg font-medium">
+                    Vlees {getSelectedCount("vlees") > 0 && `(${getSelectedCount("vlees")})`}
+                  </span>
+                  <ChevronDown
+                    className={`h-5 w-5 text-[#286058] transform transition-transform ${
+                      openDropdown === "vlees" ? "rotate-180" : "rotate-0"
+                    }`}
+                  />
+                </button>
 
-              {openDropdown === "vlees" && (
-                <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded-lg border border-[#286058]/20 shadow-lg z-10 max-h-40 overflow-y-auto">
-                  {options.vlees.map((option) => (
-                    <div key={option} className="flex items-center space-x-3 p-3 hover:bg-gray-50">
-                      <Checkbox
-                        id={`vlees-${option}`}
-                        checked={(filters.vlees || []).includes(option)}
-                        onCheckedChange={() => toggleFilter("vlees", option)}
-                        className="border-[#286058] data-[state=checked]:bg-[#e75129] data-[state=checked]:border-[#e75129]"
-                      />
-                      <label htmlFor={`vlees-${option}`} className="text-[#286058] cursor-pointer flex-1">
-                        {option}
-                      </label>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+                {openDropdown === "vlees" && (
+                  <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded-lg border border-[#286058]/20 shadow-lg z-10 max-h-32 overflow-y-auto">
+                    {options.vlees.map((option) => (
+                      <div key={option} className="flex items-center space-x-3 p-2 hover:bg-gray-50">
+                        <Checkbox
+                          id={`vlees-${option}`}
+                          checked={(filters.vlees || []).includes(option)}
+                          onCheckedChange={() => toggleFilter("vlees", option)}
+                          className="border-[#286058] data-[state=checked]:bg-[#e75129] data-[state=checked]:border-[#e75129]"
+                        />
+                        <label htmlFor={`vlees-${option}`} className="text-[#286058] cursor-pointer flex-1 text-sm">
+                          {option}
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
 
-            {/* Berijding Dropdown */}
-            <div className="relative">
-              <button
-                onClick={() => toggleDropdown("berijding")}
-                className="w-full flex justify-between items-center p-3 bg-white rounded-lg border border-[#286058]/20 hover:bg-gray-50 transition-colors"
-              >
-                <span className="text-[#286058] text-lg font-medium">
-                  Berijding {getSelectedCount("berijding") > 0 && `(${getSelectedCount("berijding")})`}
-                </span>
-                <ChevronDown
-                  className={`h-5 w-5 text-[#286058] transform transition-transform ${
-                    openDropdown === "berijding" ? "rotate-180" : "rotate-0"
-                  }`}
-                />
-              </button>
+              {/* Berijding Dropdown */}
+              <div className="relative">
+                <button
+                  onClick={() => toggleDropdown("berijding")}
+                  className="w-full flex justify-between items-center p-3 bg-white rounded-lg border border-[#286058]/20 hover:bg-gray-50 transition-colors"
+                >
+                  <span className="text-[#286058] text-lg font-medium">
+                    Berijding {getSelectedCount("berijding") > 0 && `(${getSelectedCount("berijding")})`}
+                  </span>
+                  <ChevronDown
+                    className={`h-5 w-5 text-[#286058] transform transition-transform ${
+                      openDropdown === "berijding" ? "rotate-180" : "rotate-0"
+                    }`}
+                  />
+                </button>
 
-              {openDropdown === "berijding" && (
-                <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded-lg border border-[#286058]/20 shadow-lg z-10 max-h-40 overflow-y-auto">
-                  {options.berijding.map((option) => (
-                    <div key={option} className="flex items-center space-x-3 p-3 hover:bg-gray-50">
-                      <Checkbox
-                        id={`berijding-${option}`}
-                        checked={(filters.berijding || []).includes(option)}
-                        onCheckedChange={() => toggleFilter("berijding", option)}
-                        className="border-[#286058] data-[state=checked]:bg-[#e75129] data-[state=checked]:border-[#e75129]"
-                      />
-                      <label htmlFor={`berijding-${option}`} className="text-[#286058] cursor-pointer flex-1">
-                        {option}
-                      </label>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+                {openDropdown === "berijding" && (
+                  <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded-lg border border-[#286058]/20 shadow-lg z-10 max-h-32 overflow-y-auto">
+                    {options.berijding.map((option) => (
+                      <div key={option} className="flex items-center space-x-3 p-2 hover:bg-gray-50">
+                        <Checkbox
+                          id={`berijding-${option}`}
+                          checked={(filters.berijding || []).includes(option)}
+                          onCheckedChange={() => toggleFilter("berijding", option)}
+                          className="border-[#286058] data-[state=checked]:bg-[#e75129] data-[state=checked]:border-[#e75129]"
+                        />
+                        <label htmlFor={`berijding-${option}`} className="text-[#286058] cursor-pointer flex-1 text-sm">
+                          {option}
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
 
-            {/* Seizoen Dropdown */}
-            <div className="relative">
-              <button
-                onClick={() => toggleDropdown("seizoen")}
-                className="w-full flex justify-between items-center p-3 bg-white rounded-lg border border-[#286058]/20 hover:bg-gray-50 transition-colors"
-              >
-                <span className="text-[#286058] text-lg font-medium">
-                  Seizoen {getSelectedCount("seizoen") > 0 && `(${getSelectedCount("seizoen")})`}
-                </span>
-                <ChevronDown
-                  className={`h-5 w-5 text-[#286058] transform transition-transform ${
-                    openDropdown === "seizoen" ? "rotate-180" : "rotate-0"
-                  }`}
-                />
-              </button>
+              {/* Seizoen Dropdown */}
+              <div className="relative">
+                <button
+                  onClick={() => toggleDropdown("seizoen")}
+                  className="w-full flex justify-between items-center p-3 bg-white rounded-lg border border-[#286058]/20 hover:bg-gray-50 transition-colors"
+                >
+                  <span className="text-[#286058] text-lg font-medium">
+                    Seizoen {getSelectedCount("seizoen") > 0 && `(${getSelectedCount("seizoen")})`}
+                  </span>
+                  <ChevronDown
+                    className={`h-5 w-5 text-[#286058] transform transition-transform ${
+                      openDropdown === "seizoen" ? "rotate-180" : "rotate-0"
+                    }`}
+                  />
+                </button>
 
-              {openDropdown === "seizoen" && (
-                <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded-lg border border-[#286058]/20 shadow-lg z-10 max-h-40 overflow-y-auto">
-                  {options.seizoen.map((option) => (
-                    <div key={option} className="flex items-center space-x-3 p-3 hover:bg-gray-50">
-                      <Checkbox
-                        id={`seizoen-${option}`}
-                        checked={(filters.seizoen || []).includes(option)}
-                        onCheckedChange={() => toggleFilter("seizoen", option)}
-                        className="border-[#286058] data-[state=checked]:bg-[#e75129] data-[state=checked]:border-[#e75129]"
-                      />
-                      <label htmlFor={`seizoen-${option}`} className="text-[#286058] cursor-pointer flex-1">
-                        {option}
-                      </label>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+                {openDropdown === "seizoen" && (
+                  <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded-lg border border-[#286058]/20 shadow-lg z-10 max-h-32 overflow-y-auto">
+                    {options.seizoen.map((option) => (
+                      <div key={option} className="flex items-center space-x-3 p-2 hover:bg-gray-50">
+                        <Checkbox
+                          id={`seizoen-${option}`}
+                          checked={(filters.seizoen || []).includes(option)}
+                          onCheckedChange={() => toggleFilter("seizoen", option)}
+                          className="border-[#286058] data-[state=checked]:bg-[#e75129] data-[state=checked]:border-[#e75129]"
+                        />
+                        <label htmlFor={`seizoen-${option}`} className="text-[#286058] cursor-pointer flex-1 text-sm">
+                          {option}
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
 
-            {/* Eigenaar Dropdown */}
-            <div className="relative">
-              <button
-                onClick={() => toggleDropdown("eigenaar")}
-                className="w-full flex justify-between items-center p-3 bg-white rounded-lg border border-[#286058]/20 hover:bg-gray-50 transition-colors"
-              >
-                <span className="text-[#286058] text-lg font-medium">
-                  Eigenaar {getSelectedCount("eigenaar") > 0 && `(${getSelectedCount("eigenaar")})`}
-                </span>
-                <ChevronDown
-                  className={`h-5 w-5 text-[#286058] transform transition-transform ${
-                    openDropdown === "eigenaar" ? "rotate-180" : "rotate-0"
-                  }`}
-                />
-              </button>
+              {/* Eigenaar Dropdown */}
+              <div className="relative">
+                <button
+                  onClick={() => toggleDropdown("eigenaar")}
+                  className="w-full flex justify-between items-center p-3 bg-white rounded-lg border border-[#286058]/20 hover:bg-gray-50 transition-colors"
+                >
+                  <span className="text-[#286058] text-lg font-medium">
+                    Eigenaar {getSelectedCount("eigenaar") > 0 && `(${getSelectedCount("eigenaar")})`}
+                  </span>
+                  <ChevronDown
+                    className={`h-5 w-5 text-[#286058] transform transition-transform ${
+                      openDropdown === "eigenaar" ? "rotate-180" : "rotate-0"
+                    }`}
+                  />
+                </button>
 
-              {openDropdown === "eigenaar" && (
-                <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded-lg border border-[#286058]/20 shadow-lg z-10 max-h-40 overflow-y-auto">
-                  {options.eigenaar.map((option) => (
-                    <div key={option} className="flex items-center space-x-3 p-3 hover:bg-gray-50">
-                      <Checkbox
-                        id={`eigenaar-${option}`}
-                        checked={(filters.eigenaar || []).includes(option)}
-                        onCheckedChange={() => toggleFilter("eigenaar", option)}
-                        className="border-[#286058] data-[state=checked]:bg-[#e75129] data-[state=checked]:border-[#e75129]"
-                      />
-                      <label htmlFor={`eigenaar-${option}`} className="text-[#286058] cursor-pointer flex-1">
-                        {option}
-                      </label>
-                    </div>
-                  ))}
-                </div>
-              )}
+                {openDropdown === "eigenaar" && (
+                  <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded-lg border border-[#286058]/20 shadow-lg z-10 max-h-32 overflow-y-auto">
+                    {options.eigenaar.map((option) => (
+                      <div key={option} className="flex items-center space-x-3 p-2 hover:bg-gray-50">
+                        <Checkbox
+                          id={`eigenaar-${option}`}
+                          checked={(filters.eigenaar || []).includes(option)}
+                          onCheckedChange={() => toggleFilter("eigenaar", option)}
+                          className="border-[#286058] data-[state=checked]:bg-[#e75129] data-[state=checked]:border-[#e75129]"
+                        />
+                        <label htmlFor={`eigenaar-${option}`} className="text-[#286058] cursor-pointer flex-1 text-sm">
+                          {option}
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
-          {/* Action Buttons */}
-          <div className="mt-8 flex gap-3">
+          {/* Action Buttons - Always Visible */}
+          <div className="p-6 pt-4 flex gap-3 flex-shrink-0 border-t border-[#286058]/10">
             <button
               onClick={clearFilters}
               className="flex-1 bg-gray-300 text-gray-700 px-4 py-3 rounded-md text-lg font-medium hover:bg-gray-400 transition-colors"

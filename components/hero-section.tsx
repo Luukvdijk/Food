@@ -111,9 +111,9 @@ export function HeroSection({ recept }: HeroSectionProps) {
 
             {/* Right Content - Recipe Image */}
             <div className="relative flex justify-center items-center">
-              {/* Larger overlay container */}
-              <div className="relative w-96 h-96 cursor-pointer group" onClick={handleImageClick}>
-                {/* Centered smaller image */}
+              {/* Slightly larger overlay container */}
+              <div className="relative w-72 h-72 cursor-pointer group" onClick={handleImageClick}>
+                {/* Main image */}
                 <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 rounded-full overflow-hidden">
                   <Image
                     src={recept.afbeelding_url || "/placeholder.svg?height=400&width=400&query=delicious food"}
@@ -121,18 +121,21 @@ export function HeroSection({ recept }: HeroSectionProps) {
                     fill
                     className="object-cover transition-transform duration-300 group-hover:scale-110"
                   />
+
+                  {/* Color overlay on hover */}
+                  <div className="absolute inset-0 bg-[#e75129]/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 </div>
 
-                {/* Larger Dashed Circle Overlay */}
+                {/* Dashed Circle Overlay - just slightly bigger than image */}
                 <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
-                  <svg className="w-full h-full" viewBox="0 0 384 384" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <svg className="w-full h-full" viewBox="0 0 288 288" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <circle
-                      cx="192"
-                      cy="192"
-                      r="185"
+                      cx="144"
+                      cy="144"
+                      r="140"
                       stroke="#e75129"
-                      strokeWidth="8"
-                      strokeDasharray="20 15"
+                      strokeWidth="6"
+                      strokeDasharray="15 10"
                       strokeLinecap="round"
                       fill="none"
                     />
