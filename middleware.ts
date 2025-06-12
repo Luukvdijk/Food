@@ -1,4 +1,4 @@
-import { createMiddlewareClient } from "@supabase/auth-helpers-nextjs"
+import { getMiddlewareClient } from "@/lib/supabase-server"
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
 
@@ -6,7 +6,7 @@ export async function middleware(request: NextRequest) {
   // Only protect admin routes
   if (request.nextUrl.pathname.startsWith("/admin")) {
     const response = NextResponse.next()
-    const supabase = createMiddlewareClient({ req: request, res: response })
+    const supabase = getMiddlewareClient(request, response)
 
     const {
       data: { session },
