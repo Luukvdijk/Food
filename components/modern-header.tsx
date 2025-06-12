@@ -7,8 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { FilterPopup } from "./filter-popup"
-import type { FilterOptions } from "@/types"
+import { FilterPopup, type FilterOptions } from "./filter-popup"
 
 export function ModernHeader() {
   const [zoekterm, setZoekterm] = useState("")
