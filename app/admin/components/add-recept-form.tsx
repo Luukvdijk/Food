@@ -2,10 +2,6 @@
 
 import { useState, useEffect } from "react"
 import { addRecept } from "../actions"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Loader2 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { ImageUpload } from "@/components/image-upload"
@@ -26,6 +22,96 @@ export function AddReceptForm() {
   const [hasEigenaarSupport, setHasEigenaarSupport] = useState(true)
   const [imageUrl, setImageUrl] = useState("")
   const { toast } = useToast()
+
+  // Style constants
+  const styles = {
+    container: {
+      backgroundColor: "#eee1d1",
+      color: "#286058",
+      border: "1px solid #d1d5db",
+      borderRadius: "0.5rem",
+      overflow: "hidden",
+      marginBottom: "1.5rem",
+    },
+    header: {
+      padding: "1.5rem",
+      borderBottom: "1px solid #d1d5db",
+    },
+    content: {
+      padding: "1.5rem",
+    },
+    label: {
+      display: "block",
+      fontSize: "0.875rem",
+      fontWeight: "500",
+      marginBottom: "0.5rem",
+      color: "#286058",
+    },
+    input: {
+      backgroundColor: "white",
+      color: "#286058",
+      border: "1px solid #d1d5db",
+      borderRadius: "0.375rem",
+      padding: "0.5rem",
+      width: "100%",
+      transition: "border-color 0.2s ease",
+    },
+    textarea: {
+      backgroundColor: "white",
+      color: "#286058",
+      border: "1px solid #d1d5db",
+      borderRadius: "0.375rem",
+      padding: "0.5rem",
+      width: "100%",
+      minHeight: "100px",
+      transition: "border-color 0.2s ease",
+    },
+    select: {
+      backgroundColor: "white",
+      color: "#286058",
+      border: "1px solid #d1d5db",
+      borderRadius: "0.375rem",
+      padding: "0.5rem",
+      width: "100%",
+      cursor: "pointer",
+      transition: "border-color 0.2s ease",
+    },
+    button: {
+      backgroundColor: "#e75129",
+      color: "white",
+      border: "none",
+      borderRadius: "0.375rem",
+      padding: "0.75rem 1.5rem",
+      fontSize: "0.875rem",
+      fontWeight: "500",
+      cursor: "pointer",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      transition: "background-color 0.2s ease",
+    },
+    description: {
+      fontSize: "0.875rem",
+      color: "#6b7280",
+      marginTop: "0.25rem",
+    },
+    grid: {
+      display: "grid",
+      gap: "1rem",
+    },
+    gridCols2: {
+      gridTemplateColumns: "repeat(1, minmax(0, 1fr))",
+      "@media (min-width: 768px)": {
+        gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+      },
+    },
+    gridCols4: {
+      gridTemplateColumns: "repeat(1, minmax(0, 1fr))",
+      "@media (min-width: 768px)": {
+        gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
+      },
+    },
+  }
 
   // Check if eigenaar column exists
   useEffect(() => {
@@ -95,260 +181,300 @@ export function AddReceptForm() {
   }
 
   return (
-    <div className="space-y-6">
-      <form action={handleSubmit} className="space-y-6">
+    <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
+      <form action={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
         {/* Basis informatie */}
-        <div
-          style={{ backgroundColor: "#eee1d1", color: "#286058", border: "1px solid #d1d5db" }}
-          className="rounded-lg overflow-hidden mb-6"
-        >
-          <div className="p-6 border-b border-gray-200">
-            <h3 className="text-lg font-semibold">Basis Informatie</h3>
+        <div style={styles.container}>
+          <div style={styles.header}>
+            <h3 style={{ fontSize: "1.125rem", fontWeight: "600" }}>Basis Informatie</h3>
           </div>
-          <div className="p-6 space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="naam">Recept Naam *</Label>
-                <Input
-                  id="naam"
-                  name="naam"
-                  required
-                  placeholder="Bijv. Hollandse Erwtensoep"
-                  disabled={isSubmitting}
-                  style={{ backgroundColor: "white", border: "1px solid #d1d5db", color: "#286058" }}
-                  className="w-full px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-green-600 hover:border-green-500 transition-colors"
-                />
-              </div>
-              <div>
-                <Label htmlFor="personen">Aantal Personen *</Label>
-                <Input
-                  id="personen"
-                  name="personen"
-                  type="number"
-                  required
-                  defaultValue="4"
-                  min="1"
-                  max="20"
-                  disabled={isSubmitting}
-                  style={{ backgroundColor: "white", border: "1px solid #d1d5db", color: "#286058" }}
-                  className="w-full px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-green-600 hover:border-green-500 transition-colors"
-                />
-              </div>
-            </div>
-
-            <div>
-              <Label htmlFor="beschrijving">Beschrijving *</Label>
-              <Textarea
-                id="beschrijving"
-                name="beschrijving"
-                required
-                placeholder="Een korte beschrijving van het recept..."
-                rows={3}
-                disabled={isSubmitting}
-                style={{ backgroundColor: "white", border: "1px solid #d1d5db", color: "#286058" }}
-                className="w-full px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-green-600 hover:border-green-500 transition-colors"
-              />
-            </div>
-
-            <div className={`grid grid-cols-1 ${hasEigenaarSupport ? "md:grid-cols-4" : "md:grid-cols-3"} gap-4`}>
-              <div>
-                <Label htmlFor="bereidingstijd">Bereidingstijd (minuten) *</Label>
-                <Input
-                  id="bereidingstijd"
-                  name="bereidingstijd"
-                  type="number"
-                  required
-                  placeholder="30"
-                  min="1"
-                  disabled={isSubmitting}
-                  style={{ backgroundColor: "white", border: "1px solid #d1d5db", color: "#286058" }}
-                  className="w-full px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-green-600 hover:border-green-500 transition-colors"
-                />
-              </div>
-              <div>
-                <Label>Type Gerecht *</Label>
-                <Select
-                  value={selectedType}
-                  onValueChange={(value) => setSelectedType(value as GerechtsType)}
-                  disabled={isSubmitting}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {gerechtsTypes.map((type) => (
-                      <SelectItem key={type} value={type}>
-                        {type}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label>Moeilijkheidsgraad *</Label>
-                <Select value={selectedMoeilijkheid} onValueChange={setSelectedMoeilijkheid} disabled={isSubmitting}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {moeilijkheidsgraden.map((niveau) => (
-                      <SelectItem key={niveau} value={niveau}>
-                        {niveau}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              {hasEigenaarSupport && (
+          <div style={styles.content}>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(1, minmax(0, 1fr))",
+                gap: "1rem",
+                marginBottom: "1rem",
+              }}
+            >
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(1, minmax(0, 1fr))",
+                  gap: "1rem",
+                  "@media (min-width: 768px)": { gridTemplateColumns: "repeat(2, minmax(0, 1fr))" },
+                }}
+              >
                 <div>
-                  <Label>Eigenaar *</Label>
-                  <Select
-                    value={selectedEigenaar}
-                    onValueChange={(value) => setSelectedEigenaar(value as Eigenaar)}
+                  <label style={styles.label} htmlFor="naam">
+                    Recept Naam *
+                  </label>
+                  <input
+                    id="naam"
+                    name="naam"
+                    required
+                    placeholder="Bijv. Hollandse Erwtensoep"
                     disabled={isSubmitting}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {eigenaren.map((eigenaar) => (
-                        <SelectItem key={eigenaar.value} value={eigenaar.value}>
-                          {eigenaar.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                    style={styles.input}
+                    onFocus={(e) => (e.target.style.borderColor = "#286058")}
+                    onBlur={(e) => (e.target.style.borderColor = "#d1d5db")}
+                  />
                 </div>
-              )}
-            </div>
+                <div>
+                  <label style={styles.label} htmlFor="personen">
+                    Aantal Personen *
+                  </label>
+                  <input
+                    id="personen"
+                    name="personen"
+                    type="number"
+                    required
+                    defaultValue="4"
+                    min="1"
+                    max="20"
+                    disabled={isSubmitting}
+                    style={styles.input}
+                    onFocus={(e) => (e.target.style.borderColor = "#286058")}
+                    onBlur={(e) => (e.target.style.borderColor = "#d1d5db")}
+                  />
+                </div>
+              </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="seizoen">Seizoenen (komma gescheiden)</Label>
-                <Input
-                  id="seizoen"
-                  name="seizoen"
-                  placeholder="Lente, Zomer, Herfst, Winter"
-                  defaultValue="Lente, Zomer, Herfst, Winter"
+                <label style={styles.label} htmlFor="beschrijving">
+                  Beschrijving *
+                </label>
+                <textarea
+                  id="beschrijving"
+                  name="beschrijving"
+                  required
+                  placeholder="Een korte beschrijving van het recept..."
+                  rows={3}
                   disabled={isSubmitting}
-                  style={{ backgroundColor: "white", border: "1px solid #d1d5db", color: "#286058" }}
-                  className="w-full px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-green-600 hover:border-green-500 transition-colors"
+                  style={styles.textarea}
+                  onFocus={(e) => (e.target.style.borderColor = "#286058")}
+                  onBlur={(e) => (e.target.style.borderColor = "#d1d5db")}
                 />
               </div>
-              <div>
-                <Label htmlFor="tags">Tags (komma gescheiden)</Label>
-                <Input
-                  id="tags"
-                  name="tags"
-                  placeholder="vegetarisch, snel, gezond"
-                  disabled={isSubmitting}
-                  style={{ backgroundColor: "white", border: "1px solid #d1d5db", color: "#286058" }}
-                  className="w-full px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-green-600 hover:border-green-500 transition-colors"
-                />
+
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(1, minmax(0, 1fr))",
+                  gap: "1rem",
+                  "@media (min-width: 768px)": {
+                    gridTemplateColumns: hasEigenaarSupport ? "repeat(4, minmax(0, 1fr))" : "repeat(3, minmax(0, 1fr))",
+                  },
+                }}
+              >
+                <div>
+                  <label style={styles.label} htmlFor="bereidingstijd">
+                    Bereidingstijd (minuten) *
+                  </label>
+                  <input
+                    id="bereidingstijd"
+                    name="bereidingstijd"
+                    type="number"
+                    required
+                    placeholder="30"
+                    min="1"
+                    disabled={isSubmitting}
+                    style={styles.input}
+                    onFocus={(e) => (e.target.style.borderColor = "#286058")}
+                    onBlur={(e) => (e.target.style.borderColor = "#d1d5db")}
+                  />
+                </div>
+                <div>
+                  <label style={styles.label}>Type Gerecht *</label>
+                  <select
+                    value={selectedType}
+                    onChange={(e) => setSelectedType(e.target.value as GerechtsType)}
+                    disabled={isSubmitting}
+                    style={styles.select}
+                    onFocus={(e) => (e.target.style.borderColor = "#286058")}
+                    onBlur={(e) => (e.target.style.borderColor = "#d1d5db")}
+                  >
+                    {gerechtsTypes.map((type) => (
+                      <option key={type} value={type}>
+                        {type}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label style={styles.label}>Moeilijkheidsgraad *</label>
+                  <select
+                    value={selectedMoeilijkheid}
+                    onChange={(e) => setSelectedMoeilijkheid(e.target.value)}
+                    disabled={isSubmitting}
+                    style={styles.select}
+                    onFocus={(e) => (e.target.style.borderColor = "#286058")}
+                    onBlur={(e) => (e.target.style.borderColor = "#d1d5db")}
+                  >
+                    {moeilijkheidsgraden.map((niveau) => (
+                      <option key={niveau} value={niveau}>
+                        {niveau}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                {hasEigenaarSupport && (
+                  <div>
+                    <label style={styles.label}>Eigenaar *</label>
+                    <select
+                      value={selectedEigenaar}
+                      onChange={(e) => setSelectedEigenaar(e.target.value as Eigenaar)}
+                      disabled={isSubmitting}
+                      style={styles.select}
+                      onFocus={(e) => (e.target.style.borderColor = "#286058")}
+                      onBlur={(e) => (e.target.style.borderColor = "#d1d5db")}
+                    >
+                      {eigenaren.map((eigenaar) => (
+                        <option key={eigenaar.value} value={eigenaar.value}>
+                          {eigenaar.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+              </div>
+
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(1, minmax(0, 1fr))",
+                  gap: "1rem",
+                  "@media (min-width: 768px)": { gridTemplateColumns: "repeat(2, minmax(0, 1fr))" },
+                }}
+              >
+                <div>
+                  <label style={styles.label} htmlFor="seizoen">
+                    Seizoenen (komma gescheiden)
+                  </label>
+                  <input
+                    id="seizoen"
+                    name="seizoen"
+                    placeholder="Lente, Zomer, Herfst, Winter"
+                    defaultValue="Lente, Zomer, Herfst, Winter"
+                    disabled={isSubmitting}
+                    style={styles.input}
+                    onFocus={(e) => (e.target.style.borderColor = "#286058")}
+                    onBlur={(e) => (e.target.style.borderColor = "#d1d5db")}
+                  />
+                </div>
+                <div>
+                  <label style={styles.label} htmlFor="tags">
+                    Tags (komma gescheiden)
+                  </label>
+                  <input
+                    id="tags"
+                    name="tags"
+                    placeholder="vegetarisch, snel, gezond"
+                    disabled={isSubmitting}
+                    style={styles.input}
+                    onFocus={(e) => (e.target.style.borderColor = "#286058")}
+                    onBlur={(e) => (e.target.style.borderColor = "#d1d5db")}
+                  />
+                </div>
               </div>
             </div>
           </div>
         </div>
 
         {/* Afbeelding Upload */}
-        <div
-          style={{ backgroundColor: "#eee1d1", color: "#286058", border: "1px solid #d1d5db" }}
-          className="rounded-lg overflow-hidden mb-6"
-        >
-          <div className="p-6 border-b border-gray-200">
-            <h3 className="text-lg font-semibold">Recept Afbeelding</h3>
-            <p className="text-sm text-gray-500">Upload een afbeelding van je recept</p>
+        <div style={styles.container}>
+          <div style={styles.header}>
+            <h3 style={{ fontSize: "1.125rem", fontWeight: "600" }}>Recept Afbeelding</h3>
+            <p style={styles.description}>Upload een afbeelding van je recept</p>
           </div>
-          <div className="p-6 space-y-4">
+          <div style={styles.content}>
             <ImageUpload currentImageUrl={imageUrl} onImageChange={setImageUrl} disabled={isSubmitting} />
           </div>
         </div>
 
         {/* Bereidingswijze */}
-        <div
-          style={{ backgroundColor: "#eee1d1", color: "#286058", border: "1px solid #d1d5db" }}
-          className="rounded-lg overflow-hidden mb-6"
-        >
-          <div className="p-6 border-b border-gray-200">
-            <h3 className="text-lg font-semibold">Bereidingswijze</h3>
-            <p className="text-sm text-gray-500">Voer elke stap op een nieuwe regel in</p>
+        <div style={styles.container}>
+          <div style={styles.header}>
+            <h3 style={{ fontSize: "1.125rem", fontWeight: "600" }}>Bereidingswijze</h3>
+            <p style={styles.description}>Voer elke stap op een nieuwe regel in</p>
           </div>
-          <div className="p-6 space-y-4">
-            <Textarea
+          <div style={styles.content}>
+            <textarea
               name="bereidingswijze"
               required
               placeholder="Stap 1: Was de groenten grondig&#10;Stap 2: Snijd alle ingrediënten in stukjes&#10;Stap 3: Verhit de olie in een pan"
               rows={8}
               disabled={isSubmitting}
-              style={{ backgroundColor: "white", border: "1px solid #d1d5db", color: "#286058" }}
-              className="w-full px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-green-600 hover:border-green-500 transition-colors"
+              style={styles.textarea}
+              onFocus={(e) => (e.target.style.borderColor = "#286058")}
+              onBlur={(e) => (e.target.style.borderColor = "#d1d5db")}
             />
           </div>
         </div>
 
         {/* Ingrediënten */}
-        <div
-          style={{ backgroundColor: "#eee1d1", color: "#286058", border: "1px solid #d1d5db" }}
-          className="rounded-lg overflow-hidden mb-6"
-        >
-          <div className="p-6 border-b border-gray-200">
-            <h3 className="text-lg font-semibold">Ingrediënten</h3>
-            <p className="text-sm text-gray-500">
+        <div style={styles.container}>
+          <div style={styles.header}>
+            <h3 style={{ fontSize: "1.125rem", fontWeight: "600" }}>Ingrediënten</h3>
+            <p style={styles.description}>
               Formaat per regel: hoeveelheid | eenheid | naam | notitie (optioneel)
               <br />
               Bijvoorbeeld: 500 | gram | spliterwten | gedroogd
             </p>
           </div>
-          <div className="p-6 space-y-4">
-            <Textarea
+          <div style={styles.content}>
+            <textarea
               name="ingredienten"
               required
               placeholder="500 | gram | spliterwten | gedroogd&#10;2 | stuks | uien | gesnipperd&#10;1 | liter | water"
               rows={8}
               disabled={isSubmitting}
-              style={{ backgroundColor: "white", border: "1px solid #d1d5db", color: "#286058" }}
-              className="w-full px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-green-600 hover:border-green-500 transition-colors"
+              style={styles.textarea}
+              onFocus={(e) => (e.target.style.borderColor = "#286058")}
+              onBlur={(e) => (e.target.style.borderColor = "#d1d5db")}
             />
           </div>
         </div>
 
         {/* Bijgerechten */}
-        <div
-          style={{ backgroundColor: "#eee1d1", color: "#286058", border: "1px solid #d1d5db" }}
-          className="rounded-lg overflow-hidden mb-6"
-        >
-          <div className="p-6 border-b border-gray-200">
-            <h3 className="text-lg font-semibold">Bijgerechten (optioneel)</h3>
-            <p className="text-sm text-gray-500">
+        <div style={styles.container}>
+          <div style={styles.header}>
+            <h3 style={{ fontSize: "1.125rem", fontWeight: "600" }}>Bijgerechten (optioneel)</h3>
+            <p style={styles.description}>
               Formaat per regel: naam | beschrijving
               <br />
               Bijvoorbeeld: Stokbrood | Knapperig vers stokbrood met kruidenboter
             </p>
           </div>
-          <div className="p-6 space-y-4">
-            <Textarea
+          <div style={styles.content}>
+            <textarea
               name="bijgerechten"
               placeholder="Stokbrood | Knapperig vers stokbrood met kruidenboter&#10;Salade | Frisse groene salade"
               rows={4}
               disabled={isSubmitting}
-              style={{ backgroundColor: "white", border: "1px solid #d1d5db", color: "#286058" }}
-              className="w-full px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-green-600 hover:border-green-500 transition-colors"
+              style={styles.textarea}
+              onFocus={(e) => (e.target.style.borderColor = "#286058")}
+              onBlur={(e) => (e.target.style.borderColor = "#d1d5db")}
             />
           </div>
         </div>
 
-        <div className="flex justify-end">
+        <div style={{ display: "flex", justifyContent: "flex-end" }}>
           <button
             type="submit"
             disabled={isSubmitting}
-            style={{ backgroundColor: "#e75129", color: "white" }}
-            className="px-6 py-3 rounded-md transition-all duration-200 disabled:opacity-50"
+            style={{
+              ...styles.button,
+              opacity: isSubmitting ? 0.5 : 1,
+            }}
             onMouseEnter={(e) => !isSubmitting && (e.currentTarget.style.backgroundColor = "#d63e1a")}
             onMouseLeave={(e) => !isSubmitting && (e.currentTarget.style.backgroundColor = "#e75129")}
           >
             {isSubmitting ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <Loader2
+                  style={{ marginRight: "0.5rem", height: "1rem", width: "1rem", animation: "spin 1s linear infinite" }}
+                />
                 Recept toevoegen...
               </>
             ) : (
