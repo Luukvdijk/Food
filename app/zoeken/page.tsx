@@ -49,45 +49,47 @@ export default async function ZoekenPage({ searchParams }: SearchPageProps) {
   const eigenaars = [...new Set(eigenaarData?.map((r) => r.eigenaar).filter(Boolean))]
 
   return (
-    <div className="container mx-auto py-8">
-      <h1 className="text-3xl font-bold mb-8">Recepten Zoeken</h1>
+    <div className="min-h-screen bg-primary text-white">
+      <div className="container mx-auto py-8">
+        <h1 className="text-3xl font-bold mb-8 text-white">Recepten Zoeken</h1>
 
-      <div className="mb-8">
-        <Filters
-          currentType={type}
-          currentSeizoen={seizoen}
-          currentEigenaar={eigenaar}
-          eigenaars={eigenaars as string[]}
-        />
-      </div>
+        <div className="mb-8">
+          <Filters
+            currentType={type}
+            currentSeizoen={seizoen}
+            currentEigenaar={eigenaar}
+            eigenaars={eigenaars as string[]}
+          />
+        </div>
 
-      <div>
-        <h2 className="text-xl font-semibold mb-4">
-          {q ? `Zoekresultaten voor "${q}"` : "Alle recepten"}
-          {type ? ` • Type: ${type}` : ""}
-          {seizoen ? ` • Seizoen: ${seizoen}` : ""}
-          {eigenaar ? ` • Eigenaar: ${eigenaar}` : ""}
-        </h2>
+        <div>
+          <h2 className="text-xl font-semibold mb-4 text-white">
+            {q ? `Zoekresultaten voor "${q}"` : "Alle recepten"}
+            {type ? ` • Type: ${type}` : ""}
+            {seizoen ? ` • Seizoen: ${seizoen}` : ""}
+            {eigenaar ? ` • Eigenaar: ${eigenaar}` : ""}
+          </h2>
 
-        <Suspense
-          fallback={
+          <Suspense
+            fallback={
+              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                {[...Array(6)].map((_, i) => (
+                  <Skeleton key={i} className="h-[350px]" />
+                ))}
+              </div>
+            }
+          >
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {[...Array(6)].map((_, i) => (
-                <Skeleton key={i} className="h-[350px]" />
-              ))}
+              {recepten && recepten.length > 0 ? (
+                recepten.map((recept) => <ReceptCard key={recept.id} recept={recept} />)
+              ) : (
+                <p className="col-span-full text-center text-white/70 py-8">
+                  Geen recepten gevonden. Probeer andere zoektermen of filters.
+                </p>
+              )}
             </div>
-          }
-        >
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {recepten && recepten.length > 0 ? (
-              recepten.map((recept) => <ReceptCard key={recept.id} recept={recept} />)
-            ) : (
-              <p className="col-span-full text-center text-muted-foreground py-8">
-                Geen recepten gevonden. Probeer andere zoektermen of filters.
-              </p>
-            )}
-          </div>
-        </Suspense>
+          </Suspense>
+        </div>
       </div>
     </div>
   )
