@@ -1,4 +1,4 @@
-import { getServerSupabaseClient } from "./supabase-server"
+import { createClient } from "@supabase/supabase-js"
 
 // Use fallback values for preview environment
 const supabaseUrl =
@@ -6,10 +6,7 @@ const supabaseUrl =
 const supabaseKey = process.env.SUPABASE_SERVICE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "placeholder-key"
 
 // Create Supabase client with service key for server-side operations
-// const supabase = createClient(supabaseUrl, supabaseKey)
-
-// Use the singleton server client for database operations
-const serverSupabase = getServerSupabaseClient()
+const supabase = createClient(supabaseUrl, supabaseKey)
 
 // Create a wrapper function that mimics the neon sql template literal tag
 export const sql = (strings: TemplateStringsArray, ...values: any[]) => {
@@ -20,7 +17,7 @@ export const sql = (strings: TemplateStringsArray, ...values: any[]) => {
   }
 
   // Return a promise that executes the query
-  return serverSupabase
+  return supabase
     .rpc("execute_sql", {
       query: query,
       params: values,
@@ -37,22 +34,4 @@ export const sql = (strings: TemplateStringsArray, ...values: any[]) => {
 }
 
 // Export the supabase client for direct use
-// export { supabase }
-
-export async function getRandomRecept() {
-  try {
-    const { data, error } = await serverSupabase.from("recepten").select("*").order("RANDOM()").limit(1).single()
-
-    if (error) {
-      console.error("Error fetching random recept:", error)
-      return null
-    }
-
-    return data
-  } catch (error) {
-    console.error("Error in getRandomRecept:", error)
-    return null
-  }
-}
-
-// ... rest of your database functions
+export { supabase }
