@@ -65,6 +65,7 @@ export function AddReceptForm() {
       width: "100%",
       minHeight: "100px",
       transition: "border-color 0.2s ease",
+      resize: "vertical" as const,
     },
     select: {
       backgroundColor: "white",
@@ -94,22 +95,6 @@ export function AddReceptForm() {
       fontSize: "0.875rem",
       color: "#6b7280",
       marginTop: "0.25rem",
-    },
-    grid: {
-      display: "grid",
-      gap: "1rem",
-    },
-    gridCols2: {
-      gridTemplateColumns: "repeat(1, minmax(0, 1fr))",
-      "@media (min-width: 768px)": {
-        gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
-      },
-    },
-    gridCols4: {
-      gridTemplateColumns: "repeat(1, minmax(0, 1fr))",
-      "@media (min-width: 768px)": {
-        gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
-      },
     },
   }
 
@@ -181,308 +166,324 @@ export function AddReceptForm() {
   }
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
-      <form action={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
-        {/* Basis informatie */}
-        <div style={styles.container}>
-          <div style={styles.header}>
-            <h3 style={{ fontSize: "1.125rem", fontWeight: "600" }}>Basis Informatie</h3>
-          </div>
-          <div style={styles.content}>
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(1, minmax(0, 1fr))",
-                gap: "1rem",
-                marginBottom: "1rem",
-              }}
-            >
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(1, minmax(0, 1fr))",
-                  gap: "1rem",
-                  "@media (min-width: 768px)": { gridTemplateColumns: "repeat(2, minmax(0, 1fr))" },
-                }}
-              >
-                <div>
-                  <label style={styles.label} htmlFor="naam">
-                    Recept Naam *
-                  </label>
-                  <input
-                    id="naam"
-                    name="naam"
-                    required
-                    placeholder="Bijv. Hollandse Erwtensoep"
-                    disabled={isSubmitting}
-                    style={styles.input}
-                    onFocus={(e) => (e.target.style.borderColor = "#286058")}
-                    onBlur={(e) => (e.target.style.borderColor = "#d1d5db")}
-                  />
-                </div>
-                <div>
-                  <label style={styles.label} htmlFor="personen">
-                    Aantal Personen *
-                  </label>
-                  <input
-                    id="personen"
-                    name="personen"
-                    type="number"
-                    required
-                    defaultValue="4"
-                    min="1"
-                    max="20"
-                    disabled={isSubmitting}
-                    style={styles.input}
-                    onFocus={(e) => (e.target.style.borderColor = "#286058")}
-                    onBlur={(e) => (e.target.style.borderColor = "#d1d5db")}
-                  />
-                </div>
-              </div>
+    <>
+      <style jsx>{`
+        .form-grid-2 {
+          display: grid;
+          grid-template-columns: 1fr;
+          gap: 1rem;
+        }
+        .form-grid-3 {
+          display: grid;
+          grid-template-columns: 1fr;
+          gap: 1rem;
+        }
+        .form-grid-4 {
+          display: grid;
+          grid-template-columns: 1fr;
+          gap: 1rem;
+        }
+        @media (min-width: 768px) {
+          .form-grid-2 {
+            grid-template-columns: repeat(2, 1fr);
+          }
+          .form-grid-3 {
+            grid-template-columns: repeat(3, 1fr);
+          }
+          .form-grid-4 {
+            grid-template-columns: repeat(4, 1fr);
+          }
+        }
+        .form-container {
+          display: flex;
+          flex-direction: column;
+          gap: 1.5rem;
+        }
+        .form-section {
+          display: flex;
+          flex-direction: column;
+          gap: 1rem;
+        }
+      `}</style>
 
-              <div>
-                <label style={styles.label} htmlFor="beschrijving">
-                  Beschrijving *
-                </label>
-                <textarea
-                  id="beschrijving"
-                  name="beschrijving"
-                  required
-                  placeholder="Een korte beschrijving van het recept..."
-                  rows={3}
-                  disabled={isSubmitting}
-                  style={styles.textarea}
-                  onFocus={(e) => (e.target.style.borderColor = "#286058")}
-                  onBlur={(e) => (e.target.style.borderColor = "#d1d5db")}
-                />
-              </div>
-
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(1, minmax(0, 1fr))",
-                  gap: "1rem",
-                  "@media (min-width: 768px)": {
-                    gridTemplateColumns: hasEigenaarSupport ? "repeat(4, minmax(0, 1fr))" : "repeat(3, minmax(0, 1fr))",
-                  },
-                }}
-              >
-                <div>
-                  <label style={styles.label} htmlFor="bereidingstijd">
-                    Bereidingstijd (minuten) *
-                  </label>
-                  <input
-                    id="bereidingstijd"
-                    name="bereidingstijd"
-                    type="number"
-                    required
-                    placeholder="30"
-                    min="1"
-                    disabled={isSubmitting}
-                    style={styles.input}
-                    onFocus={(e) => (e.target.style.borderColor = "#286058")}
-                    onBlur={(e) => (e.target.style.borderColor = "#d1d5db")}
-                  />
-                </div>
-                <div>
-                  <label style={styles.label}>Type Gerecht *</label>
-                  <select
-                    value={selectedType}
-                    onChange={(e) => setSelectedType(e.target.value as GerechtsType)}
-                    disabled={isSubmitting}
-                    style={styles.select}
-                    onFocus={(e) => (e.target.style.borderColor = "#286058")}
-                    onBlur={(e) => (e.target.style.borderColor = "#d1d5db")}
-                  >
-                    {gerechtsTypes.map((type) => (
-                      <option key={type} value={type}>
-                        {type}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label style={styles.label}>Moeilijkheidsgraad *</label>
-                  <select
-                    value={selectedMoeilijkheid}
-                    onChange={(e) => setSelectedMoeilijkheid(e.target.value)}
-                    disabled={isSubmitting}
-                    style={styles.select}
-                    onFocus={(e) => (e.target.style.borderColor = "#286058")}
-                    onBlur={(e) => (e.target.style.borderColor = "#d1d5db")}
-                  >
-                    {moeilijkheidsgraden.map((niveau) => (
-                      <option key={niveau} value={niveau}>
-                        {niveau}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                {hasEigenaarSupport && (
+      <div className="form-container">
+        <form action={handleSubmit} className="form-container">
+          {/* Basis informatie */}
+          <div style={styles.container}>
+            <div style={styles.header}>
+              <h3 style={{ fontSize: "1.125rem", fontWeight: "600" }}>Basis Informatie</h3>
+            </div>
+            <div style={styles.content}>
+              <div className="form-section">
+                <div className="form-grid-2">
                   <div>
-                    <label style={styles.label}>Eigenaar *</label>
+                    <label style={styles.label} htmlFor="naam">
+                      Recept Naam *
+                    </label>
+                    <input
+                      id="naam"
+                      name="naam"
+                      required
+                      placeholder="Bijv. Hollandse Erwtensoep"
+                      disabled={isSubmitting}
+                      style={styles.input}
+                      onFocus={(e) => (e.target.style.borderColor = "#286058")}
+                      onBlur={(e) => (e.target.style.borderColor = "#d1d5db")}
+                    />
+                  </div>
+                  <div>
+                    <label style={styles.label} htmlFor="personen">
+                      Aantal Personen *
+                    </label>
+                    <input
+                      id="personen"
+                      name="personen"
+                      type="number"
+                      required
+                      defaultValue="4"
+                      min="1"
+                      max="20"
+                      disabled={isSubmitting}
+                      style={styles.input}
+                      onFocus={(e) => (e.target.style.borderColor = "#286058")}
+                      onBlur={(e) => (e.target.style.borderColor = "#d1d5db")}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label style={styles.label} htmlFor="beschrijving">
+                    Beschrijving *
+                  </label>
+                  <textarea
+                    id="beschrijving"
+                    name="beschrijving"
+                    required
+                    placeholder="Een korte beschrijving van het recept..."
+                    rows={3}
+                    disabled={isSubmitting}
+                    style={styles.textarea}
+                    onFocus={(e) => (e.target.style.borderColor = "#286058")}
+                    onBlur={(e) => (e.target.style.borderColor = "#d1d5db")}
+                  />
+                </div>
+
+                <div className={hasEigenaarSupport ? "form-grid-4" : "form-grid-3"}>
+                  <div>
+                    <label style={styles.label} htmlFor="bereidingstijd">
+                      Bereidingstijd (minuten) *
+                    </label>
+                    <input
+                      id="bereidingstijd"
+                      name="bereidingstijd"
+                      type="number"
+                      required
+                      placeholder="30"
+                      min="1"
+                      disabled={isSubmitting}
+                      style={styles.input}
+                      onFocus={(e) => (e.target.style.borderColor = "#286058")}
+                      onBlur={(e) => (e.target.style.borderColor = "#d1d5db")}
+                    />
+                  </div>
+                  <div>
+                    <label style={styles.label}>Type Gerecht *</label>
                     <select
-                      value={selectedEigenaar}
-                      onChange={(e) => setSelectedEigenaar(e.target.value as Eigenaar)}
+                      value={selectedType}
+                      onChange={(e) => setSelectedType(e.target.value as GerechtsType)}
                       disabled={isSubmitting}
                       style={styles.select}
                       onFocus={(e) => (e.target.style.borderColor = "#286058")}
                       onBlur={(e) => (e.target.style.borderColor = "#d1d5db")}
                     >
-                      {eigenaren.map((eigenaar) => (
-                        <option key={eigenaar.value} value={eigenaar.value}>
-                          {eigenaar.label}
+                      {gerechtsTypes.map((type) => (
+                        <option key={type} value={type}>
+                          {type}
                         </option>
                       ))}
                     </select>
                   </div>
-                )}
-              </div>
-
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(1, minmax(0, 1fr))",
-                  gap: "1rem",
-                  "@media (min-width: 768px)": { gridTemplateColumns: "repeat(2, minmax(0, 1fr))" },
-                }}
-              >
-                <div>
-                  <label style={styles.label} htmlFor="seizoen">
-                    Seizoenen (komma gescheiden)
-                  </label>
-                  <input
-                    id="seizoen"
-                    name="seizoen"
-                    placeholder="Lente, Zomer, Herfst, Winter"
-                    defaultValue="Lente, Zomer, Herfst, Winter"
-                    disabled={isSubmitting}
-                    style={styles.input}
-                    onFocus={(e) => (e.target.style.borderColor = "#286058")}
-                    onBlur={(e) => (e.target.style.borderColor = "#d1d5db")}
-                  />
+                  <div>
+                    <label style={styles.label}>Moeilijkheidsgraad *</label>
+                    <select
+                      value={selectedMoeilijkheid}
+                      onChange={(e) => setSelectedMoeilijkheid(e.target.value)}
+                      disabled={isSubmitting}
+                      style={styles.select}
+                      onFocus={(e) => (e.target.style.borderColor = "#286058")}
+                      onBlur={(e) => (e.target.style.borderColor = "#d1d5db")}
+                    >
+                      {moeilijkheidsgraden.map((niveau) => (
+                        <option key={niveau} value={niveau}>
+                          {niveau}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  {hasEigenaarSupport && (
+                    <div>
+                      <label style={styles.label}>Eigenaar *</label>
+                      <select
+                        value={selectedEigenaar}
+                        onChange={(e) => setSelectedEigenaar(e.target.value as Eigenaar)}
+                        disabled={isSubmitting}
+                        style={styles.select}
+                        onFocus={(e) => (e.target.style.borderColor = "#286058")}
+                        onBlur={(e) => (e.target.style.borderColor = "#d1d5db")}
+                      >
+                        {eigenaren.map((eigenaar) => (
+                          <option key={eigenaar.value} value={eigenaar.value}>
+                            {eigenaar.label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
                 </div>
-                <div>
-                  <label style={styles.label} htmlFor="tags">
-                    Tags (komma gescheiden)
-                  </label>
-                  <input
-                    id="tags"
-                    name="tags"
-                    placeholder="vegetarisch, snel, gezond"
-                    disabled={isSubmitting}
-                    style={styles.input}
-                    onFocus={(e) => (e.target.style.borderColor = "#286058")}
-                    onBlur={(e) => (e.target.style.borderColor = "#d1d5db")}
-                  />
+
+                <div className="form-grid-2">
+                  <div>
+                    <label style={styles.label} htmlFor="seizoen">
+                      Seizoenen (komma gescheiden)
+                    </label>
+                    <input
+                      id="seizoen"
+                      name="seizoen"
+                      placeholder="Lente, Zomer, Herfst, Winter"
+                      defaultValue="Lente, Zomer, Herfst, Winter"
+                      disabled={isSubmitting}
+                      style={styles.input}
+                      onFocus={(e) => (e.target.style.borderColor = "#286058")}
+                      onBlur={(e) => (e.target.style.borderColor = "#d1d5db")}
+                    />
+                  </div>
+                  <div>
+                    <label style={styles.label} htmlFor="tags">
+                      Tags (komma gescheiden)
+                    </label>
+                    <input
+                      id="tags"
+                      name="tags"
+                      placeholder="vegetarisch, snel, gezond"
+                      disabled={isSubmitting}
+                      style={styles.input}
+                      onFocus={(e) => (e.target.style.borderColor = "#286058")}
+                      onBlur={(e) => (e.target.style.borderColor = "#d1d5db")}
+                    />
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
 
-        {/* Afbeelding Upload */}
-        <div style={styles.container}>
-          <div style={styles.header}>
-            <h3 style={{ fontSize: "1.125rem", fontWeight: "600" }}>Recept Afbeelding</h3>
-            <p style={styles.description}>Upload een afbeelding van je recept</p>
+          {/* Afbeelding Upload */}
+          <div style={styles.container}>
+            <div style={styles.header}>
+              <h3 style={{ fontSize: "1.125rem", fontWeight: "600" }}>Recept Afbeelding</h3>
+              <p style={styles.description}>Upload een afbeelding van je recept</p>
+            </div>
+            <div style={styles.content}>
+              <ImageUpload currentImageUrl={imageUrl} onImageChange={setImageUrl} disabled={isSubmitting} />
+            </div>
           </div>
-          <div style={styles.content}>
-            <ImageUpload currentImageUrl={imageUrl} onImageChange={setImageUrl} disabled={isSubmitting} />
-          </div>
-        </div>
 
-        {/* Bereidingswijze */}
-        <div style={styles.container}>
-          <div style={styles.header}>
-            <h3 style={{ fontSize: "1.125rem", fontWeight: "600" }}>Bereidingswijze</h3>
-            <p style={styles.description}>Voer elke stap op een nieuwe regel in</p>
+          {/* Bereidingswijze */}
+          <div style={styles.container}>
+            <div style={styles.header}>
+              <h3 style={{ fontSize: "1.125rem", fontWeight: "600" }}>Bereidingswijze</h3>
+              <p style={styles.description}>Voer elke stap op een nieuwe regel in</p>
+            </div>
+            <div style={styles.content}>
+              <textarea
+                name="bereidingswijze"
+                required
+                placeholder="Stap 1: Was de groenten grondig&#10;Stap 2: Snijd alle ingrediënten in stukjes&#10;Stap 3: Verhit de olie in een pan"
+                rows={8}
+                disabled={isSubmitting}
+                style={styles.textarea}
+                onFocus={(e) => (e.target.style.borderColor = "#286058")}
+                onBlur={(e) => (e.target.style.borderColor = "#d1d5db")}
+              />
+            </div>
           </div>
-          <div style={styles.content}>
-            <textarea
-              name="bereidingswijze"
-              required
-              placeholder="Stap 1: Was de groenten grondig&#10;Stap 2: Snijd alle ingrediënten in stukjes&#10;Stap 3: Verhit de olie in een pan"
-              rows={8}
+
+          {/* Ingrediënten */}
+          <div style={styles.container}>
+            <div style={styles.header}>
+              <h3 style={{ fontSize: "1.125rem", fontWeight: "600" }}>Ingrediënten</h3>
+              <p style={styles.description}>
+                Formaat per regel: hoeveelheid | eenheid | naam | notitie (optioneel)
+                <br />
+                Bijvoorbeeld: 500 | gram | spliterwten | gedroogd
+              </p>
+            </div>
+            <div style={styles.content}>
+              <textarea
+                name="ingredienten"
+                required
+                placeholder="500 | gram | spliterwten | gedroogd&#10;2 | stuks | uien | gesnipperd&#10;1 | liter | water"
+                rows={8}
+                disabled={isSubmitting}
+                style={styles.textarea}
+                onFocus={(e) => (e.target.style.borderColor = "#286058")}
+                onBlur={(e) => (e.target.style.borderColor = "#d1d5db")}
+              />
+            </div>
+          </div>
+
+          {/* Bijgerechten */}
+          <div style={styles.container}>
+            <div style={styles.header}>
+              <h3 style={{ fontSize: "1.125rem", fontWeight: "600" }}>Bijgerechten (optioneel)</h3>
+              <p style={styles.description}>
+                Formaat per regel: naam | beschrijving
+                <br />
+                Bijvoorbeeld: Stokbrood | Knapperig vers stokbrood met kruidenboter
+              </p>
+            </div>
+            <div style={styles.content}>
+              <textarea
+                name="bijgerechten"
+                placeholder="Stokbrood | Knapperig vers stokbrood met kruidenboter&#10;Salade | Frisse groene salade"
+                rows={4}
+                disabled={isSubmitting}
+                style={styles.textarea}
+                onFocus={(e) => (e.target.style.borderColor = "#286058")}
+                onBlur={(e) => (e.target.style.borderColor = "#d1d5db")}
+              />
+            </div>
+          </div>
+
+          <div style={{ display: "flex", justifyContent: "flex-end" }}>
+            <button
+              type="submit"
               disabled={isSubmitting}
-              style={styles.textarea}
-              onFocus={(e) => (e.target.style.borderColor = "#286058")}
-              onBlur={(e) => (e.target.style.borderColor = "#d1d5db")}
-            />
+              style={{
+                ...styles.button,
+                opacity: isSubmitting ? 0.5 : 1,
+              }}
+              onMouseEnter={(e) => !isSubmitting && (e.currentTarget.style.backgroundColor = "#d63e1a")}
+              onMouseLeave={(e) => !isSubmitting && (e.currentTarget.style.backgroundColor = "#e75129")}
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2
+                    style={{
+                      marginRight: "0.5rem",
+                      height: "1rem",
+                      width: "1rem",
+                      animation: "spin 1s linear infinite",
+                    }}
+                  />
+                  Recept toevoegen...
+                </>
+              ) : (
+                "Recept Toevoegen"
+              )}
+            </button>
           </div>
-        </div>
-
-        {/* Ingrediënten */}
-        <div style={styles.container}>
-          <div style={styles.header}>
-            <h3 style={{ fontSize: "1.125rem", fontWeight: "600" }}>Ingrediënten</h3>
-            <p style={styles.description}>
-              Formaat per regel: hoeveelheid | eenheid | naam | notitie (optioneel)
-              <br />
-              Bijvoorbeeld: 500 | gram | spliterwten | gedroogd
-            </p>
-          </div>
-          <div style={styles.content}>
-            <textarea
-              name="ingredienten"
-              required
-              placeholder="500 | gram | spliterwten | gedroogd&#10;2 | stuks | uien | gesnipperd&#10;1 | liter | water"
-              rows={8}
-              disabled={isSubmitting}
-              style={styles.textarea}
-              onFocus={(e) => (e.target.style.borderColor = "#286058")}
-              onBlur={(e) => (e.target.style.borderColor = "#d1d5db")}
-            />
-          </div>
-        </div>
-
-        {/* Bijgerechten */}
-        <div style={styles.container}>
-          <div style={styles.header}>
-            <h3 style={{ fontSize: "1.125rem", fontWeight: "600" }}>Bijgerechten (optioneel)</h3>
-            <p style={styles.description}>
-              Formaat per regel: naam | beschrijving
-              <br />
-              Bijvoorbeeld: Stokbrood | Knapperig vers stokbrood met kruidenboter
-            </p>
-          </div>
-          <div style={styles.content}>
-            <textarea
-              name="bijgerechten"
-              placeholder="Stokbrood | Knapperig vers stokbrood met kruidenboter&#10;Salade | Frisse groene salade"
-              rows={4}
-              disabled={isSubmitting}
-              style={styles.textarea}
-              onFocus={(e) => (e.target.style.borderColor = "#286058")}
-              onBlur={(e) => (e.target.style.borderColor = "#d1d5db")}
-            />
-          </div>
-        </div>
-
-        <div style={{ display: "flex", justifyContent: "flex-end" }}>
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            style={{
-              ...styles.button,
-              opacity: isSubmitting ? 0.5 : 1,
-            }}
-            onMouseEnter={(e) => !isSubmitting && (e.currentTarget.style.backgroundColor = "#d63e1a")}
-            onMouseLeave={(e) => !isSubmitting && (e.currentTarget.style.backgroundColor = "#e75129")}
-          >
-            {isSubmitting ? (
-              <>
-                <Loader2
-                  style={{ marginRight: "0.5rem", height: "1rem", width: "1rem", animation: "spin 1s linear infinite" }}
-                />
-                Recept toevoegen...
-              </>
-            ) : (
-              "Recept Toevoegen"
-            )}
-          </button>
-        </div>
-      </form>
-    </div>
+        </form>
+      </div>
+    </>
   )
 }

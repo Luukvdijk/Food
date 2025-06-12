@@ -236,165 +236,194 @@ export function IngredientsManager() {
   }
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem", color: "#286058" }}>
-      {/* Filter */}
-      <div style={styles.container}>
-        <div style={styles.header}>
-          <h3 style={{ fontSize: "1.125rem", fontWeight: "600", marginBottom: "0.5rem" }}>Filter op Recept</h3>
-        </div>
-        <div style={styles.content}>
-          <select value={selectedReceptId} onChange={(e) => setSelectedReceptId(e.target.value)} style={styles.select}>
-            <option value="all">Alle recepten</option>
-            {recepten.map((recept) => (
-              <option key={recept.id} value={recept.id.toString()}>
-                {recept.naam}
-              </option>
-            ))}
-          </select>
-        </div>
-      </div>
+    <>
+      <style jsx>{`
+        .ingredients-container {
+          display: flex;
+          flex-direction: column;
+          gap: 1.5rem;
+          color: #286058;
+        }
+        .table-responsive {
+          overflow-x: auto;
+        }
+        .select-container {
+          width: 100%;
+          max-width: 20rem;
+        }
+        @media (min-width: 768px) {
+          .select-container {
+            width: 33.333333%;
+          }
+        }
+      `}</style>
 
-      {/* Ingrediënten tabel */}
-      <div style={styles.container}>
-        <div style={styles.header}>
-          <h3 style={{ fontSize: "1.125rem", fontWeight: "600" }}>Ingrediënten ({filteredIngredienten.length})</h3>
-        </div>
-        <div style={styles.content}>
-          {filteredIngredienten.length === 0 ? (
-            <div style={{ textAlign: "center", padding: "2rem", color: "#6b7280" }}>Geen ingrediënten gevonden</div>
-          ) : (
-            <div style={{ overflowX: "auto" }}>
-              <table style={styles.table}>
-                <thead>
-                  <tr>
-                    <th style={styles.tableHeader}>Recept</th>
-                    <th style={styles.tableHeader}>Naam</th>
-                    <th style={styles.tableHeader}>Hoeveelheid</th>
-                    <th style={styles.tableHeader}>Eenheid</th>
-                    <th style={styles.tableHeader}>Notitie</th>
-                    <th style={styles.tableHeader}>Acties</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredIngredienten.map((ingredient) => {
-                    const rowHover = rowHoverStates[ingredient.id] || false
-                    return (
-                      <tr
-                        key={ingredient.id}
-                        style={{
-                          ...styles.tableRow,
-                          backgroundColor: rowHover ? "#f1ece2" : "#eee1d1",
-                        }}
-                        onMouseEnter={() => setRowHoverStates({ ...rowHoverStates, [ingredient.id]: true })}
-                        onMouseLeave={() => setRowHoverStates({ ...rowHoverStates, [ingredient.id]: false })}
-                      >
-                        <td style={styles.tableCell}>
-                          <span style={styles.badge}>{ingredient.recept_naam}</span>
-                        </td>
-                        <td style={styles.tableCell}>
-                          {editingId === ingredient.id ? (
-                            <input
-                              type="text"
-                              value={editForm.naam}
-                              onChange={(e) => setEditForm({ ...editForm, naam: e.target.value })}
-                              style={styles.input}
-                            />
-                          ) : (
-                            ingredient.naam
-                          )}
-                        </td>
-                        <td style={styles.tableCell}>
-                          {editingId === ingredient.id ? (
-                            <input
-                              type="number"
-                              step="0.1"
-                              value={editForm.hoeveelheid}
-                              onChange={(e) =>
-                                setEditForm({ ...editForm, hoeveelheid: Number.parseFloat(e.target.value) })
-                              }
-                              style={{ ...styles.input, width: "80px" }}
-                            />
-                          ) : (
-                            ingredient.hoeveelheid
-                          )}
-                        </td>
-                        <td style={styles.tableCell}>
-                          {editingId === ingredient.id ? (
-                            <input
-                              type="text"
-                              value={editForm.eenheid}
-                              onChange={(e) => setEditForm({ ...editForm, eenheid: e.target.value })}
-                              style={{ ...styles.input, width: "80px" }}
-                            />
-                          ) : (
-                            ingredient.eenheid
-                          )}
-                        </td>
-                        <td style={styles.tableCell}>
-                          {editingId === ingredient.id ? (
-                            <input
-                              type="text"
-                              value={editForm.notitie}
-                              onChange={(e) => setEditForm({ ...editForm, notitie: e.target.value })}
-                              style={{ ...styles.input, width: "120px" }}
-                              placeholder="Optioneel"
-                            />
-                          ) : (
-                            ingredient.notitie || "-"
-                          )}
-                        </td>
-                        <td style={styles.tableCell}>
-                          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                            {editingId === ingredient.id ? (
-                              <>
-                                <button
-                                  onClick={() => saveEdit(ingredient.id)}
-                                  style={styles.buttonOrange}
-                                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#d63e1a")}
-                                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#e75129")}
-                                >
-                                  <Save className="h-3 w-3" />
-                                </button>
-                                <button
-                                  onClick={cancelEdit}
-                                  style={styles.buttonCream}
-                                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#d1c7b8")}
-                                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#eee1d1")}
-                                >
-                                  <X className="h-3 w-3" />
-                                </button>
-                              </>
-                            ) : (
-                              <>
-                                <button
-                                  onClick={() => startEdit(ingredient)}
-                                  style={styles.buttonOrange}
-                                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#d63e1a")}
-                                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#e75129")}
-                                >
-                                  <Pencil className="h-3 w-3" />
-                                </button>
-                                <button
-                                  onClick={() => deleteIngredient(ingredient.id)}
-                                  style={styles.buttonOrange}
-                                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#d63e1a")}
-                                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#e75129")}
-                                >
-                                  <Trash2 className="h-3 w-3" />
-                                </button>
-                              </>
-                            )}
-                          </div>
-                        </td>
-                      </tr>
-                    )
-                  })}
-                </tbody>
-              </table>
+      <div className="ingredients-container">
+        {/* Filter */}
+        <div style={styles.container}>
+          <div style={styles.header}>
+            <h3 style={{ fontSize: "1.125rem", fontWeight: "600", marginBottom: "0.5rem" }}>Filter op Recept</h3>
+          </div>
+          <div style={styles.content}>
+            <div className="select-container">
+              <select
+                value={selectedReceptId}
+                onChange={(e) => setSelectedReceptId(e.target.value)}
+                style={styles.select}
+              >
+                <option value="all">Alle recepten</option>
+                {recepten.map((recept) => (
+                  <option key={recept.id} value={recept.id.toString()}>
+                    {recept.naam}
+                  </option>
+                ))}
+              </select>
             </div>
-          )}
+          </div>
+        </div>
+
+        {/* Ingrediënten tabel */}
+        <div style={styles.container}>
+          <div style={styles.header}>
+            <h3 style={{ fontSize: "1.125rem", fontWeight: "600" }}>Ingrediënten ({filteredIngredienten.length})</h3>
+          </div>
+          <div style={styles.content}>
+            {filteredIngredienten.length === 0 ? (
+              <div style={{ textAlign: "center", padding: "2rem", color: "#6b7280" }}>Geen ingrediënten gevonden</div>
+            ) : (
+              <div className="table-responsive">
+                <table style={styles.table}>
+                  <thead>
+                    <tr>
+                      <th style={styles.tableHeader}>Recept</th>
+                      <th style={styles.tableHeader}>Naam</th>
+                      <th style={styles.tableHeader}>Hoeveelheid</th>
+                      <th style={styles.tableHeader}>Eenheid</th>
+                      <th style={styles.tableHeader}>Notitie</th>
+                      <th style={styles.tableHeader}>Acties</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredIngredienten.map((ingredient) => {
+                      const rowHover = rowHoverStates[ingredient.id] || false
+                      return (
+                        <tr
+                          key={ingredient.id}
+                          style={{
+                            ...styles.tableRow,
+                            backgroundColor: rowHover ? "#f1ece2" : "#eee1d1",
+                          }}
+                          onMouseEnter={() => setRowHoverStates({ ...rowHoverStates, [ingredient.id]: true })}
+                          onMouseLeave={() => setRowHoverStates({ ...rowHoverStates, [ingredient.id]: false })}
+                        >
+                          <td style={styles.tableCell}>
+                            <span style={styles.badge}>{ingredient.recept_naam}</span>
+                          </td>
+                          <td style={styles.tableCell}>
+                            {editingId === ingredient.id ? (
+                              <input
+                                type="text"
+                                value={editForm.naam}
+                                onChange={(e) => setEditForm({ ...editForm, naam: e.target.value })}
+                                style={styles.input}
+                              />
+                            ) : (
+                              ingredient.naam
+                            )}
+                          </td>
+                          <td style={styles.tableCell}>
+                            {editingId === ingredient.id ? (
+                              <input
+                                type="number"
+                                step="0.1"
+                                value={editForm.hoeveelheid}
+                                onChange={(e) =>
+                                  setEditForm({ ...editForm, hoeveelheid: Number.parseFloat(e.target.value) })
+                                }
+                                style={{ ...styles.input, width: "80px" }}
+                              />
+                            ) : (
+                              ingredient.hoeveelheid
+                            )}
+                          </td>
+                          <td style={styles.tableCell}>
+                            {editingId === ingredient.id ? (
+                              <input
+                                type="text"
+                                value={editForm.eenheid}
+                                onChange={(e) => setEditForm({ ...editForm, eenheid: e.target.value })}
+                                style={{ ...styles.input, width: "80px" }}
+                              />
+                            ) : (
+                              ingredient.eenheid
+                            )}
+                          </td>
+                          <td style={styles.tableCell}>
+                            {editingId === ingredient.id ? (
+                              <input
+                                type="text"
+                                value={editForm.notitie}
+                                onChange={(e) => setEditForm({ ...editForm, notitie: e.target.value })}
+                                style={{ ...styles.input, width: "120px" }}
+                                placeholder="Optioneel"
+                              />
+                            ) : (
+                              ingredient.notitie || "-"
+                            )}
+                          </td>
+                          <td style={styles.tableCell}>
+                            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                              {editingId === ingredient.id ? (
+                                <>
+                                  <button
+                                    onClick={() => saveEdit(ingredient.id)}
+                                    style={styles.buttonOrange}
+                                    onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#d63e1a")}
+                                    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#e75129")}
+                                  >
+                                    <Save className="h-3 w-3" />
+                                  </button>
+                                  <button
+                                    onClick={cancelEdit}
+                                    style={styles.buttonCream}
+                                    onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#d1c7b8")}
+                                    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#eee1d1")}
+                                  >
+                                    <X className="h-3 w-3" />
+                                  </button>
+                                </>
+                              ) : (
+                                <>
+                                  <button
+                                    onClick={() => startEdit(ingredient)}
+                                    style={styles.buttonOrange}
+                                    onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#d63e1a")}
+                                    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#e75129")}
+                                  >
+                                    <Pencil className="h-3 w-3" />
+                                  </button>
+                                  <button
+                                    onClick={() => deleteIngredient(ingredient.id)}
+                                    style={styles.buttonOrange}
+                                    onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#d63e1a")}
+                                    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#e75129")}
+                                  >
+                                    <Trash2 className="h-3 w-3" />
+                                  </button>
+                                </>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      )
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
         </div>
       </div>
-    </div>
+    </>
   )
 }
