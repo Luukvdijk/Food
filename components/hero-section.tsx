@@ -112,8 +112,18 @@ export function HeroSection({ recept }: HeroSectionProps) {
             {/* Right Content - Recipe Image */}
             <div className="relative flex justify-center items-center">
               <div className="relative w-80 h-80 cursor-pointer group" onClick={handleImageClick}>
-                {/* Dashed Circle Background */}
-                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                {/* Main Image - Circular Crop */}
+                <div className="relative w-full h-full rounded-full overflow-hidden">
+                  <Image
+                    src={recept.afbeelding_url || "/placeholder.svg?height=400&width=400&query=delicious food"}
+                    alt={recept.naam}
+                    fill
+                    className="object-cover transition-transform duration-300 group-hover:scale-110"
+                  />
+                </div>
+
+                {/* Dashed Circle Overlay */}
+                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
                   <svg className="w-full h-full" viewBox="0 0 320 320" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <circle
                       cx="160"
@@ -128,18 +138,8 @@ export function HeroSection({ recept }: HeroSectionProps) {
                   </svg>
                 </div>
 
-                {/* Main Image - Circular Crop */}
-                <div className="relative w-full h-full rounded-full overflow-hidden">
-                  <Image
-                    src={recept.afbeelding_url || "/placeholder.svg?height=400&width=400&query=delicious food"}
-                    alt={recept.naam}
-                    fill
-                    className="object-cover transition-transform duration-300 group-hover:scale-110"
-                  />
-                </div>
-
                 {/* Click Hint */}
-                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-10">
                   <div className="bg-black/60 text-white px-4 py-2 rounded-lg text-sm font-medium">
                     Klik voor ingrediënten
                   </div>

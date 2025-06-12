@@ -104,17 +104,18 @@ export function FilterPopup({ isOpen, onClose, onFiltersChange, currentFilters }
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 z-50 flex justify-center" onClick={onClose}>
+    <div className="fixed inset-0 z-50" onClick={onClose}>
       <div
-        className="absolute top-0 w-full max-w-md transform transition-transform duration-300 ease-in-out"
+        className={`absolute top-0 left-8 w-96 transform transition-transform duration-300 ease-in-out ${
+          isOpen ? "translate-y-0" : "-translate-y-full"
+        }`}
         style={{
-          transform: isOpen ? "translateY(0)" : "translateY(-100%)",
           maxHeight: "80vh",
           overflowY: "auto",
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="bg-[#eee1d1] rounded-b-xl shadow-lg p-6">
+        <div className="bg-[#eee1d1] rounded-b-xl shadow-2xl p-6">
           {/* Header */}
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-[#e75129] text-3xl font-medium">Filters</h2>
@@ -126,7 +127,7 @@ export function FilterPopup({ isOpen, onClose, onFiltersChange, currentFilters }
             <div className="flex justify-between items-center cursor-pointer" onClick={() => toggleCategory("vlees")}>
               <h3 className="text-[#286058] text-2xl font-medium">Vlees</h3>
               <ChevronDown
-                className={`h-6 w-6 text-[#286058] transform ${categories.vlees ? "rotate-0" : "rotate-180"}`}
+                className={`h-6 w-6 text-[#286058] transform transition-transform ${categories.vlees ? "rotate-0" : "rotate-180"}`}
               />
             </div>
 
@@ -159,7 +160,7 @@ export function FilterPopup({ isOpen, onClose, onFiltersChange, currentFilters }
             >
               <h3 className="text-[#286058] text-2xl font-medium">Berijding</h3>
               <ChevronDown
-                className={`h-6 w-6 text-[#286058] transform ${categories.berijding ? "rotate-0" : "rotate-180"}`}
+                className={`h-6 w-6 text-[#286058] transform transition-transform ${categories.berijding ? "rotate-0" : "rotate-180"}`}
               />
             </div>
 
@@ -189,7 +190,7 @@ export function FilterPopup({ isOpen, onClose, onFiltersChange, currentFilters }
             <div className="flex justify-between items-center cursor-pointer" onClick={() => toggleCategory("seizoen")}>
               <h3 className="text-[#286058] text-2xl font-medium">Seizoen</h3>
               <ChevronDown
-                className={`h-6 w-6 text-[#286058] transform ${categories.seizoen ? "rotate-0" : "rotate-180"}`}
+                className={`h-6 w-6 text-[#286058] transform transition-transform ${categories.seizoen ? "rotate-0" : "rotate-180"}`}
               />
             </div>
 
@@ -222,7 +223,7 @@ export function FilterPopup({ isOpen, onClose, onFiltersChange, currentFilters }
             >
               <h3 className="text-[#286058] text-2xl font-medium">Eigenaar</h3>
               <ChevronDown
-                className={`h-6 w-6 text-[#286058] transform ${categories.eigenaar ? "rotate-0" : "rotate-180"}`}
+                className={`h-6 w-6 text-[#286058] transform transition-transform ${categories.eigenaar ? "rotate-0" : "rotate-180"}`}
               />
             </div>
 
