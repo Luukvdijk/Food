@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import type { GerechtsType, Seizoen, Eigenaar, FilterOptions } from "@/types"
@@ -17,9 +17,28 @@ interface RandomReceptFiltersProps {
 }
 
 export function RandomReceptFilters({ onFiltersChange }: RandomReceptFiltersProps) {
-  const [selectedType, setSelectedType] = useState<string>("")
-  const [selectedSeizoen, setSelectedSeizoen] = useState<string>("")
-  const [selectedEigenaar, setSelectedEigenaar] = useState<string>("")
+  const [selectedType, setSelectedType] = useState<string>("all")
+  const [selectedSeizoen, setSelectedSeizoen] = useState<string>("all")
+  const [selectedEigenaar, setSelectedEigenaar] = useState<string>("all")
+  const [dbInfo, setDbInfo] = useState<any>(null)
+
+  // Fetch database info on component mount to help debug
+  useEffect(() => {
+    const fetchDbInfo = async () => {
+      try {
+        const response = await fetch("/api/debug-recepten")
+        if (response.ok) {
+          const data = await response.json()
+          setDbInfo(data)
+          console.log("Database info:", data)
+        }
+      } catch (error) {
+        console.error("Error fetching DB info:", error)
+      }
+    }
+
+    fetchDbInfo()
+  }, [])
 
   const updateFilters = (type?: string, seizoen?: string, eigenaar?: string) => {
     const filters: FilterOptions = {}
@@ -37,24 +56,27 @@ export function RandomReceptFilters({ onFiltersChange }: RandomReceptFiltersProp
   }
 
   const handleTypeChange = (value: string) => {
+    console.log("Type changed to:", value)
     setSelectedType(value)
     updateFilters(value, undefined, undefined)
   }
 
   const handleSeizoenChange = (value: string) => {
+    console.log("Seizoen changed to:", value)
     setSelectedSeizoen(value)
     updateFilters(undefined, value, undefined)
   }
 
   const handleEigenaarChange = (value: string) => {
+    console.log("Eigenaar changed to:", value)
     setSelectedEigenaar(value)
     updateFilters(undefined, undefined, value)
   }
 
   const resetFilters = () => {
-    setSelectedType("")
-    setSelectedSeizoen("")
-    setSelectedEigenaar("")
+    setSelectedType("all")
+    setSelectedSeizoen("all")
+    setSelectedEigenaar("all")
     onFiltersChange({})
   }
 
@@ -74,11 +96,17 @@ export function RandomReceptFilters({ onFiltersChange }: RandomReceptFiltersProp
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Alle types</SelectItem>
-              {gerechtsTypes.map((type) => (
-                <SelectItem key={type} value={type}>
-                  {type}
-                </SelectItem>
-              ))}
+              {dbInfo?.uniqueTypes
+                ? dbInfo.uniqueTypes.map((type: string) => (
+                    <SelectItem key={type} value={type}>
+                      {type}
+                    </SelectItem>
+                  ))
+                : gerechtsTypes.map((type) => (
+                    <SelectItem key={type} value={type}>
+                      {type}
+                    </SelectItem>
+                  ))}
             </SelectContent>
           </Select>
         </div>
@@ -90,11 +118,17 @@ export function RandomReceptFilters({ onFiltersChange }: RandomReceptFiltersProp
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Alle seizoenen</SelectItem>
-              {seizoenen.map((seizoen) => (
-                <SelectItem key={seizoen} value={seizoen}>
-                  {seizoen}
-                </SelectItem>
-              ))}
+              {dbInfo?.uniqueSeasons
+                ? dbInfo.uniqueSeasons.map((seizoen: string) => (
+                    <SelectItem key={seizoen} value={seizoen}>
+                      {seizoen}
+                    </SelectItem>
+                  ))
+                : seizoenen.map((seizoen) => (
+                    <SelectItem key={seizoen} value={seizoen}>
+                      {seizoen}
+                    </SelectItem>
+                  ))}
             </SelectContent>
           </Select>
         </div>

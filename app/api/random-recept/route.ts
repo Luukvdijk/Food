@@ -16,6 +16,7 @@ export async function GET(request: Request) {
 
     // Apply filters
     if (type) {
+      // Make sure we're using the exact column name and format
       query = query.eq("type", type)
     }
 
@@ -24,11 +25,12 @@ export async function GET(request: Request) {
     }
 
     if (seizoen) {
-      // For array fields in Supabase, we need to use the contains operator
+      // For array fields, we need to check if the array contains the value
+      // Let's try a different approach for arrays
       query = query.contains("seizoen", [seizoen])
     }
 
-    // Get all matching recipes first
+    // Execute the query and get all matching recipes
     const { data: allRecipes, error: fetchError } = await query
 
     if (fetchError) {
