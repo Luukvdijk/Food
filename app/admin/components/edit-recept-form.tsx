@@ -80,206 +80,325 @@ export function EditReceptForm({ recept, ingredienten, bijgerechten }: EditRecep
   // Format bijgerechten voor textarea
   const bijgerechtenText = bijgerechten.map((bij) => `${bij.naam} | ${bij.beschrijving}`).join("\n")
 
+  const inputStyle = {
+    backgroundColor: "white",
+    color: "#286058",
+    borderColor: "#286058",
+  }
+
+  const focusStyle = `
+    .custom-input:focus {
+      outline: none !important;
+      border-color: #e75129 !important;
+      box-shadow: 0 0 0 2px rgba(231, 81, 41, 0.2) !important;
+      background-color: white !important;
+    }
+    .custom-textarea:focus {
+      outline: none !important;
+      border-color: #e75129 !important;
+      box-shadow: 0 0 0 2px rgba(231, 81, 41, 0.2) !important;
+      background-color: white !important;
+    }
+    .custom-select:focus {
+      outline: none !important;
+      border-color: #e75129 !important;
+      box-shadow: 0 0 0 2px rgba(231, 81, 41, 0.2) !important;
+      background-color: white !important;
+    }
+    .admin-select-content {
+      background-color: white !important;
+      border-color: #286058 !important;
+    }
+    .admin-select-item {
+      color: #286058 !important;
+    }
+    .admin-select-item:hover {
+      background-color: #eee1d1 !important;
+      color: #286058 !important;
+    }
+    .admin-select-item[data-state="checked"] {
+      background-color: #e75129 !important;
+      color: white !important;
+    }
+  `
+
   return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-4">
-        <Button variant="ghost" size="sm" asChild disabled={isSubmitting}>
-          <Link href="/admin">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Terug naar overzicht
-          </Link>
-        </Button>
-        <h2 className="text-2xl font-bold">Recept Bewerken: {recept.naam}</h2>
-      </div>
-
-      <form action={handleSubmit} className="space-y-6">
-        {/* Basis informatie */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Basis Informatie</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="naam">Recept Naam *</Label>
-                <Input id="naam" name="naam" required defaultValue={recept.naam} disabled={isSubmitting} />
-              </div>
-              <div>
-                <Label htmlFor="personen">Aantal Personen *</Label>
-                <Input
-                  id="personen"
-                  name="personen"
-                  type="number"
-                  required
-                  defaultValue={recept.personen}
-                  min="1"
-                  max="20"
-                  disabled={isSubmitting}
-                />
-              </div>
-            </div>
-
-            <div>
-              <Label htmlFor="beschrijving">Beschrijving *</Label>
-              <Textarea
-                id="beschrijving"
-                name="beschrijving"
-                required
-                defaultValue={recept.beschrijving}
-                rows={3}
-                disabled={isSubmitting}
-              />
-            </div>
-
-            <div className={`grid grid-cols-1 ${hasEigenaarSupport ? "md:grid-cols-4" : "md:grid-cols-3"} gap-4`}>
-              <div>
-                <Label htmlFor="bereidingstijd">Bereidingstijd (minuten) *</Label>
-                <Input
-                  id="bereidingstijd"
-                  name="bereidingstijd"
-                  type="number"
-                  required
-                  defaultValue={recept.bereidingstijd}
-                  min="1"
-                  disabled={isSubmitting}
-                />
-              </div>
-              <div>
-                <Label>Type Gerecht *</Label>
-                <Select
-                  value={selectedType}
-                  onValueChange={(value) => setSelectedType(value as GerechtsType)}
-                  disabled={isSubmitting}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {gerechtsTypes.map((type) => (
-                      <SelectItem key={type} value={type}>
-                        {type}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label>Moeilijkheidsgraad *</Label>
-                <Select value={selectedMoeilijkheid} onValueChange={setSelectedMoeilijkheid} disabled={isSubmitting}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {moeilijkheidsgraden.map((niveau) => (
-                      <SelectItem key={niveau} value={niveau}>
-                        {niveau}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              {hasEigenaarSupport && (
-                <div>
-                  <Label>Eigenaar *</Label>
-                  <Select
-                    value={selectedEigenaar}
-                    onValueChange={(value) => setSelectedEigenaar(value as Eigenaar)}
-                    disabled={isSubmitting}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {eigenaren.map((eigenaar) => (
-                        <SelectItem key={eigenaar.value} value={eigenaar.value}>
-                          {eigenaar.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="seizoen">Seizoenen (komma gescheiden)</Label>
-                <Input id="seizoen" name="seizoen" defaultValue={recept.seizoen.join(", ")} disabled={isSubmitting} />
-              </div>
-              <div>
-                <Label htmlFor="tags">Tags (komma gescheiden)</Label>
-                <Input id="tags" name="tags" defaultValue={recept.tags.join(", ")} disabled={isSubmitting} />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Afbeelding Upload */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Recept Afbeelding</CardTitle>
-            <CardDescription>Upload een afbeelding van je recept</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ImageUpload currentImageUrl={imageUrl} onImageChange={setImageUrl} disabled={isSubmitting} />
-          </CardContent>
-        </Card>
-
-        {/* Bereidingswijze */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Bereidingswijze</CardTitle>
-            <CardDescription>Voer elke stap op een nieuwe regel in</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Textarea
-              name="bereidingswijze"
-              required
-              defaultValue={recept.bereidingswijze.join("\n")}
-              rows={8}
+    <div style={{ backgroundColor: "#286058", minHeight: "100vh" }} className="text-white">
+      <style dangerouslySetInnerHTML={{ __html: focusStyle }} />
+      <div className="container mx-auto py-8 px-4">
+        <div className="space-y-6">
+          <div className="flex items-center gap-4">
+            <Button
+              variant="ghost"
+              size="sm"
+              asChild
               disabled={isSubmitting}
-            />
-          </CardContent>
-        </Card>
+              style={{
+                backgroundColor: "#eee1d1",
+                color: "#286058",
+                transition: "background-color 0.2s ease",
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#d1c7b8")}
+              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#eee1d1")}
+            >
+              <Link href="/admin">
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Terug naar overzicht
+              </Link>
+            </Button>
+            <h2 className="text-2xl font-bold">Recept Bewerken: {recept.naam}</h2>
+          </div>
 
-        {/* Ingrediënten */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Ingrediënten</CardTitle>
-            <CardDescription>Formaat per regel: hoeveelheid | eenheid | naam | notitie (optioneel)</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Textarea name="ingredienten" required defaultValue={ingredientenText} rows={8} disabled={isSubmitting} />
-          </CardContent>
-        </Card>
+          <form action={handleSubmit} className="space-y-6">
+            {/* Basis informatie */}
+            <Card style={{ backgroundColor: "#eee1d1", color: "#286058" }}>
+              <CardHeader>
+                <CardTitle className="text-lg">Basis Informatie</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="naam">Recept Naam *</Label>
+                    <Input
+                      id="naam"
+                      name="naam"
+                      required
+                      defaultValue={recept.naam}
+                      disabled={isSubmitting}
+                      className="custom-input"
+                      style={inputStyle}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="personen">Aantal Personen *</Label>
+                    <Input
+                      id="personen"
+                      name="personen"
+                      type="number"
+                      required
+                      defaultValue={recept.personen}
+                      min="1"
+                      max="20"
+                      disabled={isSubmitting}
+                      className="custom-input"
+                      style={inputStyle}
+                    />
+                  </div>
+                </div>
 
-        {/* Bijgerechten */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Bijgerechten (optioneel)</CardTitle>
-            <CardDescription>Formaat per regel: naam | beschrijving</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Textarea name="bijgerechten" defaultValue={bijgerechtenText} rows={4} disabled={isSubmitting} />
-          </CardContent>
-        </Card>
+                <div>
+                  <Label htmlFor="beschrijving">Beschrijving *</Label>
+                  <Textarea
+                    id="beschrijving"
+                    name="beschrijving"
+                    required
+                    defaultValue={recept.beschrijving}
+                    rows={3}
+                    disabled={isSubmitting}
+                    className="custom-textarea"
+                    style={inputStyle}
+                  />
+                </div>
 
-        <div className="flex justify-end gap-2">
-          <Button type="button" variant="outline" asChild disabled={isSubmitting}>
-            <Link href="/admin">Annuleren</Link>
-          </Button>
-          <Button type="submit" disabled={isSubmitting} size="lg">
-            {isSubmitting ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Recept bijwerken...
-              </>
-            ) : (
-              "Recept Bijwerken"
-            )}
-          </Button>
+                <div className={`grid grid-cols-1 ${hasEigenaarSupport ? "md:grid-cols-4" : "md:grid-cols-3"} gap-4`}>
+                  <div>
+                    <Label htmlFor="bereidingstijd">Bereidingstijd (minuten) *</Label>
+                    <Input
+                      id="bereidingstijd"
+                      name="bereidingstijd"
+                      type="number"
+                      required
+                      defaultValue={recept.bereidingstijd}
+                      min="1"
+                      disabled={isSubmitting}
+                      className="custom-input"
+                      style={inputStyle}
+                    />
+                  </div>
+                  <div>
+                    <Label>Type Gerecht *</Label>
+                    <Select
+                      value={selectedType}
+                      onValueChange={(value) => setSelectedType(value as GerechtsType)}
+                      disabled={isSubmitting}
+                    >
+                      <SelectTrigger className="custom-select" style={inputStyle}>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="admin-select-content">
+                        {gerechtsTypes.map((type) => (
+                          <SelectItem key={type} value={type} className="admin-select-item">
+                            {type}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label>Moeilijkheidsgraad *</Label>
+                    <Select
+                      value={selectedMoeilijkheid}
+                      onValueChange={setSelectedMoeilijkheid}
+                      disabled={isSubmitting}
+                    >
+                      <SelectTrigger className="custom-select" style={inputStyle}>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="admin-select-content">
+                        {moeilijkheidsgraden.map((niveau) => (
+                          <SelectItem key={niveau} value={niveau} className="admin-select-item">
+                            {niveau}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  {hasEigenaarSupport && (
+                    <div>
+                      <Label>Eigenaar *</Label>
+                      <Select
+                        value={selectedEigenaar}
+                        onValueChange={(value) => setSelectedEigenaar(value as Eigenaar)}
+                        disabled={isSubmitting}
+                      >
+                        <SelectTrigger className="custom-select" style={inputStyle}>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent className="admin-select-content">
+                          {eigenaren.map((eigenaar) => (
+                            <SelectItem key={eigenaar.value} value={eigenaar.value} className="admin-select-item">
+                              {eigenaar.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="seizoen">Seizoenen (komma gescheiden)</Label>
+                    <Input
+                      id="seizoen"
+                      name="seizoen"
+                      defaultValue={recept.seizoen.join(", ")}
+                      disabled={isSubmitting}
+                      className="custom-input"
+                      style={inputStyle}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="tags">Tags (komma gescheiden)</Label>
+                    <Input
+                      id="tags"
+                      name="tags"
+                      defaultValue={recept.tags.join(", ")}
+                      disabled={isSubmitting}
+                      className="custom-input"
+                      style={inputStyle}
+                    />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Afbeelding Upload */}
+            <Card style={{ backgroundColor: "#eee1d1", color: "#286058" }}>
+              <CardHeader>
+                <CardTitle className="text-lg">Recept Afbeelding</CardTitle>
+                <CardDescription>Upload een afbeelding van je recept</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ImageUpload currentImageUrl={imageUrl} onImageChange={setImageUrl} disabled={isSubmitting} />
+              </CardContent>
+            </Card>
+
+            {/* Bereidingswijze */}
+            <Card style={{ backgroundColor: "#eee1d1", color: "#286058" }}>
+              <CardHeader>
+                <CardTitle className="text-lg">Bereidingswijze</CardTitle>
+                <CardDescription>Voer elke stap op een nieuwe regel in</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Textarea
+                  name="bereidingswijze"
+                  required
+                  defaultValue={recept.bereidingswijze.join("\n")}
+                  rows={8}
+                  disabled={isSubmitting}
+                  className="custom-textarea"
+                  style={inputStyle}
+                />
+              </CardContent>
+            </Card>
+
+            {/* Ingrediënten */}
+            <Card style={{ backgroundColor: "#eee1d1", color: "#286058" }}>
+              <CardHeader>
+                <CardTitle className="text-lg">Ingrediënten</CardTitle>
+                <CardDescription>Formaat per regel: hoeveelheid | eenheid | naam | notitie (optioneel)</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Textarea
+                  name="ingredienten"
+                  required
+                  defaultValue={ingredientenText}
+                  rows={8}
+                  disabled={isSubmitting}
+                  className="custom-textarea"
+                  style={inputStyle}
+                />
+              </CardContent>
+            </Card>
+
+            {/* Bijgerechten */}
+            <Card style={{ backgroundColor: "#eee1d1", color: "#286058" }}>
+              <CardHeader>
+                <CardTitle className="text-lg">Bijgerechten (optioneel)</CardTitle>
+                <CardDescription>Formaat per regel: naam | beschrijving</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Textarea
+                  name="bijgerechten"
+                  defaultValue={bijgerechtenText}
+                  rows={4}
+                  disabled={isSubmitting}
+                  className="custom-textarea"
+                  style={inputStyle}
+                />
+              </CardContent>
+            </Card>
+
+            <div className="flex justify-end gap-2">
+              <Button type="button" variant="outline" asChild disabled={isSubmitting}>
+                <Link href="/admin">Annuleren</Link>
+              </Button>
+              <Button
+                type="submit"
+                disabled={isSubmitting}
+                size="lg"
+                style={{
+                  backgroundColor: "#e75129",
+                  color: "white",
+                  transition: "background-color 0.2s ease",
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#d63e1a")}
+                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#e75129")}
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Recept bijwerken...
+                  </>
+                ) : (
+                  "Recept Bijwerken"
+                )}
+              </Button>
+            </div>
+          </form>
         </div>
-      </form>
+      </div>
     </div>
   )
 }

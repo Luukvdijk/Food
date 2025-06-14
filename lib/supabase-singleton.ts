@@ -4,7 +4,6 @@ import {
   createRouteHandlerClient,
   createMiddlewareClient,
 } from "@supabase/auth-helpers-nextjs"
-import { cookies } from "next/headers"
 import type { NextRequest, NextResponse } from "next/server"
 
 // Suppress the GoTrueClient warning
@@ -43,6 +42,7 @@ export function getServiceClient() {
 
 export function getServerClient() {
   try {
+    const { cookies } = require("next/headers")
     const cookieStore = cookies()
     return createServerComponentClient({ cookies: () => cookieStore })
   } catch (error) {
@@ -52,6 +52,7 @@ export function getServerClient() {
 
 export function getRouteHandlerClient() {
   try {
+    const { cookies } = require("next/headers")
     const cookieStore = cookies()
     return createRouteHandlerClient({ cookies: () => cookieStore })
   } catch (error) {
