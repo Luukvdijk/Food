@@ -4,7 +4,7 @@ import type React from "react"
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { Search, Settings, Moon, Sun } from "lucide-react"
+import { Search, Settings, Moon, Sun, X } from "lucide-react"
 import { useTheme } from "next-themes"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -39,6 +39,10 @@ export function Header() {
     }
   }
 
+  const clearSearch = () => {
+    setZoekterm("")
+  }
+
   const toggleTheme = () => {
     setTheme(theme === "dark" ? "light" : "dark")
   }
@@ -57,15 +61,31 @@ export function Header() {
             </a>
           </h1>
 
-          <form onSubmit={handleSearch} className="w-full md:w-1/2 flex gap-2">
-            <Input
-              type="search"
-              placeholder="Zoek recepten op naam of ingrediënten..."
-              value={zoekterm}
-              onChange={(e) => setZoekterm(e.target.value)}
-              className="w-full"
-            />
-            <Button type="submit" size="icon">
+          <form onSubmit={handleSearch} className="w-full md:w-1/2 flex gap-2 relative">
+            <div className="relative w-full">
+              <Input
+                type="search"
+                placeholder="Zoek recepten op naam of ingrediënten..."
+                value={zoekterm}
+                onChange={(e) => setZoekterm(e.target.value)}
+                className="w-full pr-8"
+                style={{
+                  backgroundColor: "white",
+                  borderColor: "#286058",
+                }}
+              />
+              {zoekterm && (
+                <button
+                  type="button"
+                  onClick={clearSearch}
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 p-1 rounded-full hover:bg-gray-100"
+                  style={{ color: "#286058" }}
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              )}
+            </div>
+            <Button type="submit" size="icon" style={{ backgroundColor: "#286058", color: "white" }}>
               <Search className="h-4 w-4" />
               <span className="sr-only">Zoeken</span>
             </Button>

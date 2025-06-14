@@ -80,8 +80,36 @@ export function EditReceptForm({ recept, ingredienten, bijgerechten }: EditRecep
   // Format bijgerechten voor textarea
   const bijgerechtenText = bijgerechten.map((bij) => `${bij.naam} | ${bij.beschrijving}`).join("\n")
 
+  const inputStyle = {
+    backgroundColor: "white",
+    color: "#286058",
+    borderColor: "#286058",
+  }
+
+  const focusStyle = `
+    .custom-input:focus {
+      outline: none !important;
+      border-color: #e75129 !important;
+      box-shadow: 0 0 0 2px rgba(231, 81, 41, 0.2) !important;
+      background-color: white !important;
+    }
+    .custom-textarea:focus {
+      outline: none !important;
+      border-color: #e75129 !important;
+      box-shadow: 0 0 0 2px rgba(231, 81, 41, 0.2) !important;
+      background-color: white !important;
+    }
+    .custom-select:focus {
+      outline: none !important;
+      border-color: #e75129 !important;
+      box-shadow: 0 0 0 2px rgba(231, 81, 41, 0.2) !important;
+      background-color: white !important;
+    }
+  `
+
   return (
     <div style={{ backgroundColor: "#286058", minHeight: "100vh" }} className="text-white">
+      <style dangerouslySetInnerHTML={{ __html: focusStyle }} />
       <div className="container mx-auto py-8 px-4">
         <div className="space-y-6">
           <div className="flex items-center gap-4">
@@ -122,11 +150,8 @@ export function EditReceptForm({ recept, ingredienten, bijgerechten }: EditRecep
                       required
                       defaultValue={recept.naam}
                       disabled={isSubmitting}
-                      style={{
-                        backgroundColor: "white",
-                        color: "#286058",
-                        borderColor: "#286058",
-                      }}
+                      className="custom-input"
+                      style={inputStyle}
                     />
                   </div>
                   <div>
@@ -140,11 +165,8 @@ export function EditReceptForm({ recept, ingredienten, bijgerechten }: EditRecep
                       min="1"
                       max="20"
                       disabled={isSubmitting}
-                      style={{
-                        backgroundColor: "white",
-                        color: "#286058",
-                        borderColor: "#286058",
-                      }}
+                      className="custom-input"
+                      style={inputStyle}
                     />
                   </div>
                 </div>
@@ -158,11 +180,8 @@ export function EditReceptForm({ recept, ingredienten, bijgerechten }: EditRecep
                     defaultValue={recept.beschrijving}
                     rows={3}
                     disabled={isSubmitting}
-                    style={{
-                      backgroundColor: "white",
-                      color: "#286058",
-                      borderColor: "#286058",
-                    }}
+                    className="custom-textarea"
+                    style={inputStyle}
                   />
                 </div>
 
@@ -177,11 +196,8 @@ export function EditReceptForm({ recept, ingredienten, bijgerechten }: EditRecep
                       defaultValue={recept.bereidingstijd}
                       min="1"
                       disabled={isSubmitting}
-                      style={{
-                        backgroundColor: "white",
-                        color: "#286058",
-                        borderColor: "#286058",
-                      }}
+                      className="custom-input"
+                      style={inputStyle}
                     />
                   </div>
                   <div>
@@ -191,13 +207,7 @@ export function EditReceptForm({ recept, ingredienten, bijgerechten }: EditRecep
                       onValueChange={(value) => setSelectedType(value as GerechtsType)}
                       disabled={isSubmitting}
                     >
-                      <SelectTrigger
-                        style={{
-                          backgroundColor: "white",
-                          color: "#286058",
-                          borderColor: "#286058",
-                        }}
-                      >
+                      <SelectTrigger className="custom-select" style={inputStyle}>
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -216,13 +226,7 @@ export function EditReceptForm({ recept, ingredienten, bijgerechten }: EditRecep
                       onValueChange={setSelectedMoeilijkheid}
                       disabled={isSubmitting}
                     >
-                      <SelectTrigger
-                        style={{
-                          backgroundColor: "white",
-                          color: "#286058",
-                          borderColor: "#286058",
-                        }}
-                      >
+                      <SelectTrigger className="custom-select" style={inputStyle}>
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -242,13 +246,7 @@ export function EditReceptForm({ recept, ingredienten, bijgerechten }: EditRecep
                         onValueChange={(value) => setSelectedEigenaar(value as Eigenaar)}
                         disabled={isSubmitting}
                       >
-                        <SelectTrigger
-                          style={{
-                            backgroundColor: "white",
-                            color: "#286058",
-                            borderColor: "#286058",
-                          }}
-                        >
+                        <SelectTrigger className="custom-select" style={inputStyle}>
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -271,11 +269,8 @@ export function EditReceptForm({ recept, ingredienten, bijgerechten }: EditRecep
                       name="seizoen"
                       defaultValue={recept.seizoen.join(", ")}
                       disabled={isSubmitting}
-                      style={{
-                        backgroundColor: "white",
-                        color: "#286058",
-                        borderColor: "#286058",
-                      }}
+                      className="custom-input"
+                      style={inputStyle}
                     />
                   </div>
                   <div>
@@ -285,11 +280,8 @@ export function EditReceptForm({ recept, ingredienten, bijgerechten }: EditRecep
                       name="tags"
                       defaultValue={recept.tags.join(", ")}
                       disabled={isSubmitting}
-                      style={{
-                        backgroundColor: "white",
-                        color: "#286058",
-                        borderColor: "#286058",
-                      }}
+                      className="custom-input"
+                      style={inputStyle}
                     />
                   </div>
                 </div>
@@ -320,11 +312,8 @@ export function EditReceptForm({ recept, ingredienten, bijgerechten }: EditRecep
                   defaultValue={recept.bereidingswijze.join("\n")}
                   rows={8}
                   disabled={isSubmitting}
-                  style={{
-                    backgroundColor: "white",
-                    color: "#286058",
-                    borderColor: "#286058",
-                  }}
+                  className="custom-textarea"
+                  style={inputStyle}
                 />
               </CardContent>
             </Card>
@@ -342,11 +331,8 @@ export function EditReceptForm({ recept, ingredienten, bijgerechten }: EditRecep
                   defaultValue={ingredientenText}
                   rows={8}
                   disabled={isSubmitting}
-                  style={{
-                    backgroundColor: "white",
-                    color: "#286058",
-                    borderColor: "#286058",
-                  }}
+                  className="custom-textarea"
+                  style={inputStyle}
                 />
               </CardContent>
             </Card>
@@ -363,11 +349,8 @@ export function EditReceptForm({ recept, ingredienten, bijgerechten }: EditRecep
                   defaultValue={bijgerechtenText}
                   rows={4}
                   disabled={isSubmitting}
-                  style={{
-                    backgroundColor: "white",
-                    color: "#286058",
-                    borderColor: "#286058",
-                  }}
+                  className="custom-textarea"
+                  style={inputStyle}
                 />
               </CardContent>
             </Card>
