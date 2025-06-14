@@ -79,6 +79,8 @@ export function ModernHeader() {
                     fontSize: "1rem",
                     outline: "none",
                     transition: "all 0.2s ease",
+                    WebkitAppearance: "none",
+                    MozAppearance: "textfield",
                   }}
                   onFocus={(e) => {
                     e.target.style.backgroundColor = "rgba(255, 255, 255, 0.2)"
