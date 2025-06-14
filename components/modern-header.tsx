@@ -79,9 +79,10 @@ export function ModernHeader() {
                     fontSize: "1rem",
                     outline: "none",
                     transition: "all 0.2s ease",
+                    // Hide browser's default clear button
                     WebkitAppearance: "none",
-                    MozAppearance: "textfield",
                   }}
+                  className="[&::-webkit-search-cancel-button]:appearance-none [&::-webkit-search-decoration]:appearance-none"
                   onFocus={(e) => {
                     e.target.style.backgroundColor = "rgba(255, 255, 255, 0.2)"
                     e.target.style.borderColor = "#eee1d1"
