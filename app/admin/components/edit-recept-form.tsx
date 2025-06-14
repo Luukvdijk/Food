@@ -116,7 +116,18 @@ export function EditReceptForm({ recept, ingredienten, bijgerechten }: EditRecep
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="naam">Recept Naam *</Label>
-                    <Input id="naam" name="naam" required defaultValue={recept.naam} disabled={isSubmitting} />
+                    <Input
+                      id="naam"
+                      name="naam"
+                      required
+                      defaultValue={recept.naam}
+                      disabled={isSubmitting}
+                      style={{
+                        backgroundColor: "white",
+                        color: "#286058",
+                        borderColor: "#286058",
+                      }}
+                    />
                   </div>
                   <div>
                     <Label htmlFor="personen">Aantal Personen *</Label>
@@ -129,6 +140,11 @@ export function EditReceptForm({ recept, ingredienten, bijgerechten }: EditRecep
                       min="1"
                       max="20"
                       disabled={isSubmitting}
+                      style={{
+                        backgroundColor: "white",
+                        color: "#286058",
+                        borderColor: "#286058",
+                      }}
                     />
                   </div>
                 </div>
@@ -142,6 +158,11 @@ export function EditReceptForm({ recept, ingredienten, bijgerechten }: EditRecep
                     defaultValue={recept.beschrijving}
                     rows={3}
                     disabled={isSubmitting}
+                    style={{
+                      backgroundColor: "white",
+                      color: "#286058",
+                      borderColor: "#286058",
+                    }}
                   />
                 </div>
 
@@ -156,6 +177,11 @@ export function EditReceptForm({ recept, ingredienten, bijgerechten }: EditRecep
                       defaultValue={recept.bereidingstijd}
                       min="1"
                       disabled={isSubmitting}
+                      style={{
+                        backgroundColor: "white",
+                        color: "#286058",
+                        borderColor: "#286058",
+                      }}
                     />
                   </div>
                   <div>
@@ -165,7 +191,13 @@ export function EditReceptForm({ recept, ingredienten, bijgerechten }: EditRecep
                       onValueChange={(value) => setSelectedType(value as GerechtsType)}
                       disabled={isSubmitting}
                     >
-                      <SelectTrigger>
+                      <SelectTrigger
+                        style={{
+                          backgroundColor: "white",
+                          color: "#286058",
+                          borderColor: "#286058",
+                        }}
+                      >
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -184,7 +216,13 @@ export function EditReceptForm({ recept, ingredienten, bijgerechten }: EditRecep
                       onValueChange={setSelectedMoeilijkheid}
                       disabled={isSubmitting}
                     >
-                      <SelectTrigger>
+                      <SelectTrigger
+                        style={{
+                          backgroundColor: "white",
+                          color: "#286058",
+                          borderColor: "#286058",
+                        }}
+                      >
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -204,7 +242,13 @@ export function EditReceptForm({ recept, ingredienten, bijgerechten }: EditRecep
                         onValueChange={(value) => setSelectedEigenaar(value as Eigenaar)}
                         disabled={isSubmitting}
                       >
-                        <SelectTrigger>
+                        <SelectTrigger
+                          style={{
+                            backgroundColor: "white",
+                            color: "#286058",
+                            borderColor: "#286058",
+                          }}
+                        >
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -227,11 +271,26 @@ export function EditReceptForm({ recept, ingredienten, bijgerechten }: EditRecep
                       name="seizoen"
                       defaultValue={recept.seizoen.join(", ")}
                       disabled={isSubmitting}
+                      style={{
+                        backgroundColor: "white",
+                        color: "#286058",
+                        borderColor: "#286058",
+                      }}
                     />
                   </div>
                   <div>
                     <Label htmlFor="tags">Tags (komma gescheiden)</Label>
-                    <Input id="tags" name="tags" defaultValue={recept.tags.join(", ")} disabled={isSubmitting} />
+                    <Input
+                      id="tags"
+                      name="tags"
+                      defaultValue={recept.tags.join(", ")}
+                      disabled={isSubmitting}
+                      style={{
+                        backgroundColor: "white",
+                        color: "#286058",
+                        borderColor: "#286058",
+                      }}
+                    />
                   </div>
                 </div>
               </CardContent>
@@ -261,6 +320,11 @@ export function EditReceptForm({ recept, ingredienten, bijgerechten }: EditRecep
                   defaultValue={recept.bereidingswijze.join("\n")}
                   rows={8}
                   disabled={isSubmitting}
+                  style={{
+                    backgroundColor: "white",
+                    color: "#286058",
+                    borderColor: "#286058",
+                  }}
                 />
               </CardContent>
             </Card>
@@ -278,6 +342,11 @@ export function EditReceptForm({ recept, ingredienten, bijgerechten }: EditRecep
                   defaultValue={ingredientenText}
                   rows={8}
                   disabled={isSubmitting}
+                  style={{
+                    backgroundColor: "white",
+                    color: "#286058",
+                    borderColor: "#286058",
+                  }}
                 />
               </CardContent>
             </Card>
@@ -289,7 +358,17 @@ export function EditReceptForm({ recept, ingredienten, bijgerechten }: EditRecep
                 <CardDescription>Formaat per regel: naam | beschrijving</CardDescription>
               </CardHeader>
               <CardContent>
-                <Textarea name="bijgerechten" defaultValue={bijgerechtenText} rows={4} disabled={isSubmitting} />
+                <Textarea
+                  name="bijgerechten"
+                  defaultValue={bijgerechtenText}
+                  rows={4}
+                  disabled={isSubmitting}
+                  style={{
+                    backgroundColor: "white",
+                    color: "#286058",
+                    borderColor: "#286058",
+                  }}
+                />
               </CardContent>
             </Card>
 

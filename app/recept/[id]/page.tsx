@@ -93,16 +93,41 @@ export default async function ReceptPage({ params }: ReceptPageProps) {
             <p className="text-lg text-white mb-4">{recept.beschrijving}</p>
 
             <div className="flex flex-wrap gap-2 mb-6">
-              <Badge variant="outline">{recept.type}</Badge>
+              <Badge
+                variant="outline"
+                style={{
+                  backgroundColor: "#e75129",
+                  color: "white",
+                  borderColor: "#e75129",
+                }}
+              >
+                {recept.type}
+              </Badge>
               {recept.seizoen &&
                 recept.seizoen.map((s: string) => (
-                  <Badge key={s} variant="secondary">
+                  <Badge
+                    key={s}
+                    variant="secondary"
+                    style={{
+                      backgroundColor: "#eee1d1",
+                      color: "#286058",
+                      borderColor: "#eee1d1",
+                    }}
+                  >
                     {s}
                   </Badge>
                 ))}
               {recept.tags &&
                 recept.tags.map((tag: string) => (
-                  <Badge key={tag} variant="outline">
+                  <Badge
+                    key={tag}
+                    variant="outline"
+                    style={{
+                      backgroundColor: "#eee1d1",
+                      color: "#286058",
+                      borderColor: "#286058",
+                    }}
+                  >
                     {tag}
                   </Badge>
                 ))}
