@@ -4,15 +4,42 @@ import { HeroSection } from "@/components/hero-section"
 
 async function getRandomReceptForInitialLoad() {
   try {
+    // First get total count
     const { count, error: countError } = await supabase.from("recepten").select("*", { count: "exact", head: true })
 
-    if (countError) throw countError
-    if (!count || count === 0) return null
+    if (countError) {
+      console.error("Count error:", countError)
+      throw countError
+    }
 
+    if (!count || count === 0) {
+      console.log("No recipes found in database")
+      return null
+    }
+
+    console.log(`Found ${count} recipes in database`)
+
+    // Get random offset
     const randomOffset = Math.floor(Math.random() * count)
-    const { data, error } = await supabase.from("recepten").select("*").range(randomOffset, randomOffset).single()
+    console.log(`Using random offset: ${randomOffset}`)
 
-    if (error) throw error
+    // Use the same query pattern as search page
+    const { data, error } = await supabase
+      .from("recepten")
+      .select(`
+        *,
+        ingredienten (*),
+        bijgerechten (*)
+      `)
+      .range(randomOffset, randomOffset)
+      .single()
+
+    if (error) {
+      console.error("Recipe fetch error:", error)
+      throw error
+    }
+
+    console.log("Successfully fetched recipe:", data?.naam)
     return data
   } catch (error) {
     console.error("Error fetching random recept:", error)
