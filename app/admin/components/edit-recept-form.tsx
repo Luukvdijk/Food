@@ -105,6 +105,21 @@ export function EditReceptForm({ recept, ingredienten, bijgerechten }: EditRecep
       box-shadow: 0 0 0 2px rgba(231, 81, 41, 0.2) !important;
       background-color: white !important;
     }
+    .admin-select-content {
+      background-color: white !important;
+      border-color: #286058 !important;
+    }
+    .admin-select-item {
+      color: #286058 !important;
+    }
+    .admin-select-item:hover {
+      background-color: #eee1d1 !important;
+      color: #286058 !important;
+    }
+    .admin-select-item[data-state="checked"] {
+      background-color: #e75129 !important;
+      color: white !important;
+    }
   `
 
   return (
@@ -210,9 +225,9 @@ export function EditReceptForm({ recept, ingredienten, bijgerechten }: EditRecep
                       <SelectTrigger className="custom-select" style={inputStyle}>
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent className="admin-select-content">
                         {gerechtsTypes.map((type) => (
-                          <SelectItem key={type} value={type}>
+                          <SelectItem key={type} value={type} className="admin-select-item">
                             {type}
                           </SelectItem>
                         ))}
@@ -229,9 +244,9 @@ export function EditReceptForm({ recept, ingredienten, bijgerechten }: EditRecep
                       <SelectTrigger className="custom-select" style={inputStyle}>
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent className="admin-select-content">
                         {moeilijkheidsgraden.map((niveau) => (
-                          <SelectItem key={niveau} value={niveau}>
+                          <SelectItem key={niveau} value={niveau} className="admin-select-item">
                             {niveau}
                           </SelectItem>
                         ))}
@@ -249,9 +264,9 @@ export function EditReceptForm({ recept, ingredienten, bijgerechten }: EditRecep
                         <SelectTrigger className="custom-select" style={inputStyle}>
                           <SelectValue />
                         </SelectTrigger>
-                        <SelectContent>
+                        <SelectContent className="admin-select-content">
                           {eigenaren.map((eigenaar) => (
-                            <SelectItem key={eigenaar.value} value={eigenaar.value}>
+                            <SelectItem key={eigenaar.value} value={eigenaar.value} className="admin-select-item">
                               {eigenaar.label}
                             </SelectItem>
                           ))}

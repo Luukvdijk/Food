@@ -2,7 +2,7 @@
 
 import type React from "react"
 import { useState, useEffect } from "react"
-import { Search, ChevronDown, Settings } from "lucide-react"
+import { Search, ChevronDown, Settings, X } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { FilterPopup, type FilterOptions } from "./filter-popup"
 
@@ -39,6 +39,10 @@ export function ModernHeader() {
     window.location.reload()
   }
 
+  const clearSearch = () => {
+    setZoekterm("")
+  }
+
   return (
     <>
       <header className="bg-[#286058] text-white relative overflow-hidden w-full">
@@ -64,7 +68,7 @@ export function ModernHeader() {
                   onChange={(e) => setZoekterm(e.target.value)}
                   style={{
                     paddingLeft: "2.5rem",
-                    paddingRight: "1rem",
+                    paddingRight: zoekterm ? "2.5rem" : "1rem",
                     paddingTop: "0.5rem",
                     paddingBottom: "0.5rem",
                     width: "20rem",
@@ -87,6 +91,29 @@ export function ModernHeader() {
                     e.target.style.boxShadow = "none"
                   }}
                 />
+                {zoekterm && (
+                  <button
+                    type="button"
+                    onClick={clearSearch}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-[#286058] hover:text-[#1a4a42] transition-colors"
+                    style={{
+                      backgroundColor: "#eee1d1",
+                      borderRadius: "50%",
+                      padding: "2px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = "#d1c7b8"
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = "#eee1d1"
+                    }}
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                )}
               </div>
             </form>
 
