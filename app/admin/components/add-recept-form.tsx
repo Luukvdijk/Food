@@ -118,6 +118,8 @@ export function AddReceptForm() {
     setIsSubmitting(true)
 
     try {
+      console.log("Form submission started")
+
       formData.set("type", selectedType)
       formData.set("moeilijkheidsgraad", selectedMoeilijkheid)
       formData.set("afbeelding_url", imageUrl)
@@ -128,6 +130,7 @@ export function AddReceptForm() {
       // Parse and format ingredients
       const ingredientenText = formData.get("ingredienten") as string
       if (ingredientenText) {
+        console.log("Processing ingredients text:", ingredientenText)
         const ingredientenLines = ingredientenText.split("\n").filter((line) => line.trim())
         const ingredienten = ingredientenLines.map((line) => {
           const parts = line.split("|").map((part) => part.trim())
@@ -138,12 +141,14 @@ export function AddReceptForm() {
             notitie: parts[3] || "",
           }
         })
+        console.log("Parsed ingredients:", ingredienten)
         formData.set("ingredienten", JSON.stringify(ingredienten))
       }
 
       // Parse and format bijgerechten
       const bijgerechtenText = formData.get("bijgerechten") as string
       if (bijgerechtenText) {
+        console.log("Processing bijgerechten text:", bijgerechtenText)
         const bijgerechtenLines = bijgerechtenText.split("\n").filter((line) => line.trim())
         const bijgerechten = bijgerechtenLines.map((line) => {
           const parts = line.split("|").map((part) => part.trim())
@@ -152,25 +157,35 @@ export function AddReceptForm() {
             beschrijving: parts[1] || "",
           }
         })
+        console.log("Parsed bijgerechten:", bijgerechten)
         formData.set("bijgerechten", JSON.stringify(bijgerechten))
       }
 
+      console.log("Calling addRecept action...")
       const result = await addRecept(formData)
+      console.log("Action result:", result)
 
       if (!result.success) {
         throw new Error(result.error || "Unknown error occurred")
       }
 
       // If we reach here, something went wrong with the redirect
+      console.warn("Action completed without redirect - this shouldn't happen")
       toast({
         title: "Succes!",
         description: "Recept succesvol toegevoegd",
         className: "bg-green-50 border-green-200 text-green-800",
       })
     } catch (error: any) {
+      console.log("Caught error:", error)
+
       // Check if this is a redirect (which is expected and means success)
-      if (error?.digest?.includes("NEXT_REDIRECT") || error?.message === "NEXT_REDIRECT") {
-        // This is actually success - the redirect happened
+      if (
+        error?.digest?.includes("NEXT_REDIRECT") ||
+        error?.message === "NEXT_REDIRECT" ||
+        error?.message?.includes("NEXT_REDIRECT")
+      ) {
+        console.log("Redirect detected - form submission successful")
         return
       } else {
         // This is an actual error
