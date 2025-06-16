@@ -125,38 +125,59 @@ export function AddReceptForm() {
         formData.set("eigenaar", selectedEigenaar)
       }
 
-      await addRecept(formData)
+      // Parse and format ingredients
+      const ingredientenText = formData.get("ingredienten") as string
+      if (ingredientenText) {
+        const ingredientenLines = ingredientenText.split("\n").filter((line) => line.trim())
+        const ingredienten = ingredientenLines.map((line) => {
+          const parts = line.split("|").map((part) => part.trim())
+          return {
+            hoeveelheid: parts[0] || "",
+            eenheid: parts[1] || "",
+            naam: parts[2] || "",
+            notitie: parts[3] || "",
+          }
+        })
+        formData.set("ingredienten", JSON.stringify(ingredienten))
+      }
 
-      // If we get here without a redirect, something went wrong
-      console.log("Action completed without redirect - this shouldn't happen")
+      // Parse and format bijgerechten
+      const bijgerechtenText = formData.get("bijgerechten") as string
+      if (bijgerechtenText) {
+        const bijgerechtenLines = bijgerechtenText.split("\n").filter((line) => line.trim())
+        const bijgerechten = bijgerechtenLines.map((line) => {
+          const parts = line.split("|").map((part) => part.trim())
+          return {
+            naam: parts[0] || "",
+            beschrijving: parts[1] || "",
+          }
+        })
+        formData.set("bijgerechten", JSON.stringify(bijgerechten))
+      }
+
+      const result = await addRecept(formData)
+
+      if (!result.success) {
+        throw new Error(result.error || "Unknown error occurred")
+      }
+
+      // If we reach here, something went wrong with the redirect
+      toast({
+        title: "Succes!",
+        description: "Recept succesvol toegevoegd",
+        className: "bg-green-50 border-green-200 text-green-800",
+      })
     } catch (error: any) {
       // Check if this is a redirect (which is expected and means success)
       if (error?.digest?.includes("NEXT_REDIRECT") || error?.message === "NEXT_REDIRECT") {
         // This is actually success - the redirect happened
-        toast({
-          title: "Succes!",
-          description: "Recept succesvol toegevoegd",
-          className: "bg-green-50 border-green-200 text-green-800",
-        })
-
-        // Reset form after a delay
-        setTimeout(() => {
-          // Reset form fields
-          const form = document.querySelector("form") as HTMLFormElement
-          if (form) {
-            form.reset()
-          }
-          setSelectedType("Diner")
-          setSelectedMoeilijkheid("Gemiddeld")
-          setSelectedEigenaar("henk")
-          setImageUrl("")
-        }, 1000)
+        return
       } else {
         // This is an actual error
         console.error("Form submission error:", error)
         toast({
           title: "Fout",
-          description: "Er is een fout opgetreden bij het toevoegen van het recept",
+          description: error.message || "Er is een fout opgetreden bij het toevoegen van het recept",
           className: "bg-red-50 border-red-200 text-red-800",
         })
       }

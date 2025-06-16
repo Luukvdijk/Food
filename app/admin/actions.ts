@@ -3,6 +3,7 @@
 import { supabase } from "@/lib/db"
 import type { Ingredient, Bijgerecht } from "@/types"
 import { revalidatePath } from "next/cache"
+import { redirect } from "next/navigation"
 
 export async function addRecept(formData: FormData): Promise<{ success: boolean; id?: number; error?: string }> {
   try {
@@ -56,6 +57,7 @@ export async function addRecept(formData: FormData): Promise<{ success: boolean;
 
     revalidatePath("/admin")
     revalidatePath("/")
+    redirect("/admin?success=added")
     return { success: true, id: recept.id }
   } catch (error) {
     console.error("Error creating recept:", error)
@@ -129,6 +131,7 @@ export async function updateRecept(id: string, formData: FormData): Promise<{ su
     revalidatePath("/admin")
     revalidatePath("/")
     revalidatePath(`/recept/${id}`)
+    redirect(`/admin?success=updated`)
     return { success: true }
   } catch (error) {
     console.error("Error updating recept:", error)
@@ -152,6 +155,7 @@ export async function deleteRecept(id: string): Promise<{ success: boolean; erro
 
     revalidatePath("/admin")
     revalidatePath("/")
+    redirect("/admin?success=deleted")
     return { success: true }
   } catch (error) {
     console.error("Error deleting recept:", error)
