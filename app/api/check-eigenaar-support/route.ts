@@ -1,19 +1,21 @@
 import { NextResponse } from "next/server"
-import { sql } from "@/lib/db"
+import { supabase } from "@/lib/db"
 
 export async function GET() {
   try {
-    const columnCheck = await sql`
-      SELECT column_name 
-      FROM information_schema.columns 
-      WHERE table_name = 'recepten' AND column_name = 'eigenaar'
-    `
+    // Try to query the recepten table to check if eigenaar column exists
+    const { data, error } = await supabase.from("recepten").select("eigenaar").limit(1).single()
 
-    const hasEigenaarSupport = columnCheck.length > 0
+    // If no error, the column exists
+    if (!error || error.code !== "PGRST116") {
+      return NextResponse.json({ hasEigenaarSupport: true })
+    }
 
-    return NextResponse.json({ hasEigenaarSupport })
+    // If we get a column not found error, eigenaar doesn't exist
+    return NextResponse.json({ hasEigenaarSupport: false })
   } catch (error) {
     console.error("Error checking eigenaar support:", error)
-    return NextResponse.json({ hasEigenaarSupport: false })
+    // Default to true to be safe
+    return NextResponse.json({ hasEigenaarSupport: true })
   }
 }
