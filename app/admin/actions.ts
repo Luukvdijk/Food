@@ -7,6 +7,8 @@ import { redirect } from "next/navigation"
 
 export async function addRecept(formData: FormData): Promise<{ success: boolean; id?: number; error?: string }> {
   try {
+    console.log("Starting addRecept with formData:", Object.fromEntries(formData.entries()))
+
     const receptData = {
       naam: formData.get("naam") as string,
       beschrijving: formData.get("beschrijving") as string,
@@ -23,47 +25,91 @@ export async function addRecept(formData: FormData): Promise<{ success: boolean;
       updated_at: new Date().toISOString(),
     }
 
+    console.log("Inserting recept data:", receptData)
+
     const { data: recept, error } = await supabase.from("recepten").insert(receptData).select().single()
 
-    if (error) throw error
+    if (error) {
+      console.error("Supabase insert error:", error)
+      throw new Error(`Database error: ${error.message}`)
+    }
+
+    console.log("Recipe inserted successfully:", recept)
 
     // Handle ingredients
     const ingredientenData = formData.get("ingredienten") as string
     if (ingredientenData) {
-      const ingredienten = JSON.parse(ingredientenData)
-      const ingredientenToInsert = ingredienten.map((ing: any) => ({
-        ...ing,
-        recept_id: recept.id,
-      }))
+      console.log("Processing ingredients:", ingredientenData)
+      try {
+        const ingredienten = JSON.parse(ingredientenData)
+        const ingredientenToInsert = ingredienten.map((ing: any) => ({
+          ...ing,
+          recept_id: recept.id,
+        }))
 
-      const { error: ingredientenError } = await supabase.from("ingredienten").insert(ingredientenToInsert)
+        console.log("Inserting ingredients:", ingredientenToInsert)
+        const { error: ingredientenError } = await supabase.from("ingredienten").insert(ingredientenToInsert)
 
-      if (ingredientenError) throw ingredientenError
+        if (ingredientenError) {
+          console.error("Ingredients insert error:", ingredientenError)
+          throw new Error(`Ingredients error: ${ingredientenError.message}`)
+        }
+      } catch (parseError) {
+        console.error("Error parsing ingredients:", parseError)
+        throw new Error(
+          `Invalid ingredients format: ${parseError instanceof Error ? parseError.message : "Unknown parsing error"}`,
+        )
+      }
     }
 
     // Handle bijgerechten
     const bijgerechtenData = formData.get("bijgerechten") as string
     if (bijgerechtenData) {
-      const bijgerechten = JSON.parse(bijgerechtenData)
-      const bijgerechtenToInsert = bijgerechten.map((bij: any) => ({
-        ...bij,
-        recept_id: recept.id,
-      }))
+      console.log("Processing bijgerechten:", bijgerechtenData)
+      try {
+        const bijgerechten = JSON.parse(bijgerechtenData)
+        const bijgerechtenToInsert = bijgerechten.map((bij: any) => ({
+          ...bij,
+          recept_id: recept.id,
+        }))
 
-      const { error: bijgerechtenError } = await supabase.from("bijgerechten").insert(bijgerechtenToInsert)
+        console.log("Inserting bijgerechten:", bijgerechtenToInsert)
+        const { error: bijgerechtenError } = await supabase.from("bijgerechten").insert(bijgerechtenToInsert)
 
-      if (bijgerechtenError) throw bijgerechtenError
+        if (bijgerechtenError) {
+          console.error("Bijgerechten insert error:", bijgerechtenError)
+          throw new Error(`Bijgerechten error: ${bijgerechtenError.message}`)
+        }
+      } catch (parseError) {
+        console.error("Error parsing bijgerechten:", parseError)
+        throw new Error(
+          `Invalid bijgerechten format: ${parseError instanceof Error ? parseError.message : "Unknown parsing error"}`,
+        )
+      }
     }
 
+    console.log("Revalidating paths...")
     revalidatePath("/admin")
     revalidatePath("/")
+
+    console.log("Redirecting to admin page...")
     redirect("/admin?success=added")
+
     return { success: true, id: recept.id }
   } catch (error) {
     console.error("Error creating recept:", error)
+
+    // Don't throw redirect errors
+    if (
+      error instanceof Error &&
+      (error.message.includes("NEXT_REDIRECT") || error.digest?.includes("NEXT_REDIRECT"))
+    ) {
+      throw error // Re-throw redirect errors
+    }
+
     return {
       success: false,
-      error: error instanceof Error ? error.message : "Unknown error",
+      error: error instanceof Error ? error.message : "Unknown error occurred",
     }
   }
 }
