@@ -9,20 +9,32 @@ export async function addRecept(formData: FormData): Promise<{ success: boolean;
   try {
     console.log("Starting addRecept with formData:", Object.fromEntries(formData.entries()))
 
+    // First, let's check what columns exist in the recepten table
+    const { data: tableInfo, error: tableError } = await supabase.from("recepten").select("*").limit(1)
+
+    if (tableError) {
+      console.error("Error checking table schema:", tableError)
+    } else {
+      console.log("Table schema check - sample row:", tableInfo)
+    }
+
     const receptData = {
       naam: formData.get("naam") as string,
       beschrijving: formData.get("beschrijving") as string,
       bereidingstijd: Number.parseInt(formData.get("bereidingstijd") as string),
       moeilijkheidsgraad: formData.get("moeilijkheidsgraad") as string,
       type: formData.get("type") as string,
-      seizoen: formData.get("seizoen") as string,
-      tags: formData.get("tags") as string,
-      afbeelding_url: formData.get("afbeelding_url") as string,
-      bereidingswijze: formData.get("bereidingswijze") as string,
+      seizoen: (formData.get("seizoen") as string)?.split(",").map((s) => s.trim()) || [],
+      tags:
+        (formData.get("tags") as string)
+          ?.split(",")
+          .map((s) => s.trim())
+          .filter(Boolean) || [],
+      afbeelding_url: (formData.get("afbeelding_url") as string) || null,
+      bereidingswijze: (formData.get("bereidingswijze") as string)?.split("\n").filter((line) => line.trim()) || [],
       personen: Number.parseInt(formData.get("personen") as string),
       eigenaar: formData.get("eigenaar") as string,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
+      // Remove created_at and updated_at - let the database handle these with defaults
     }
 
     console.log("Inserting recept data:", receptData)
@@ -43,8 +55,11 @@ export async function addRecept(formData: FormData): Promise<{ success: boolean;
       try {
         const ingredienten = JSON.parse(ingredientenData)
         const ingredientenToInsert = ingredienten.map((ing: any) => ({
-          ...ing,
           recept_id: recept.id,
+          naam: ing.naam,
+          hoeveelheid: Number.parseFloat(ing.hoeveelheid) || 0,
+          eenheid: ing.eenheid,
+          notitie: ing.notitie || null,
         }))
 
         console.log("Inserting ingredients:", ingredientenToInsert)
@@ -69,8 +84,9 @@ export async function addRecept(formData: FormData): Promise<{ success: boolean;
       try {
         const bijgerechten = JSON.parse(bijgerechtenData)
         const bijgerechtenToInsert = bijgerechten.map((bij: any) => ({
-          ...bij,
           recept_id: recept.id,
+          naam: bij.naam,
+          beschrijving: bij.beschrijving,
         }))
 
         console.log("Inserting bijgerechten:", bijgerechtenToInsert)
@@ -125,13 +141,17 @@ export async function updateRecept(id: string, formData: FormData): Promise<{ su
       bereidingstijd: Number.parseInt(formData.get("bereidingstijd") as string),
       moeilijkheidsgraad: formData.get("moeilijkheidsgraad") as string,
       type: formData.get("type") as string,
-      seizoen: formData.get("seizoen") as string,
-      tags: formData.get("tags") as string,
-      afbeelding_url: formData.get("afbeelding_url") as string,
-      bereidingswijze: formData.get("bereidingswijze") as string,
+      seizoen: (formData.get("seizoen") as string)?.split(",").map((s) => s.trim()) || [],
+      tags:
+        (formData.get("tags") as string)
+          ?.split(",")
+          .map((s) => s.trim())
+          .filter(Boolean) || [],
+      afbeelding_url: (formData.get("afbeelding_url") as string) || null,
+      bereidingswijze: (formData.get("bereidingswijze") as string)?.split("\n").filter((line) => line.trim()) || [],
       personen: Number.parseInt(formData.get("personen") as string),
       eigenaar: formData.get("eigenaar") as string,
-      updated_at: new Date().toISOString(),
+      // Remove updated_at - let the database handle this
     }
 
     const { error } = await supabase.from("recepten").update(receptData).eq("id", id)
@@ -147,8 +167,11 @@ export async function updateRecept(id: string, formData: FormData): Promise<{ su
       // Insert new ingredients
       const ingredienten = JSON.parse(ingredientenData)
       const ingredientenToInsert = ingredienten.map((ing: any) => ({
-        ...ing,
         recept_id: id,
+        naam: ing.naam,
+        hoeveelheid: Number.parseFloat(ing.hoeveelheid) || 0,
+        eenheid: ing.eenheid,
+        notitie: ing.notitie || null,
       }))
 
       const { error: ingredientenError } = await supabase.from("ingredienten").insert(ingredientenToInsert)
@@ -165,8 +188,9 @@ export async function updateRecept(id: string, formData: FormData): Promise<{ su
       // Insert new bijgerechten
       const bijgerechten = JSON.parse(bijgerechtenData)
       const bijgerechtenToInsert = bijgerechten.map((bij: any) => ({
-        ...bij,
         recept_id: id,
+        naam: bij.naam,
+        beschrijving: bij.beschrijving,
       }))
 
       const { error: bijgerechtenError } = await supabase.from("bijgerechten").insert(bijgerechtenToInsert)
@@ -223,6 +247,7 @@ export async function addIngredient(
         naam: data.naam,
         hoeveelheid: data.hoeveelheid,
         eenheid: data.eenheid,
+        notitie: data.notitie || null,
       })
       .select()
       .single()
@@ -247,6 +272,7 @@ export async function updateIngredient(
         naam: data.naam,
         hoeveelheid: data.hoeveelheid,
         eenheid: data.eenheid,
+        notitie: data.notitie || null,
       })
       .eq("id", id)
 
