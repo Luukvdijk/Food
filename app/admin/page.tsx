@@ -1,3 +1,4 @@
+import { getUser } from "@/lib/auth"
 import { redirect } from "next/navigation"
 import { supabase } from "@/lib/db"
 import AdminClient from "./admin-client"
@@ -10,13 +11,6 @@ interface AdminPageProps {
     updated?: string
     edit?: string
   }
-}
-
-// Demo user for testing
-const DEMO_USER = {
-  id: "demo-user-123",
-  email: "demo@example.com",
-  name: "Demo Admin",
 }
 
 async function getAllReceptenAdmin() {
@@ -150,9 +144,11 @@ async function getReceptForEdit(id: number) {
 }
 
 export default async function AdminPage({ searchParams }: AdminPageProps) {
-  // Demo mode - skip authentication check
-  console.log("Admin page loading in demo mode")
-  const user = DEMO_USER
+  // Check authentication first - don't catch redirect errors
+  const user = await getUser()
+  if (!user) {
+    redirect("/auth/signin")
+  }
 
   // Try to load data with error handling
   let recepten: any[] = []
