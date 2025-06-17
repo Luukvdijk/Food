@@ -371,7 +371,26 @@ export function EditReceptForm({ recept, ingredienten, bijgerechten }: EditRecep
             </Card>
 
             <div className="flex justify-end gap-2">
-              <Button type="button" variant="outline" asChild disabled={isSubmitting}>
+              <Button
+                type="button"
+                variant="outline"
+                asChild
+                disabled={isSubmitting}
+                style={{
+                  backgroundColor: "white",
+                  color: "#286058",
+                  borderColor: "#286058",
+                  transition: "all 0.2s ease",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = "#f8f9fa"
+                  e.currentTarget.style.borderColor = "#286058"
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = "white"
+                  e.currentTarget.style.borderColor = "#286058"
+                }}
+              >
                 <Link href="/admin">Annuleren</Link>
               </Button>
               <Button

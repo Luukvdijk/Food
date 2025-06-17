@@ -162,12 +162,12 @@ export async function updateRecept(id: string, formData: FormData): Promise<{ su
     const ingredientenData = formData.get("ingredienten") as string
     if (ingredientenData) {
       // Delete existing ingredients
-      await supabase.from("ingredienten").delete().eq("recept_id", id)
+      await supabase.from("ingredienten").delete().eq("recept_id", Number(id))
 
       // Insert new ingredients
       const ingredienten = JSON.parse(ingredientenData)
       const ingredientenToInsert = ingredienten.map((ing: any) => ({
-        recept_id: id,
+        recept_id: Number(id),
         naam: ing.naam,
         hoeveelheid: Number.parseFloat(ing.hoeveelheid) || 0,
         eenheid: ing.eenheid,
@@ -183,12 +183,12 @@ export async function updateRecept(id: string, formData: FormData): Promise<{ su
     const bijgerechtenData = formData.get("bijgerechten") as string
     if (bijgerechtenData) {
       // Delete existing bijgerechten
-      await supabase.from("bijgerechten").delete().eq("recept_id", id)
+      await supabase.from("bijgerechten").delete().eq("recept_id", Number(id))
 
       // Insert new bijgerechten
       const bijgerechten = JSON.parse(bijgerechtenData)
       const bijgerechtenToInsert = bijgerechten.map((bij: any) => ({
-        recept_id: id,
+        recept_id: Number(id),
         naam: bij.naam,
         beschrijving: bij.beschrijving,
       }))
