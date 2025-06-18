@@ -319,18 +319,20 @@ export function HeroSection({ recept: initialRecept }: HeroSectionProps) {
 
               {/* Filters */}
               {showFilters && (
-                <div className="bg-white/10 rounded-lg p-4 space-y-4">
+                <div className="bg-white/15 backdrop-blur-sm rounded-lg p-6 space-y-4 border border-white/20">
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
-                      <label className="block text-sm font-medium mb-2">Type</label>
+                      <label className="block text-sm font-medium mb-2 text-white">Type</label>
                       <Select value={filters.type} onValueChange={(value) => handleFilterChange("type", value)}>
-                        <SelectTrigger className="bg-white/20 border-white/30 text-white">
+                        <SelectTrigger className="bg-white text-[#286058] border-white/50 hover:bg-gray-50 focus:ring-2 focus:ring-[#e75129]">
                           <SelectValue placeholder="Alle types" />
                         </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="all">Alle types</SelectItem>
+                        <SelectContent className="bg-white border-gray-200">
+                          <SelectItem value="all" className="text-[#286058] hover:bg-gray-100">
+                            Alle types
+                          </SelectItem>
                           {filterOptions.types.map((type) => (
-                            <SelectItem key={type} value={type}>
+                            <SelectItem key={type} value={type} className="text-[#286058] hover:bg-gray-100">
                               {type}
                             </SelectItem>
                           ))}
@@ -338,15 +340,17 @@ export function HeroSection({ recept: initialRecept }: HeroSectionProps) {
                       </Select>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium mb-2">Seizoen</label>
+                      <label className="block text-sm font-medium mb-2 text-white">Seizoen</label>
                       <Select value={filters.seizoen} onValueChange={(value) => handleFilterChange("seizoen", value)}>
-                        <SelectTrigger className="bg-white/20 border-white/30 text-white">
+                        <SelectTrigger className="bg-white text-[#286058] border-white/50 hover:bg-gray-50 focus:ring-2 focus:ring-[#e75129]">
                           <SelectValue placeholder="Alle seizoenen" />
                         </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="all">Alle seizoenen</SelectItem>
+                        <SelectContent className="bg-white border-gray-200">
+                          <SelectItem value="all" className="text-[#286058] hover:bg-gray-100">
+                            Alle seizoenen
+                          </SelectItem>
                           {filterOptions.seizoenen.map((seizoen) => (
-                            <SelectItem key={seizoen} value={seizoen}>
+                            <SelectItem key={seizoen} value={seizoen} className="text-[#286058] hover:bg-gray-100">
                               {seizoen}
                             </SelectItem>
                           ))}
@@ -354,15 +358,17 @@ export function HeroSection({ recept: initialRecept }: HeroSectionProps) {
                       </Select>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium mb-2">Eigenaar</label>
+                      <label className="block text-sm font-medium mb-2 text-white">Eigenaar</label>
                       <Select value={filters.eigenaar} onValueChange={(value) => handleFilterChange("eigenaar", value)}>
-                        <SelectTrigger className="bg-white/20 border-white/30 text-white">
+                        <SelectTrigger className="bg-white text-[#286058] border-white/50 hover:bg-gray-50 focus:ring-2 focus:ring-[#e75129]">
                           <SelectValue placeholder="Alle eigenaars" />
                         </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="all">Alle eigenaars</SelectItem>
+                        <SelectContent className="bg-white border-gray-200">
+                          <SelectItem value="all" className="text-[#286058] hover:bg-gray-100">
+                            Alle eigenaars
+                          </SelectItem>
                           {filterOptions.eigenaars.map((eigenaar) => (
-                            <SelectItem key={eigenaar} value={eigenaar}>
+                            <SelectItem key={eigenaar} value={eigenaar} className="text-[#286058] hover:bg-gray-100">
                               {eigenaar}
                             </SelectItem>
                           ))}
@@ -370,11 +376,11 @@ export function HeroSection({ recept: initialRecept }: HeroSectionProps) {
                       </Select>
                     </div>
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex gap-3 pt-2">
                     <Button
                       onClick={applyFilters}
                       disabled={isPending}
-                      className="bg-[#e75129] hover:bg-[#d63e1a] text-white"
+                      className="bg-[#e75129] hover:bg-[#d63e1a] text-white font-medium px-6 py-2 rounded-md transition-colors duration-200"
                     >
                       {isPending ? "Laden..." : "Filter toepassen"}
                     </Button>
@@ -382,7 +388,7 @@ export function HeroSection({ recept: initialRecept }: HeroSectionProps) {
                       onClick={clearFilters}
                       disabled={isPending}
                       variant="outline"
-                      className="bg-white/10 border-white/30 text-white hover:bg-white/20"
+                      className="bg-white/10 border-white/40 text-white hover:bg-white/20 hover:border-white/60 font-medium px-6 py-2 rounded-md transition-colors duration-200"
                     >
                       Wis filters
                     </Button>
