@@ -324,15 +324,22 @@ export function HeroSection({ recept: initialRecept }: HeroSectionProps) {
                     <div>
                       <label className="block text-sm font-medium mb-2 text-white">Type</label>
                       <Select value={filters.type} onValueChange={(value) => handleFilterChange("type", value)}>
-                        <SelectTrigger className="bg-white text-[#286058] border-white/50 hover:bg-gray-50 focus:ring-2 focus:ring-[#e75129]">
+                        <SelectTrigger className="bg-white text-[#286058] border-white/50 hover:bg-gray-50 focus:ring-2 focus:ring-[#e75129] [&>span]:text-[#286058]">
                           <SelectValue placeholder="Alle types" />
                         </SelectTrigger>
-                        <SelectContent className="bg-white border-gray-200">
-                          <SelectItem value="all" className="text-[#286058] hover:bg-gray-100">
+                        <SelectContent className="bg-white border-gray-200 [&>*]:text-[#286058]">
+                          <SelectItem
+                            value="all"
+                            className="text-[#286058] hover:bg-gray-100 focus:bg-gray-100 focus:text-[#286058] data-[highlighted]:bg-gray-100 data-[highlighted]:text-[#286058]"
+                          >
                             Alle types
                           </SelectItem>
                           {filterOptions.types.map((type) => (
-                            <SelectItem key={type} value={type} className="text-[#286058] hover:bg-gray-100">
+                            <SelectItem
+                              key={type}
+                              value={type}
+                              className="text-[#286058] hover:bg-gray-100 focus:bg-gray-100 focus:text-[#286058] data-[highlighted]:bg-gray-100 data-[highlighted]:text-[#286058]"
+                            >
                               {type}
                             </SelectItem>
                           ))}
@@ -342,15 +349,22 @@ export function HeroSection({ recept: initialRecept }: HeroSectionProps) {
                     <div>
                       <label className="block text-sm font-medium mb-2 text-white">Seizoen</label>
                       <Select value={filters.seizoen} onValueChange={(value) => handleFilterChange("seizoen", value)}>
-                        <SelectTrigger className="bg-white text-[#286058] border-white/50 hover:bg-gray-50 focus:ring-2 focus:ring-[#e75129]">
+                        <SelectTrigger className="bg-white text-[#286058] border-white/50 hover:bg-gray-50 focus:ring-2 focus:ring-[#e75129] [&>span]:text-[#286058]">
                           <SelectValue placeholder="Alle seizoenen" />
                         </SelectTrigger>
-                        <SelectContent className="bg-white border-gray-200">
-                          <SelectItem value="all" className="text-[#286058] hover:bg-gray-100">
+                        <SelectContent className="bg-white border-gray-200 [&>*]:text-[#286058]">
+                          <SelectItem
+                            value="all"
+                            className="text-[#286058] hover:bg-gray-100 focus:bg-gray-100 focus:text-[#286058] data-[highlighted]:bg-gray-100 data-[highlighted]:text-[#286058]"
+                          >
                             Alle seizoenen
                           </SelectItem>
                           {filterOptions.seizoenen.map((seizoen) => (
-                            <SelectItem key={seizoen} value={seizoen} className="text-[#286058] hover:bg-gray-100">
+                            <SelectItem
+                              key={seizoen}
+                              value={seizoen}
+                              className="text-[#286058] hover:bg-gray-100 focus:bg-gray-100 focus:text-[#286058] data-[highlighted]:bg-gray-100 data-[highlighted]:text-[#286058]"
+                            >
                               {seizoen}
                             </SelectItem>
                           ))}
@@ -360,15 +374,22 @@ export function HeroSection({ recept: initialRecept }: HeroSectionProps) {
                     <div>
                       <label className="block text-sm font-medium mb-2 text-white">Eigenaar</label>
                       <Select value={filters.eigenaar} onValueChange={(value) => handleFilterChange("eigenaar", value)}>
-                        <SelectTrigger className="bg-white text-[#286058] border-white/50 hover:bg-gray-50 focus:ring-2 focus:ring-[#e75129]">
+                        <SelectTrigger className="bg-white text-[#286058] border-white/50 hover:bg-gray-50 focus:ring-2 focus:ring-[#e75129] [&>span]:text-[#286058]">
                           <SelectValue placeholder="Alle eigenaars" />
                         </SelectTrigger>
-                        <SelectContent className="bg-white border-gray-200">
-                          <SelectItem value="all" className="text-[#286058] hover:bg-gray-100">
+                        <SelectContent className="bg-white border-gray-200 [&>*]:text-[#286058]">
+                          <SelectItem
+                            value="all"
+                            className="text-[#286058] hover:bg-gray-100 focus:bg-gray-100 focus:text-[#286058] data-[highlighted]:bg-gray-100 data-[highlighted]:text-[#286058]"
+                          >
                             Alle eigenaars
                           </SelectItem>
                           {filterOptions.eigenaars.map((eigenaar) => (
-                            <SelectItem key={eigenaar} value={eigenaar} className="text-[#286058] hover:bg-gray-100">
+                            <SelectItem
+                              key={eigenaar}
+                              value={eigenaar}
+                              className="text-[#286058] hover:bg-gray-100 focus:bg-gray-100 focus:text-[#286058] data-[highlighted]:bg-gray-100 data-[highlighted]:text-[#286058]"
+                            >
                               {eigenaar}
                             </SelectItem>
                           ))}
