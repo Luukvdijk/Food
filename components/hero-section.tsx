@@ -300,7 +300,7 @@ export function HeroSection({ recept: initialRecept }: HeroSectionProps) {
                 <Button
                   onClick={() => setShowFilters(!showFilters)}
                   variant="outline"
-                  className="bg-white/10 border-white/30 text-white hover:bg-white/20"
+                  className="bg-white/10 border-white/30 text-white hover:bg-white/20 hover:text-white focus:text-white"
                 >
                   <Filter className="h-4 w-4 mr-2" />
                   {showFilters ? "Verberg filters" : "Toon filters"}
@@ -309,7 +309,7 @@ export function HeroSection({ recept: initialRecept }: HeroSectionProps) {
                   <Button
                     onClick={clearFilters}
                     variant="outline"
-                    className="bg-white/10 border-white/30 text-white hover:bg-white/20"
+                    className="bg-white/10 border-white/30 text-white hover:bg-white/20 hover:text-white focus:text-white"
                     disabled={isPending}
                   >
                     Wis filters
