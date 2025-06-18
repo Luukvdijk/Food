@@ -41,32 +41,60 @@ export function EditReceptForm({ recept, ingredienten, bijgerechten }: EditRecep
   const handleSubmit = async (formData: FormData) => {
     setIsSubmitting(true)
     try {
-      formData.set("id", recept.id.toString())
+      // Add the recipe ID and other form data
       formData.set("type", selectedType)
       formData.set("moeilijkheidsgraad", selectedMoeilijkheid)
       formData.set("afbeelding_url", imageUrl)
       if (hasEigenaarSupport) {
         formData.set("eigenaar", selectedEigenaar)
       }
-      await updateRecept(formData)
-    } catch (error: any) {
-      // Check if this is a redirect (which is expected and means success)
-      if (error?.digest?.includes("NEXT_REDIRECT") || error?.message === "NEXT_REDIRECT") {
-        // This is actually success - the redirect happened
-        toast({
-          title: "Succes!",
-          description: "Recept succesvol bijgewerkt",
-          className: "bg-green-50 border-green-200 text-green-800",
+
+      // Process ingredients data
+      const ingredientenTextarea = formData.get("ingredienten") as string
+      if (ingredientenTextarea) {
+        const ingredientenLines = ingredientenTextarea.split("\n").filter((line) => line.trim())
+        const ingredientenData = ingredientenLines.map((line) => {
+          const parts = line.split("|").map((part) => part.trim())
+          return {
+            naam: parts[2] || "",
+            hoeveelheid: parts[0] || "0",
+            eenheid: parts[1] || "",
+            notitie: parts[3] || null,
+          }
         })
-      } else {
-        // This is an actual error
-        console.error("Form submission error:", error)
-        toast({
-          title: "Fout",
-          description: "Er is een fout opgetreden bij het bijwerken van het recept",
-          className: "bg-red-50 border-red-200 text-red-800",
-        })
+        formData.set("ingredienten", JSON.stringify(ingredientenData))
       }
+
+      // Process bijgerechten data
+      const bijgerechtenTextarea = formData.get("bijgerechten") as string
+      if (bijgerechtenTextarea) {
+        const bijgerechtenLines = bijgerechtenTextarea.split("\n").filter((line) => line.trim())
+        const bijgerechtenData = bijgerechtenLines.map((line) => {
+          const parts = line.split("|").map((part) => part.trim())
+          return {
+            naam: parts[0] || "",
+            beschrijving: parts[1] || "",
+          }
+        })
+        formData.set("bijgerechten", JSON.stringify(bijgerechtenData))
+      }
+
+      console.log("Submitting form with data:", Object.fromEntries(formData.entries()))
+
+      await updateRecept(recept.id.toString(), formData)
+
+      toast({
+        title: "Succes!",
+        description: "Recept succesvol bijgewerkt",
+        className: "bg-green-50 border-green-200 text-green-800",
+      })
+    } catch (error: any) {
+      console.error("Form submission error:", error)
+      toast({
+        title: "Fout",
+        description: "Er is een fout opgetreden bij het bijwerken van het recept",
+        className: "bg-red-50 border-red-200 text-red-800",
+      })
     } finally {
       setIsSubmitting(false)
     }
@@ -119,6 +147,16 @@ export function EditReceptForm({ recept, ingredienten, bijgerechten }: EditRecep
     .admin-select-item[data-state="checked"] {
       background-color: #e75129 !important;
       color: white !important;
+    }
+    .cancel-button {
+      background-color: white !important;
+      color: #286058 !important;
+      border: 1px solid #286058 !important;
+    }
+    .cancel-button:hover {
+      background-color: #f8f9fa !important;
+      color: #286058 !important;
+      border: 1px solid #286058 !important;
     }
   `
 
@@ -371,28 +409,11 @@ export function EditReceptForm({ recept, ingredienten, bijgerechten }: EditRecep
             </Card>
 
             <div className="flex justify-end gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                asChild
-                disabled={isSubmitting}
-                style={{
-                  backgroundColor: "white",
-                  color: "#286058",
-                  borderColor: "#286058",
-                  transition: "all 0.2s ease",
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = "#f8f9fa"
-                  e.currentTarget.style.borderColor = "#286058"
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = "white"
-                  e.currentTarget.style.borderColor = "#286058"
-                }}
-              >
-                <Link href="/admin">Annuleren</Link>
-              </Button>
+              <Link href="/admin">
+                <Button type="button" variant="outline" disabled={isSubmitting} className="cancel-button">
+                  Annuleren
+                </Button>
+              </Link>
               <Button
                 type="submit"
                 disabled={isSubmitting}
