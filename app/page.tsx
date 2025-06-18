@@ -1,10 +1,9 @@
 import { supabase } from "@/lib/db"
-import { ModernHeader } from "@/components/modern-header"
 import { HeroSection } from "@/components/hero-section"
+import { Bijgerechten } from "@/components/bijgerechten"
 
 async function getRandomReceptForInitialLoad() {
   try {
-    // First get total count
     const { count, error: countError } = await supabase.from("recepten").select("*", { count: "exact", head: true })
 
     if (countError) {
@@ -17,13 +16,8 @@ async function getRandomReceptForInitialLoad() {
       return null
     }
 
-    console.log(`Found ${count} recipes in database`)
-
-    // Get random offset
     const randomOffset = Math.floor(Math.random() * count)
-    console.log(`Using random offset: ${randomOffset}`)
 
-    // Use the same query pattern as search page
     const { data, error } = await supabase
       .from("recepten")
       .select(`
@@ -39,7 +33,6 @@ async function getRandomReceptForInitialLoad() {
       throw error
     }
 
-    console.log("Successfully fetched recipe:", data?.naam)
     return data
   } catch (error) {
     console.error("Error fetching random recept:", error)
@@ -52,7 +45,6 @@ export default async function Home() {
 
   return (
     <div className="min-h-screen w-full">
-      <ModernHeader />
       <HeroSection recept={randomRecept} />
 
       {/* Curved transition section */}
@@ -65,16 +57,22 @@ export default async function Home() {
             <div className="w-24 h-1 bg-[#e75129] mx-auto"></div>
           </div>
 
-          {/* Empty state for bijgerechten */}
-          <div className="text-center py-12">
-            <div className="max-w-2xl mx-auto">
-              <div className="text-6xl mb-6">🍽️</div>
-              <h3 className="text-2xl font-semibold mb-4 text-[#286058]">Perfect op zichzelf</h3>
-              <p className="text-gray-600 text-lg mb-8">
-                Dit recept is heerlijk zoals het is! Geen bijgerechten nodig.
-              </p>
+          {/* Bijgerechten section */}
+          {randomRecept?.bijgerechten && randomRecept.bijgerechten.length > 0 ? (
+            <div className="max-w-4xl mx-auto">
+              <Bijgerechten bijgerechten={randomRecept.bijgerechten} />
             </div>
-          </div>
+          ) : (
+            <div className="text-center py-12">
+              <div className="max-w-2xl mx-auto">
+                <div className="text-6xl mb-6">🍽️</div>
+                <h3 className="text-2xl font-semibold mb-4 text-[#286058]">Perfect op zichzelf</h3>
+                <p className="text-gray-600 text-lg mb-8">
+                  Dit recept is heerlijk zoals het is! Geen bijgerechten nodig.
+                </p>
+              </div>
+            </div>
+          )}
 
           {/* Search prompt */}
           <div className="text-center mt-16 py-12 bg-white/50 rounded-lg max-w-4xl mx-auto">

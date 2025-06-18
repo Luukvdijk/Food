@@ -4,8 +4,10 @@ import { useState, useTransition, useEffect } from "react"
 import { Star, Minus, Plus, Users } from "lucide-react"
 import Image from "next/image"
 import { IngredientsPopup } from "./ingredients-popup"
-import { refreshHomepage } from "@/app/actions"
 import { useRouter } from "next/navigation"
+import { Button } from "@/components/ui/button"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { ModernHeader } from "./modern-header"
 
 interface HeroSectionProps {
   recept?: {
@@ -15,56 +17,165 @@ interface HeroSectionProps {
     seizoen: string[]
     tags: string[]
     type: string
+    eigenaar?: string
   } | null
 }
 
-export function HeroSection({ recept }: HeroSectionProps) {
+interface FilterOptions {
+  types: string[]
+  seizoenen: string[]
+  eigenaars: string[]
+}
+
+export function HeroSection({ recept: initialRecept }: HeroSectionProps) {
   const [servings, setServings] = useState(1)
   const [showIngredientsPopup, setShowIngredientsPopup] = useState(false)
   const [hoverStates, setHoverStates] = useState<Record<string, boolean>>({})
   const [isPending, startTransition] = useTransition()
+  const [showFilters, setShowFilters] = useState(false)
+  const [filters, setFilters] = useState({
+    type: "",
+    seizoen: "",
+    eigenaar: "",
+  })
+  const [filterOptions, setFilterOptions] = useState<FilterOptions>({
+    types: [],
+    seizoenen: [],
+    eigenaars: [],
+  })
+  const [currentRecept, setCurrentRecept] = useState(initialRecept)
   const router = useRouter()
   const [minHeight, setMinHeight] = useState("calc(100vh - 80px)")
+
+  // Load filter options on component mount
+  useEffect(() => {
+    const loadFilterOptions = async () => {
+      try {
+        console.log("Loading filter options...")
+        const response = await fetch("/api/get-filter-options")
+        const options = await response.json()
+        console.log("Filter options loaded:", options)
+        setFilterOptions(options)
+      } catch (error) {
+        console.error("Error loading filter options:", error)
+      }
+    }
+
+    loadFilterOptions()
+  }, [])
 
   // Adjust height based on screen size
   useEffect(() => {
     const handleResize = () => {
       const isMobile = window.innerWidth < 768
       if (isMobile) {
-        setMinHeight("auto") // Auto height on mobile to prevent cutoff
+        setMinHeight("auto")
       } else {
         setMinHeight("calc(100vh - 80px)")
       }
     }
 
-    // Initial check
     handleResize()
-
-    // Add event listener
     window.addEventListener("resize", handleResize)
-
-    // Cleanup
     return () => window.removeEventListener("resize", handleResize)
   }, [])
 
   const incrementServings = () => setServings((prev) => prev + 1)
   const decrementServings = () => setServings((prev) => Math.max(1, prev - 1))
 
+  const fetchRandomRecipe = async () => {
+    try {
+      let url = "/api/random-recept"
+      const params = new URLSearchParams()
+
+      // Only add filters if they have actual values
+      if (filters.type) {
+        params.append("type", filters.type)
+      }
+      if (filters.seizoen) {
+        params.append("seizoen", filters.seizoen)
+      }
+      if (filters.eigenaar) {
+        params.append("eigenaar", filters.eigenaar)
+      }
+
+      if (params.toString()) {
+        url += `?${params.toString()}`
+      }
+
+      console.log("=== Fetching Random Recipe ===")
+      console.log("URL:", url)
+      console.log("Current filters:", filters)
+
+      const response = await fetch(url)
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+
+      const data = await response.json()
+
+      console.log("API Response:", data)
+
+      if (data && data.id) {
+        setCurrentRecept(data)
+        console.log("New recipe loaded:", data.naam)
+      } else {
+        console.log("No recipe found with current filters")
+        alert("Geen recepten gevonden met deze filters. Probeer andere filters.")
+      }
+    } catch (error) {
+      console.error("Error fetching random recipe:", error)
+      alert("Er is een fout opgetreden bij het ophalen van een recept.")
+    }
+  }
+
   const handleNewRecipe = () => {
+    console.log("=== New Recipe Button Clicked ===")
+    console.log("Current filters:", filters)
+
     startTransition(async () => {
+      await fetchRandomRecipe()
+    })
+  }
+
+  const handleFilterChange = (filterType: string, value: string) => {
+    console.log(`Filter changed: ${filterType} = ${value}`)
+    setFilters((prev) => ({
+      ...prev,
+      [filterType]: value,
+    }))
+  }
+
+  const applyFilters = () => {
+    console.log("=== Apply Filters Clicked ===")
+    console.log("Filters to apply:", filters)
+
+    startTransition(async () => {
+      await fetchRandomRecipe()
+    })
+  }
+
+  const clearFilters = () => {
+    console.log("=== Clear Filters Clicked ===")
+    setFilters({ type: "", seizoen: "", eigenaar: "" })
+
+    startTransition(async () => {
+      // Fetch without any filters
       try {
-        await refreshHomepage()
-        router.refresh()
+        const response = await fetch("/api/random-recept")
+        const data = await response.json()
+        if (data && data.id) {
+          setCurrentRecept(data)
+        }
       } catch (error) {
-        console.error("Error refreshing recipe:", error)
-        // Fallback to window reload if server action fails
-        window.location.reload()
+        console.error("Error clearing filters:", error)
       }
     })
   }
 
   const handleImageClick = () => {
-    if (recept) {
+    if (currentRecept) {
       setShowIngredientsPopup(true)
     }
   }
@@ -76,24 +187,37 @@ export function HeroSection({ recept }: HeroSectionProps) {
     }))
   }
 
-  if (!recept) {
+  const hasActiveFilters = filters.type || filters.seizoen || filters.eigenaar
+
+  const handleFiltersToggle = () => {
+    setShowFilters(!showFilters)
+  }
+
+  if (!currentRecept) {
     return (
-      <section
-        className="bg-[#286058] text-white relative overflow-hidden w-full flex items-center py-16 md:py-0"
-        style={{ minHeight: minHeight }}
-      >
-        <div className="w-full py-12 px-8 relative z-10">
-          <div className="text-center">
-            <h1 className="text-6xl font-bold mb-8">Geen recept gevonden</h1>
-            <p className="text-xl opacity-90">Probeer een ander recept te zoeken</p>
+      <>
+        <ModernHeader onFiltersToggle={handleFiltersToggle} hasActiveFilters={hasActiveFilters} />
+        <section
+          className="bg-[#286058] text-white relative overflow-hidden w-full flex items-center py-16 md:py-0"
+          style={{ minHeight: minHeight }}
+        >
+          <div className="w-full py-12 px-8 relative z-10">
+            <div className="text-center">
+              <h1 className="text-6xl font-bold mb-8">Geen recept gevonden</h1>
+              <p className="text-xl opacity-90">Probeer andere filters of zoek een ander recept</p>
+              <Button onClick={clearFilters} className="mt-4 bg-[#e75129] hover:bg-[#d63e1a]">
+                Alle recepten tonen
+              </Button>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      </>
     )
   }
 
   return (
     <>
+      <ModernHeader onFiltersToggle={handleFiltersToggle} hasActiveFilters={hasActiveFilters} />
       <section
         className="bg-[#286058] text-white relative overflow-hidden w-full flex items-center py-16 md:py-0"
         style={{ minHeight: minHeight }}
@@ -102,11 +226,11 @@ export function HeroSection({ recept }: HeroSectionProps) {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center max-w-7xl mx-auto">
             {/* Left Content */}
             <div className="space-y-8">
-              <h1 className="text-5xl md:text-6xl font-bold leading-tight">{recept.naam}</h1>
+              <h1 className="text-5xl md:text-6xl font-bold leading-tight">{currentRecept.naam}</h1>
 
               {/* Tags */}
               <div style={{ display: "flex", flexWrap: "wrap", gap: "12px" }}>
-                {recept.seizoen.map((seizoen) => (
+                {currentRecept.seizoen?.map((seizoen) => (
                   <span
                     key={seizoen}
                     style={{
@@ -139,9 +263,9 @@ export function HeroSection({ recept }: HeroSectionProps) {
                   onMouseEnter={() => handleBadgeHover("type", true)}
                   onMouseLeave={() => handleBadgeHover("type", false)}
                 >
-                  {recept.type}
+                  {currentRecept.type}
                 </span>
-                {recept.tags.slice(0, 1).map((tag) => (
+                {currentRecept.tags?.slice(0, 1).map((tag) => (
                   <span
                     key={tag}
                     style={{
@@ -160,6 +284,24 @@ export function HeroSection({ recept }: HeroSectionProps) {
                     {tag}
                   </span>
                 ))}
+                {currentRecept.eigenaar && (
+                  <span
+                    style={{
+                      backgroundColor: hoverStates["eigenaar"] ? "#d1c7b8" : "#eee1d1",
+                      color: "#286058",
+                      padding: "8px 16px",
+                      borderRadius: "4px",
+                      fontSize: "14px",
+                      fontWeight: "500",
+                      transition: "background-color 0.2s ease",
+                      cursor: "default",
+                    }}
+                    onMouseEnter={() => handleBadgeHover("eigenaar", true)}
+                    onMouseLeave={() => handleBadgeHover("eigenaar", false)}
+                  >
+                    {currentRecept.eigenaar}
+                  </span>
+                )}
               </div>
 
               {/* Controls */}
@@ -190,7 +332,7 @@ export function HeroSection({ recept }: HeroSectionProps) {
                     }
                   }}
                 >
-                  {isPending ? "Laden..." : "Nieuw gerecht"}
+                  {isPending ? "Laden..." : hasActiveFilters ? "Nieuw gefilterd gerecht" : "Nieuw gerecht"}
                 </button>
 
                 <div className="flex items-center gap-4">
@@ -253,22 +395,17 @@ export function HeroSection({ recept }: HeroSectionProps) {
 
             {/* Right Content - Recipe Image */}
             <div className="relative flex justify-center items-center">
-              {/* Slightly larger overlay container */}
               <div className="relative w-64 h-64 md:w-72 md:h-72 cursor-pointer group" onClick={handleImageClick}>
-                {/* Main image */}
                 <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-56 h-56 md:w-64 md:h-64 rounded-full overflow-hidden">
                   <Image
-                    src={recept.afbeelding_url || "/placeholder.svg?height=400&width=400&query=delicious food"}
-                    alt={recept.naam}
+                    src={currentRecept.afbeelding_url || "/placeholder.svg?height=400&width=400&query=delicious food"}
+                    alt={currentRecept.naam}
                     fill
                     className="object-cover transition-transform duration-300 group-hover:scale-110"
                   />
-
-                  {/* Color overlay on hover */}
                   <div className="absolute inset-0 bg-[#e75129]/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 </div>
 
-                {/* Dashed Circle Overlay - just slightly bigger than image */}
                 <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
                   <svg className="w-full h-full" viewBox="0 0 288 288" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <circle
@@ -284,7 +421,6 @@ export function HeroSection({ recept }: HeroSectionProps) {
                   </svg>
                 </div>
 
-                {/* Click Hint */}
                 <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-10">
                   <div className="bg-black/60 text-white px-4 py-2 rounded-lg text-sm font-medium">
                     Klik voor ingrediënten
@@ -292,7 +428,6 @@ export function HeroSection({ recept }: HeroSectionProps) {
                 </div>
               </div>
 
-              {/* Rating */}
               <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2">
                 <div className="flex gap-2">
                   {[1, 2, 3, 4, 5].map((star) => (
@@ -309,10 +444,110 @@ export function HeroSection({ recept }: HeroSectionProps) {
       <IngredientsPopup
         isOpen={showIngredientsPopup}
         onClose={() => setShowIngredientsPopup(false)}
-        receptId={recept.id}
+        receptId={currentRecept.id}
         servings={servings}
-        receptNaam={recept.naam}
+        receptNaam={currentRecept.naam}
       />
+
+      {/* Filter Popup - moved to top left */}
+      {showFilters && (
+        <div className="fixed top-0 left-0 z-40">
+          <div
+            className="bg-[#eee1d1] rounded-b-xl shadow-2xl flex flex-col"
+            style={{ width: "400px", height: "70vh", maxHeight: "500px" }}
+          >
+            {/* Header */}
+            <div className="flex justify-between items-center p-6 pb-4 flex-shrink-0">
+              <h2 className="text-[#e75129] text-3xl font-medium">Filters</h2>
+              <button
+                onClick={() => setShowFilters(false)}
+                className="h-6 w-6 text-[#e75129] cursor-pointer hover:text-[#d63e1a] transition-colors"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Filter Categories - Scrollable */}
+            <div className="flex-1 px-6 overflow-y-auto">
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-[#286058] text-lg font-medium mb-2">Type</label>
+                  <Select value={filters.type} onValueChange={(value) => handleFilterChange("type", value)}>
+                    <SelectTrigger className="bg-white text-[#286058] border-[#286058]/20 hover:bg-gray-50 focus:ring-2 focus:ring-[#e75129]">
+                      <SelectValue placeholder="Alle types" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-white border-gray-200">
+                      <SelectItem value="all" className="text-[#286058] hover:bg-gray-100">
+                        Alle types
+                      </SelectItem>
+                      {filterOptions.types.map((type) => (
+                        <SelectItem key={type} value={type} className="text-[#286058] hover:bg-gray-100">
+                          {type}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <label className="block text-[#286058] text-lg font-medium mb-2">Seizoen</label>
+                  <Select value={filters.seizoen} onValueChange={(value) => handleFilterChange("seizoen", value)}>
+                    <SelectTrigger className="bg-white text-[#286058] border-[#286058]/20 hover:bg-gray-50 focus:ring-2 focus:ring-[#e75129]">
+                      <SelectValue placeholder="Alle seizoenen" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-white border-gray-200">
+                      <SelectItem value="all" className="text-[#286058] hover:bg-gray-100">
+                        Alle seizoenen
+                      </SelectItem>
+                      {filterOptions.seizoenen.map((seizoen) => (
+                        <SelectItem key={seizoen} value={seizoen} className="text-[#286058] hover:bg-gray-100">
+                          {seizoen}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <label className="block text-[#286058] text-lg font-medium mb-2">Eigenaar</label>
+                  <Select value={filters.eigenaar} onValueChange={(value) => handleFilterChange("eigenaar", value)}>
+                    <SelectTrigger className="bg-white text-[#286058] border-[#286058]/20 hover:bg-gray-50 focus:ring-2 focus:ring-[#e75129]">
+                      <SelectValue placeholder="Alle eigenaars" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-white border-gray-200">
+                      <SelectItem value="all" className="text-[#286058] hover:bg-gray-100">
+                        Alle eigenaars
+                      </SelectItem>
+                      {filterOptions.eigenaars.map((eigenaar) => (
+                        <SelectItem key={eigenaar} value={eigenaar} className="text-[#286058] hover:bg-gray-100">
+                          {eigenaar}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </div>
+
+            {/* Action Buttons - Always Visible */}
+            <div className="p-6 pt-4 flex gap-3 flex-shrink-0 border-t border-[#286058]/10">
+              <button
+                onClick={clearFilters}
+                className="flex-1 bg-gray-300 text-gray-700 px-4 py-3 rounded-md text-lg font-medium hover:bg-gray-400 hover:text-gray-800 transition-colors"
+              >
+                Wis alles
+              </button>
+              <button
+                onClick={applyFilters}
+                disabled={isPending}
+                className="flex-1 bg-[#e75129] text-white px-4 py-3 rounded-md text-lg font-medium hover:bg-[#d04a26] transition-colors disabled:opacity-50"
+              >
+                {isPending ? "Laden..." : "Toepassen"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   )
 }
