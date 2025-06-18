@@ -27,9 +27,9 @@ export function HeroSection({ recept: initialRecept }: HeroSectionProps) {
   const [isPending, startTransition] = useTransition()
   const [showFilters, setShowFilters] = useState(false)
   const [filters, setFilters] = useState({
-    type: "Alle types",
-    seizoen: "Alle seizoenen",
-    eigenaar: "Alle eigenaars",
+    type: "All",
+    seizoen: "All",
+    eigenaar: "All",
   })
   const [currentRecept, setCurrentRecept] = useState(initialRecept)
   const router = useRouter()
@@ -54,44 +54,65 @@ export function HeroSection({ recept: initialRecept }: HeroSectionProps) {
   const incrementServings = () => setServings((prev) => prev + 1)
   const decrementServings = () => setServings((prev) => Math.max(1, prev - 1))
 
-  const fetchRandomRecipe = async (withFilters = false) => {
+  const fetchRandomRecipe = async () => {
     try {
       let url = "/api/random-recept"
+      const params = new URLSearchParams()
 
-      if (withFilters) {
-        const params = new URLSearchParams()
-        if (filters.type !== "Alle types") params.append("type", filters.type)
-        if (filters.seizoen !== "Alle seizoenen") params.append("seizoen", filters.seizoen)
-        if (filters.eigenaar !== "Alle eigenaars") params.append("eigenaar", filters.eigenaar)
-
-        if (params.toString()) {
-          url += `?${params.toString()}`
-        }
+      // Only add filters if they have actual values
+      if (filters.type && filters.type !== "All") {
+        params.append("type", filters.type)
+      }
+      if (filters.seizoen && filters.seizoen !== "All") {
+        params.append("seizoen", filters.seizoen)
+      }
+      if (filters.eigenaar && filters.eigenaar !== "All") {
+        params.append("eigenaar", filters.eigenaar)
       }
 
-      console.log("Fetching random recipe from:", url)
+      if (params.toString()) {
+        url += `?${params.toString()}`
+      }
+
+      console.log("=== Fetching Random Recipe ===")
+      console.log("URL:", url)
+      console.log("Current filters:", filters)
+
       const response = await fetch(url)
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+
       const data = await response.json()
+
+      console.log("API Response:", data)
 
       if (data && data.id) {
         setCurrentRecept(data)
         console.log("New recipe loaded:", data.naam)
       } else {
         console.log("No recipe found with current filters")
-        // Optionally show a message or fallback
+        // Show message but don't clear current recipe
+        alert("Geen recepten gevonden met deze filters. Probeer andere filters.")
       }
     } catch (error) {
       console.error("Error fetching random recipe:", error)
+      alert("Er is een fout opgetreden bij het ophalen van een recept.")
     }
   }
 
   const handleNewRecipe = () => {
+    console.log("=== New Recipe Button Clicked ===")
+    console.log("Current filters:", filters)
+
     startTransition(async () => {
-      await fetchRandomRecipe(true) // Use filters when getting new recipe
+      await fetchRandomRecipe()
     })
   }
 
   const handleFilterChange = (filterType: string, value: string) => {
+    console.log(`Filter changed: ${filterType} = ${value}`)
     setFilters((prev) => ({
       ...prev,
       [filterType]: value,
@@ -99,15 +120,29 @@ export function HeroSection({ recept: initialRecept }: HeroSectionProps) {
   }
 
   const applyFilters = () => {
+    console.log("=== Apply Filters Clicked ===")
+    console.log("Filters to apply:", filters)
+
     startTransition(async () => {
-      await fetchRandomRecipe(true)
+      await fetchRandomRecipe()
     })
   }
 
   const clearFilters = () => {
-    setFilters({ type: "Alle types", seizoen: "Alle seizoenen", eigenaar: "Alle eigenaars" })
+    console.log("=== Clear Filters Clicked ===")
+    setFilters({ type: "All", seizoen: "All", eigenaar: "All" })
+
     startTransition(async () => {
-      await fetchRandomRecipe(false)
+      // Fetch without any filters
+      try {
+        const response = await fetch("/api/random-recept")
+        const data = await response.json()
+        if (data && data.id) {
+          setCurrentRecept(data)
+        }
+      } catch (error) {
+        console.error("Error clearing filters:", error)
+      }
     })
   }
 
@@ -123,6 +158,8 @@ export function HeroSection({ recept: initialRecept }: HeroSectionProps) {
       [id]: isHovering,
     }))
   }
+
+  const hasActiveFilters = filters.type !== "All" || filters.seizoen !== "All" || filters.eigenaar !== "All"
 
   if (!currentRecept) {
     return (
@@ -157,7 +194,7 @@ export function HeroSection({ recept: initialRecept }: HeroSectionProps) {
 
               {/* Tags */}
               <div style={{ display: "flex", flexWrap: "wrap", gap: "12px" }}>
-                {currentRecept.seizoen.map((seizoen) => (
+                {currentRecept.seizoen?.map((seizoen) => (
                   <span
                     key={seizoen}
                     style={{
@@ -192,7 +229,7 @@ export function HeroSection({ recept: initialRecept }: HeroSectionProps) {
                 >
                   {currentRecept.type}
                 </span>
-                {currentRecept.tags.slice(0, 1).map((tag) => (
+                {currentRecept.tags?.slice(0, 1).map((tag) => (
                   <span
                     key={tag}
                     style={{
@@ -241,16 +278,14 @@ export function HeroSection({ recept: initialRecept }: HeroSectionProps) {
                   <Filter className="h-4 w-4 mr-2" />
                   {showFilters ? "Verberg filters" : "Toon filters"}
                 </Button>
-                {(filters.type !== "Alle types" ||
-                  filters.seizoen !== "Alle seizoenen" ||
-                  filters.eigenaar !== "Alle eigenaars") && (
+                {hasActiveFilters && (
                   <Button
                     onClick={clearFilters}
                     variant="outline"
                     className="bg-white/10 border-white/30 text-white hover:bg-white/20"
                     disabled={isPending}
                   >
-                    Wis filters
+                    Wis filters ({Object.values(filters).filter((value) => value !== "All").length})
                   </Button>
                 )}
               </div>
@@ -266,7 +301,7 @@ export function HeroSection({ recept: initialRecept }: HeroSectionProps) {
                           <SelectValue placeholder="Alle types" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="Alle types">Alle types</SelectItem>
+                          <SelectItem value="All">Alle types</SelectItem>
                           <SelectItem value="Hoofdgerecht">Hoofdgerecht</SelectItem>
                           <SelectItem value="Voorgerecht">Voorgerecht</SelectItem>
                           <SelectItem value="Nagerecht">Nagerecht</SelectItem>
@@ -282,7 +317,7 @@ export function HeroSection({ recept: initialRecept }: HeroSectionProps) {
                           <SelectValue placeholder="Alle seizoenen" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="Alle seizoenen">Alle seizoenen</SelectItem>
+                          <SelectItem value="All">Alle seizoenen</SelectItem>
                           <SelectItem value="Lente">Lente</SelectItem>
                           <SelectItem value="Zomer">Zomer</SelectItem>
                           <SelectItem value="Herfst">Herfst</SelectItem>
@@ -297,20 +332,30 @@ export function HeroSection({ recept: initialRecept }: HeroSectionProps) {
                           <SelectValue placeholder="Alle eigenaars" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="Alle eigenaars">Alle eigenaars</SelectItem>
+                          <SelectItem value="All">Alle eigenaars</SelectItem>
                           <SelectItem value="Luuk">Luuk</SelectItem>
                           <SelectItem value="Anouk">Anouk</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
                   </div>
-                  <Button
-                    onClick={applyFilters}
-                    disabled={isPending}
-                    className="bg-[#e75129] hover:bg-[#d63e1a] text-white"
-                  >
-                    {isPending ? "Laden..." : "Filter toepassen"}
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button
+                      onClick={applyFilters}
+                      disabled={isPending}
+                      className="bg-[#e75129] hover:bg-[#d63e1a] text-white"
+                    >
+                      {isPending ? "Laden..." : "Filter toepassen"}
+                    </Button>
+                    <Button
+                      onClick={clearFilters}
+                      disabled={isPending}
+                      variant="outline"
+                      className="bg-white/10 border-white/30 text-white hover:bg-white/20"
+                    >
+                      Wis filters
+                    </Button>
+                  </div>
                 </div>
               )}
 
@@ -342,7 +387,7 @@ export function HeroSection({ recept: initialRecept }: HeroSectionProps) {
                     }
                   }}
                 >
-                  {isPending ? "Laden..." : "Nieuw gerecht"}
+                  {isPending ? "Laden..." : hasActiveFilters ? "Nieuw gefilterd gerecht" : "Nieuw gerecht"}
                 </button>
 
                 <div className="flex items-center gap-4">

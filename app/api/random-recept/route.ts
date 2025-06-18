@@ -9,32 +9,42 @@ export async function GET(request: Request) {
     const seizoen = searchParams.get("seizoen") as Seizoen | null
     const eigenaar = searchParams.get("eigenaar") as Eigenaar | null
 
-    console.log("Random recipe API called with filters:", { type, seizoen, eigenaar })
+    console.log("=== Random Recipe API Called ===")
+    console.log("Filters received:", { type, seizoen, eigenaar })
 
-    // Start building the query
-    let query = supabase.from("recepten").select("*")
+    // Start building the query with full recipe data
+    let query = supabase.from("recepten").select(`
+        *,
+        ingredienten (*),
+        bijgerechten (*)
+      `)
 
     // Apply filters
-    if (type) {
-      console.log("Filtering by type:", type)
+    if (type && type !== "Alle types") {
+      console.log("Applying type filter:", type)
       query = query.eq("type", type)
     }
 
-    if (eigenaar) {
-      console.log("Filtering by eigenaar:", eigenaar)
+    if (eigenaar && eigenaar !== "Alle eigenaars") {
+      console.log("Applying eigenaar filter:", eigenaar)
       query = query.eq("eigenaar", eigenaar)
     }
 
-    if (seizoen) {
-      console.log("Filtering by seizoen:", seizoen)
-      // Check if seizoen is stored as array or string
-      query = query.contains("seizoen", [seizoen])
+    if (seizoen && seizoen !== "Alle seizoenen") {
+      console.log("Applying seizoen filter:", seizoen)
+      // Try both array contains and direct match
+      query = query.or(`seizoen.cs.{${seizoen}},seizoen.eq.${seizoen}`)
     }
 
     // Execute the query and get all matching recipes
+    console.log("Executing query...")
     const { data: allRecipes, error: fetchError } = await query
 
-    console.log("Query result:", { count: allRecipes?.length, error: fetchError })
+    console.log("Query result:", {
+      count: allRecipes?.length,
+      error: fetchError,
+      firstRecipe: allRecipes?.[0]?.naam,
+    })
 
     if (fetchError) {
       console.error("Database error:", fetchError)
@@ -51,6 +61,13 @@ export async function GET(request: Request) {
     const randomRecipe = allRecipes[randomIndex]
 
     console.log("Selected random recipe:", randomRecipe.naam)
+    console.log("Recipe details:", {
+      id: randomRecipe.id,
+      type: randomRecipe.type,
+      seizoen: randomRecipe.seizoen,
+      eigenaar: randomRecipe.eigenaar,
+    })
+
     return NextResponse.json(randomRecipe)
   } catch (error) {
     console.error("Random recipe API error:", error)
