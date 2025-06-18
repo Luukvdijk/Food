@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useTransition, useEffect } from "react"
-import { Star, Minus, Plus, Users, Filter } from "lucide-react"
+import { Star, Minus, Plus, Users } from "lucide-react"
 import Image from "next/image"
 import { IngredientsPopup } from "./ingredients-popup"
 import { useRouter } from "next/navigation"
@@ -295,128 +295,6 @@ export function HeroSection({ recept: initialRecept }: HeroSectionProps) {
                 )}
               </div>
 
-              {/* Filter Toggle */}
-              <div className="flex items-center gap-4">
-                <Button
-                  onClick={() => setShowFilters(!showFilters)}
-                  variant="outline"
-                  className="bg-white/10 border-white/30 text-white hover:bg-white/20 hover:text-white focus:text-white"
-                >
-                  <Filter className="h-4 w-4 mr-2" />
-                  {showFilters ? "Verberg filters" : "Toon filters"}
-                </Button>
-                {hasActiveFilters && (
-                  <Button
-                    onClick={clearFilters}
-                    variant="outline"
-                    className="bg-white/10 border-white/30 text-white hover:bg-white/20 hover:text-white focus:text-white"
-                    disabled={isPending}
-                  >
-                    Wis filters
-                  </Button>
-                )}
-              </div>
-
-              {/* Filters */}
-              {showFilters && (
-                <div className="bg-white/15 backdrop-blur-sm rounded-lg p-6 space-y-4 border border-white/20">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium mb-2 text-white">Type</label>
-                      <Select value={filters.type} onValueChange={(value) => handleFilterChange("type", value)}>
-                        <SelectTrigger className="bg-white text-[#286058] border-white/50 hover:bg-gray-50 focus:ring-2 focus:ring-[#e75129] [&>span]:text-[#286058]">
-                          <SelectValue placeholder="Alle types" />
-                        </SelectTrigger>
-                        <SelectContent className="bg-white border-gray-200 [&>*]:text-[#286058]">
-                          <SelectItem
-                            value="all"
-                            className="text-[#286058] hover:bg-gray-100 focus:bg-gray-100 focus:text-[#286058] data-[highlighted]:bg-gray-100 data-[highlighted]:text-[#286058]"
-                          >
-                            Alle types
-                          </SelectItem>
-                          {filterOptions.types.map((type) => (
-                            <SelectItem
-                              key={type}
-                              value={type}
-                              className="text-[#286058] hover:bg-gray-100 focus:bg-gray-100 focus:text-[#286058] data-[highlighted]:bg-gray-100 data-[highlighted]:text-[#286058]"
-                            >
-                              {type}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium mb-2 text-white">Seizoen</label>
-                      <Select value={filters.seizoen} onValueChange={(value) => handleFilterChange("seizoen", value)}>
-                        <SelectTrigger className="bg-white text-[#286058] border-white/50 hover:bg-gray-50 focus:ring-2 focus:ring-[#e75129] [&>span]:text-[#286058]">
-                          <SelectValue placeholder="Alle seizoenen" />
-                        </SelectTrigger>
-                        <SelectContent className="bg-white border-gray-200 [&>*]:text-[#286058]">
-                          <SelectItem
-                            value="all"
-                            className="text-[#286058] hover:bg-gray-100 focus:bg-gray-100 focus:text-[#286058] data-[highlighted]:bg-gray-100 data-[highlighted]:text-[#286058]"
-                          >
-                            Alle seizoenen
-                          </SelectItem>
-                          {filterOptions.seizoenen.map((seizoen) => (
-                            <SelectItem
-                              key={seizoen}
-                              value={seizoen}
-                              className="text-[#286058] hover:bg-gray-100 focus:bg-gray-100 focus:text-[#286058] data-[highlighted]:bg-gray-100 data-[highlighted]:text-[#286058]"
-                            >
-                              {seizoen}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium mb-2 text-white">Eigenaar</label>
-                      <Select value={filters.eigenaar} onValueChange={(value) => handleFilterChange("eigenaar", value)}>
-                        <SelectTrigger className="bg-white text-[#286058] border-white/50 hover:bg-gray-50 focus:ring-2 focus:ring-[#e75129] [&>span]:text-[#286058]">
-                          <SelectValue placeholder="Alle eigenaars" />
-                        </SelectTrigger>
-                        <SelectContent className="bg-white border-gray-200 [&>*]:text-[#286058]">
-                          <SelectItem
-                            value="all"
-                            className="text-[#286058] hover:bg-gray-100 focus:bg-gray-100 focus:text-[#286058] data-[highlighted]:bg-gray-100 data-[highlighted]:text-[#286058]"
-                          >
-                            Alle eigenaars
-                          </SelectItem>
-                          {filterOptions.eigenaars.map((eigenaar) => (
-                            <SelectItem
-                              key={eigenaar}
-                              value={eigenaar}
-                              className="text-[#286058] hover:bg-gray-100 focus:bg-gray-100 focus:text-[#286058] data-[highlighted]:bg-gray-100 data-[highlighted]:text-[#286058]"
-                            >
-                              {eigenaar}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                  <div className="flex gap-3 pt-2">
-                    <Button
-                      onClick={applyFilters}
-                      disabled={isPending}
-                      className="bg-[#e75129] hover:bg-[#d63e1a] text-white font-medium px-6 py-2 rounded-md transition-colors duration-200"
-                    >
-                      {isPending ? "Laden..." : "Filter toepassen"}
-                    </Button>
-                    <Button
-                      onClick={clearFilters}
-                      disabled={isPending}
-                      variant="outline"
-                      className="bg-white/10 border-white/40 text-white hover:bg-white/20 hover:border-white/60 font-medium px-6 py-2 rounded-md transition-colors duration-200"
-                    >
-                      Wis filters
-                    </Button>
-                  </div>
-                </div>
-              )}
-
               {/* Controls */}
               <div className="flex flex-wrap items-center gap-6">
                 <button
@@ -561,6 +439,110 @@ export function HeroSection({ recept: initialRecept }: HeroSectionProps) {
         servings={servings}
         receptNaam={currentRecept.naam}
       />
+
+      {/* Filter Popup - moved to top left */}
+      <div className="fixed top-0 left-0 z-50">
+        <div
+          className={`transform transition-transform duration-300 ease-in-out ${
+            showFilters ? "translate-y-0" : "-translate-y-full"
+          }`}
+        >
+          <div
+            className="bg-[#eee1d1] rounded-b-xl shadow-2xl flex flex-col"
+            style={{ width: "400px", height: "70vh", maxHeight: "500px" }}
+          >
+            {/* Header */}
+            <div className="flex justify-between items-center p-6 pb-4 flex-shrink-0">
+              <h2 className="text-[#e75129] text-3xl font-medium">Filters</h2>
+              <button
+                onClick={() => setShowFilters(false)}
+                className="h-6 w-6 text-[#e75129] cursor-pointer hover:text-[#d63e1a] transition-colors"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Filter Categories - Scrollable */}
+            <div className="flex-1 px-6 overflow-y-auto">
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-[#286058] text-lg font-medium mb-2">Type</label>
+                  <Select value={filters.type} onValueChange={(value) => handleFilterChange("type", value)}>
+                    <SelectTrigger className="bg-white text-[#286058] border-[#286058]/20 hover:bg-gray-50 focus:ring-2 focus:ring-[#e75129]">
+                      <SelectValue placeholder="Alle types" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-white border-gray-200">
+                      <SelectItem value="all" className="text-[#286058] hover:bg-gray-100">
+                        Alle types
+                      </SelectItem>
+                      {filterOptions.types.map((type) => (
+                        <SelectItem key={type} value={type} className="text-[#286058] hover:bg-gray-100">
+                          {type}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <label className="block text-[#286058] text-lg font-medium mb-2">Seizoen</label>
+                  <Select value={filters.seizoen} onValueChange={(value) => handleFilterChange("seizoen", value)}>
+                    <SelectTrigger className="bg-white text-[#286058] border-[#286058]/20 hover:bg-gray-50 focus:ring-2 focus:ring-[#e75129]">
+                      <SelectValue placeholder="Alle seizoenen" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-white border-gray-200">
+                      <SelectItem value="all" className="text-[#286058] hover:bg-gray-100">
+                        Alle seizoenen
+                      </SelectItem>
+                      {filterOptions.seizoenen.map((seizoen) => (
+                        <SelectItem key={seizoen} value={seizoen} className="text-[#286058] hover:bg-gray-100">
+                          {seizoen}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <label className="block text-[#286058] text-lg font-medium mb-2">Eigenaar</label>
+                  <Select value={filters.eigenaar} onValueChange={(value) => handleFilterChange("eigenaar", value)}>
+                    <SelectTrigger className="bg-white text-[#286058] border-[#286058]/20 hover:bg-gray-50 focus:ring-2 focus:ring-[#e75129]">
+                      <SelectValue placeholder="Alle eigenaars" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-white border-gray-200">
+                      <SelectItem value="all" className="text-[#286058] hover:bg-gray-100">
+                        Alle eigenaars
+                      </SelectItem>
+                      {filterOptions.eigenaars.map((eigenaar) => (
+                        <SelectItem key={eigenaar} value={eigenaar} className="text-[#286058] hover:bg-gray-100">
+                          {eigenaar}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </div>
+
+            {/* Action Buttons - Always Visible */}
+            <div className="p-6 pt-4 flex gap-3 flex-shrink-0 border-t border-[#286058]/10">
+              <button
+                onClick={clearFilters}
+                className="flex-1 bg-gray-300 text-gray-700 px-4 py-3 rounded-md text-lg font-medium hover:bg-gray-400 hover:text-gray-800 transition-colors"
+              >
+                Wis alles
+              </button>
+              <button
+                onClick={applyFilters}
+                disabled={isPending}
+                className="flex-1 bg-[#e75129] text-white px-4 py-3 rounded-md text-lg font-medium hover:bg-[#d04a26] transition-colors disabled:opacity-50"
+              >
+                {isPending ? "Laden..." : "Toepassen"}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
     </>
   )
 }
