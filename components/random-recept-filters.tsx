@@ -31,7 +31,7 @@ export function RandomReceptFilters({ onFiltersChange }: RandomReceptFiltersProp
           setDbInfo(data)
         }
       } catch (error) {
-        // Silently fail if debug endpoint is not available
+        console.log("Debug endpoint not available, using fallback data")
       }
     }
 
@@ -49,25 +49,30 @@ export function RandomReceptFilters({ onFiltersChange }: RandomReceptFiltersProp
     if (finalSeizoen && finalSeizoen !== "all") filters.seizoen = finalSeizoen as Seizoen
     if (finalEigenaar && finalEigenaar !== "all") filters.eigenaar = finalEigenaar as Eigenaar
 
+    console.log("Updating filters:", filters)
     onFiltersChange(filters)
   }
 
   const handleTypeChange = (value: string) => {
+    console.log("Type changed to:", value)
     setSelectedType(value)
     updateFilters(value, undefined, undefined)
   }
 
   const handleSeizoenChange = (value: string) => {
+    console.log("Seizoen changed to:", value)
     setSelectedSeizoen(value)
     updateFilters(undefined, value, undefined)
   }
 
   const handleEigenaarChange = (value: string) => {
+    console.log("Eigenaar changed to:", value)
     setSelectedEigenaar(value)
     updateFilters(undefined, undefined, value)
   }
 
   const resetFilters = () => {
+    console.log("Resetting filters")
     setSelectedType("all")
     setSelectedSeizoen("all")
     setSelectedEigenaar("all")
