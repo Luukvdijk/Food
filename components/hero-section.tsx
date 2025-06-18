@@ -20,6 +20,12 @@ interface HeroSectionProps {
   } | null
 }
 
+interface FilterOptions {
+  types: string[]
+  seizoenen: string[]
+  eigenaars: string[]
+}
+
 export function HeroSection({ recept: initialRecept }: HeroSectionProps) {
   const [servings, setServings] = useState(1)
   const [showIngredientsPopup, setShowIngredientsPopup] = useState(false)
@@ -27,13 +33,35 @@ export function HeroSection({ recept: initialRecept }: HeroSectionProps) {
   const [isPending, startTransition] = useTransition()
   const [showFilters, setShowFilters] = useState(false)
   const [filters, setFilters] = useState({
-    type: "All",
-    seizoen: "All",
-    eigenaar: "All",
+    type: "",
+    seizoen: "",
+    eigenaar: "",
+  })
+  const [filterOptions, setFilterOptions] = useState<FilterOptions>({
+    types: [],
+    seizoenen: [],
+    eigenaars: [],
   })
   const [currentRecept, setCurrentRecept] = useState(initialRecept)
   const router = useRouter()
   const [minHeight, setMinHeight] = useState("calc(100vh - 80px)")
+
+  // Load filter options on component mount
+  useEffect(() => {
+    const loadFilterOptions = async () => {
+      try {
+        console.log("Loading filter options...")
+        const response = await fetch("/api/get-filter-options")
+        const options = await response.json()
+        console.log("Filter options loaded:", options)
+        setFilterOptions(options)
+      } catch (error) {
+        console.error("Error loading filter options:", error)
+      }
+    }
+
+    loadFilterOptions()
+  }, [])
 
   // Adjust height based on screen size
   useEffect(() => {
@@ -60,13 +88,13 @@ export function HeroSection({ recept: initialRecept }: HeroSectionProps) {
       const params = new URLSearchParams()
 
       // Only add filters if they have actual values
-      if (filters.type && filters.type !== "All") {
+      if (filters.type) {
         params.append("type", filters.type)
       }
-      if (filters.seizoen && filters.seizoen !== "All") {
+      if (filters.seizoen) {
         params.append("seizoen", filters.seizoen)
       }
-      if (filters.eigenaar && filters.eigenaar !== "All") {
+      if (filters.eigenaar) {
         params.append("eigenaar", filters.eigenaar)
       }
 
@@ -93,7 +121,6 @@ export function HeroSection({ recept: initialRecept }: HeroSectionProps) {
         console.log("New recipe loaded:", data.naam)
       } else {
         console.log("No recipe found with current filters")
-        // Show message but don't clear current recipe
         alert("Geen recepten gevonden met deze filters. Probeer andere filters.")
       }
     } catch (error) {
@@ -130,7 +157,7 @@ export function HeroSection({ recept: initialRecept }: HeroSectionProps) {
 
   const clearFilters = () => {
     console.log("=== Clear Filters Clicked ===")
-    setFilters({ type: "All", seizoen: "All", eigenaar: "All" })
+    setFilters({ type: "", seizoen: "", eigenaar: "" })
 
     startTransition(async () => {
       // Fetch without any filters
@@ -159,7 +186,7 @@ export function HeroSection({ recept: initialRecept }: HeroSectionProps) {
     }))
   }
 
-  const hasActiveFilters = filters.type !== "All" || filters.seizoen !== "All" || filters.eigenaar !== "All"
+  const hasActiveFilters = filters.type || filters.seizoen || filters.eigenaar
 
   if (!currentRecept) {
     return (
@@ -285,7 +312,7 @@ export function HeroSection({ recept: initialRecept }: HeroSectionProps) {
                     className="bg-white/10 border-white/30 text-white hover:bg-white/20"
                     disabled={isPending}
                   >
-                    Wis filters ({Object.values(filters).filter((value) => value !== "All").length})
+                    Wis filters
                   </Button>
                 )}
               </div>
@@ -301,12 +328,12 @@ export function HeroSection({ recept: initialRecept }: HeroSectionProps) {
                           <SelectValue placeholder="Alle types" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="All">Alle types</SelectItem>
-                          <SelectItem value="Hoofdgerecht">Hoofdgerecht</SelectItem>
-                          <SelectItem value="Voorgerecht">Voorgerecht</SelectItem>
-                          <SelectItem value="Nagerecht">Nagerecht</SelectItem>
-                          <SelectItem value="Bijgerecht">Bijgerecht</SelectItem>
-                          <SelectItem value="Snack">Snack</SelectItem>
+                          <SelectItem value="all">Alle types</SelectItem>
+                          {filterOptions.types.map((type) => (
+                            <SelectItem key={type} value={type}>
+                              {type}
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                     </div>
@@ -317,11 +344,12 @@ export function HeroSection({ recept: initialRecept }: HeroSectionProps) {
                           <SelectValue placeholder="Alle seizoenen" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="All">Alle seizoenen</SelectItem>
-                          <SelectItem value="Lente">Lente</SelectItem>
-                          <SelectItem value="Zomer">Zomer</SelectItem>
-                          <SelectItem value="Herfst">Herfst</SelectItem>
-                          <SelectItem value="Winter">Winter</SelectItem>
+                          <SelectItem value="all">Alle seizoenen</SelectItem>
+                          {filterOptions.seizoenen.map((seizoen) => (
+                            <SelectItem key={seizoen} value={seizoen}>
+                              {seizoen}
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                     </div>
@@ -332,9 +360,12 @@ export function HeroSection({ recept: initialRecept }: HeroSectionProps) {
                           <SelectValue placeholder="Alle eigenaars" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="All">Alle eigenaars</SelectItem>
-                          <SelectItem value="Luuk">Luuk</SelectItem>
-                          <SelectItem value="Anouk">Anouk</SelectItem>
+                          <SelectItem value="all">Alle eigenaars</SelectItem>
+                          {filterOptions.eigenaars.map((eigenaar) => (
+                            <SelectItem key={eigenaar} value={eigenaar}>
+                              {eigenaar}
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                     </div>

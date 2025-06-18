@@ -1,38 +1,33 @@
 import { NextResponse } from "next/server"
 import { supabase } from "@/lib/db"
-import type { GerechtsType, Seizoen, Eigenaar } from "@/types"
 
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url)
-    const type = searchParams.get("type") as GerechtsType | null
-    const seizoen = searchParams.get("seizoen") as Seizoen | null
-    const eigenaar = searchParams.get("eigenaar") as Eigenaar | null
+    const type = searchParams.get("type")
+    const seizoen = searchParams.get("seizoen")
+    const eigenaar = searchParams.get("eigenaar")
 
     console.log("=== Random Recipe API Called ===")
     console.log("Filters received:", { type, seizoen, eigenaar })
 
     // Start building the query with full recipe data
-    let query = supabase.from("recepten").select(`
-        *,
-        ingredienten (*),
-        bijgerechten (*)
-      `)
+    let query = supabase.from("recepten").select("*")
 
-    // Apply filters
-    if (type && type !== "Alle types") {
+    // Apply filters only if they have values
+    if (type) {
       console.log("Applying type filter:", type)
       query = query.eq("type", type)
     }
 
-    if (eigenaar && eigenaar !== "Alle eigenaars") {
+    if (eigenaar) {
       console.log("Applying eigenaar filter:", eigenaar)
       query = query.eq("eigenaar", eigenaar)
     }
 
-    if (seizoen && seizoen !== "Alle seizoenen") {
+    if (seizoen) {
       console.log("Applying seizoen filter:", seizoen)
-      // Try both array contains and direct match
+      // Handle both array and string formats for seizoen
       query = query.or(`seizoen.cs.{${seizoen}},seizoen.eq.${seizoen}`)
     }
 
