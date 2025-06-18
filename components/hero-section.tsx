@@ -7,6 +7,7 @@ import { IngredientsPopup } from "./ingredients-popup"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { ModernHeader } from "./modern-header"
 
 interface HeroSectionProps {
   recept?: {
@@ -188,27 +189,35 @@ export function HeroSection({ recept: initialRecept }: HeroSectionProps) {
 
   const hasActiveFilters = filters.type || filters.seizoen || filters.eigenaar
 
+  const handleFiltersToggle = () => {
+    setShowFilters(!showFilters)
+  }
+
   if (!currentRecept) {
     return (
-      <section
-        className="bg-[#286058] text-white relative overflow-hidden w-full flex items-center py-16 md:py-0"
-        style={{ minHeight: minHeight }}
-      >
-        <div className="w-full py-12 px-8 relative z-10">
-          <div className="text-center">
-            <h1 className="text-6xl font-bold mb-8">Geen recept gevonden</h1>
-            <p className="text-xl opacity-90">Probeer andere filters of zoek een ander recept</p>
-            <Button onClick={clearFilters} className="mt-4 bg-[#e75129] hover:bg-[#d63e1a]">
-              Alle recepten tonen
-            </Button>
+      <>
+        <ModernHeader onFiltersToggle={handleFiltersToggle} hasActiveFilters={hasActiveFilters} />
+        <section
+          className="bg-[#286058] text-white relative overflow-hidden w-full flex items-center py-16 md:py-0"
+          style={{ minHeight: minHeight }}
+        >
+          <div className="w-full py-12 px-8 relative z-10">
+            <div className="text-center">
+              <h1 className="text-6xl font-bold mb-8">Geen recept gevonden</h1>
+              <p className="text-xl opacity-90">Probeer andere filters of zoek een ander recept</p>
+              <Button onClick={clearFilters} className="mt-4 bg-[#e75129] hover:bg-[#d63e1a]">
+                Alle recepten tonen
+              </Button>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      </>
     )
   }
 
   return (
     <>
+      <ModernHeader onFiltersToggle={handleFiltersToggle} hasActiveFilters={hasActiveFilters} />
       <section
         className="bg-[#286058] text-white relative overflow-hidden w-full flex items-center py-16 md:py-0"
         style={{ minHeight: minHeight }}
@@ -441,12 +450,8 @@ export function HeroSection({ recept: initialRecept }: HeroSectionProps) {
       />
 
       {/* Filter Popup - moved to top left */}
-      <div className="fixed top-0 left-0 z-50">
-        <div
-          className={`transform transition-transform duration-300 ease-in-out ${
-            showFilters ? "translate-y-0" : "-translate-y-full"
-          }`}
-        >
+      {showFilters && (
+        <div className="fixed top-0 left-0 z-40">
           <div
             className="bg-[#eee1d1] rounded-b-xl shadow-2xl flex flex-col"
             style={{ width: "400px", height: "70vh", maxHeight: "500px" }}
@@ -542,7 +547,7 @@ export function HeroSection({ recept: initialRecept }: HeroSectionProps) {
             </div>
           </div>
         </div>
-      </div>
+      )}
     </>
   )
 }

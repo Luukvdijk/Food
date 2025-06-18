@@ -1,5 +1,4 @@
 import { supabase } from "@/lib/db"
-import { ModernHeader } from "@/components/modern-header"
 import { HeroSection } from "@/components/hero-section"
 import { Bijgerechten } from "@/components/bijgerechten"
 
@@ -46,7 +45,6 @@ export default async function Home() {
 
   return (
     <div className="min-h-screen w-full">
-      <ModernHeader />
       <HeroSection recept={randomRecept} />
 
       {/* Curved transition section */}
